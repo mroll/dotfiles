@@ -1,4 +1,3 @@
-
 ;; Packages:
 ;;
 ;; * package
@@ -19,11 +18,8 @@
 ;; * parse-csv
 
 
-(add-to-list 'load-path "~/.emacs.d/ext/")
-(add-to-list 'load-path "~/.emacs.d/elpa/vline-20120108.445")
-(add-to-list 'load-path "~/.emacs.d/elpa/hl-line+-20170621.734")
-(add-to-list 'load-path "~/.emacs.d/elpa/col-highlight-20170510.1541")
-(add-to-list 'load-path "~/.emacs.d/elpa/crosshairs-20170626.1548")
+(let ((default-directory  "~/.emacs.d/elpa/"))
+  (normal-top-level-add-subdirs-to-load-path))
 
 (require 'package)
 (package-initialize)
@@ -217,7 +213,6 @@
   :init
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
   (setq org-hide-emphasis-markers t))
-; (setq org-bullets-bullet-list '("⌬" "⎆" "✶" "✭" "✺" "✹" "✸" "✷" "✦" "■" "▲" "●"))
 
 
 (use-package org-install)
