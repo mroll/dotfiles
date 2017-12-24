@@ -3,3 +3,5 @@ emacs/.emacs.d/
 !emacs/.emacs.d/custom
 !emacs/.emacs.d/mpr-init.el
 !emacs/.emacs.d/gnus.el
+
+news/.newsrc.eld
