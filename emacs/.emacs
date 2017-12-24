@@ -1,3 +1,8 @@
+;;; .emacs -- start emacs config process
+;;; Commentary:
+;;
+;; Load packages and set package-specific configs.
+;;
 ;; Packages:
 ;;
 ;; * package
@@ -17,6 +22,8 @@
 ;; * evil-multiedit
 ;; * parse-csv
 
+
+;;; Code:
 
 (let ((default-directory  "~/.emacs.d/elpa/"))
   (normal-top-level-add-subdirs-to-load-path))
@@ -55,7 +62,7 @@
 (use-package erc)
 (use-package erc-services
   :init
-  (setq erc-autojoin-channels-alist '((".*\\.freenode.net"
+  (setq erc-autojoin-channels-alist '(("matthewroll.com:5000"
                                        "#emacs"
                                        "#reddit-cyberpunk"
                                        "#tcl"
@@ -153,19 +160,19 @@
                 ("MEETING" :foreground "forest green" :weight bold)
                 ("PHONE" :foreground "forest green" :weight bold))))
   (org-clock-persistence-insinuate)
-  (setq bh/keep-clock-running nil)
-  (setq org-clock-history-length 23)
-  (setq org-clock-in-resume t)
-  (setq org-clock-persist t)
-  (setq org-clock-in-switch-to-state 'bh/clock-in-to-next)
-  (setq org-drawers (quote ("PROPERTIES" "LOGBOOK")))
-  (setq org-clock-into-drawer t)
-  (setq org-clock-out-remove-zero-time-clocks t)
-  (setq org-clock-out-when-done t)
-  (setq org-clock-persist-query-resume nil)
-  (setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
-  (setq org-clock-report-include-clocking-task t)
-  (setq org-capture-templates
+  (defvar bh/keep-clock-running nil)
+  (defvar org-clock-history-length 23)
+  (defvar org-clock-in-resume t)
+  (defvar org-clock-persist t)
+  (defvar org-clock-in-switch-to-state 'bh/clock-in-to-next)
+  (defvar org-drawers (quote ("PROPERTIES" "LOGBOOK")))
+  (defvar org-clock-into-drawer t)
+  (defvar org-clock-out-remove-zero-time-clocks t)
+  (defvar org-clock-out-when-done t)
+  (defvar org-clock-persist-query-resume nil)
+  (defvar org-clock-auto-clock-resolution (quote when-no-clock-is-running))
+  (defvar org-clock-report-include-clocking-task t)
+  (defvar org-capture-templates
         (quote (("t" "todo" entry (file "~/org/refile.org")
                  "* TODO %?\n  %U\n\n  " :clock-in t :clock-resume t)
                 ("r" "respond" entry (file "~/org/refile.org")
@@ -233,16 +240,21 @@
 (use-package parse-csv)
 
 
+(use-package epa-file
+  :config
+  (epa-file-enable))
+
+
 (add-hook 'python-mode-hook 'jedi:setup)
-(setq jedi:setup-keys t)                      ; optional
-(setq jedi:complete-on-dot t)                 ; optional
-(setq jedi:get-in-function-call-timeout 200)
+(defvar jedi:setup-keys t)                      ; optional
+(defvar jedi:complete-on-dot t)                 ; optional
+(defvar jedi:get-in-function-call-timeout 200)
 
 
-(add-to-list 'load-path 
-  (expand-file-name "/usr/local/Cellar/ledger/3.1.1_6/share/emacs/site-lisp/")) 
-(add-to-list 'auto-mode-alist '("\_ledger.txt$" . ledger-mode)) 
-;; after setting up the load-path 
+(add-to-list 'load-path
+  (expand-file-name "/usr/local/Cellar/ledger/3.1.1_6/share/emacs/site-lisp/"))
+(add-to-list 'auto-mode-alist '("\_ledger.txt$" . ledger-mode))
+;; after setting up the load-path
 (autoload 'ledger-mode "ledger-mode" "A major mode for Ledger" t)
 
 
@@ -253,6 +265,9 @@
 
 ;;
 
+(load "~/.emacs.d/gnus.el")
+
+; depends on gnus
 (load "~/.emacs.d/mpr-init.el")
 
 (provide '.emacs)

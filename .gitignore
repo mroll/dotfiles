@@ -2,3 +2,4 @@ emacs/.emacs.d/
 */**/*.swp
 !emacs/.emacs.d/custom
 !emacs/.emacs.d/mpr-init.el
+!emacs/.emacs.d/gnus.el

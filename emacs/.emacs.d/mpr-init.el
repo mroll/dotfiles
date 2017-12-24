@@ -131,6 +131,17 @@
   (insert (format "if (%s)" condition))
   (insert-multiline-brace))
 
+(defun my-gnus-group-list-subscribed-groups ()
+  "List all subscribed groups with or without un-read messages"
+  (interactive)
+  (gnus-group-list-all-groups 5))
+
+(defun what-face ()
+  (interactive)
+  (message (face-font (or (get-char-property (point) 'face)
+                          'default))))
+
+
 ;; -------------------------------------------------------------------
 
 
@@ -192,6 +203,10 @@
 (define-key global-map "\C-c\C-x\C-i" 'bh/punch-in)
 (define-key global-map "\C-c\C-x\C-o" 'bh/punch-out)
 
+(define-key gnus-group-mode-map
+  ;; list all the subscribed groups even they contain zero un-read messages
+  (kbd "o") 'my-gnus-group-list-subscribed-groups)
+
 ;; -------------------------------------------------------------------
 
 
@@ -231,8 +246,9 @@
 (set-face-attribute 'org-todo nil :foreground "chocolate1" :weight 'bold)
 (set-face-attribute 'sldb-condition-face nil :inherit font-lock-warning-face :foreground "gray81")
 (set-face-attribute 'slime-repl-output-face nil :foreground "gray88")
+(set-face-attribute 'variable-pitch nil :foreground "gray88" :family "Inconsolata" :height 1.0)
 
-(set-frame-font "Inconsolata 11")
+(set-frame-font "Inconsolata 12")
 (global-font-lock-mode t)
 
 (load-theme 'grandshell t)
@@ -332,6 +348,12 @@
 (setq python-shell-interpreter "python3")
 (setq tcl-application "/usr/local/bin/tclsh8.6")
 
+; crypto
+(defvar epa-pinentry-mode 'loopback)
+
+(defun mpr/erc-connect ()
+  (erc :server "matthewroll.com" :port 5000 :nick "le4fy" :password "matt/freenode:red wall mouse"))
+(erc-connect)
 
 (provide 'mpr-init)
 ;;; mpr-init.el ends here
