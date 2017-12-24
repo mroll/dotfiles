@@ -348,12 +348,9 @@
 (setq python-shell-interpreter "python3")
 (setq tcl-application "/usr/local/bin/tclsh8.6")
 
-; crypto
-(defvar epa-pinentry-mode 'loopback)
-
 (defun mpr/erc-connect ()
   (erc :server "matthewroll.com" :port 5000 :nick "le4fy" :password "matt/freenode:red wall mouse"))
-(erc-connect)
+; (mpr/erc-connect)
 
 (provide 'mpr-init)
 ;;; mpr-init.el ends here

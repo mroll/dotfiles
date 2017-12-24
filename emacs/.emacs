@@ -241,8 +241,11 @@
 
 
 (use-package epa-file
+  :init
+  (defvar epa-pinentry-mode 'loopback)
   :config
   (epa-file-enable))
+
 
 
 (add-hook 'python-mode-hook 'jedi:setup)
