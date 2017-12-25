@@ -268,6 +268,7 @@
 
 ;;
 
+(load "~/.emacs.d/mpr-secrets.el.gpg")
 (load "~/.emacs.d/gnus.el")
 
 ; depends on gnus

@@ -141,6 +141,9 @@
   (message (face-font (or (get-char-property (point) 'face)
                           'default))))
 
+(defun mpr/erc-connect ()
+  (erc :server "matthewroll.com" :port 5000 :nick "le4fy" :password mpr/znc-pass))
+; (mpr/erc-connect)
 
 ;; -------------------------------------------------------------------
 
@@ -348,9 +351,6 @@
 (setq python-shell-interpreter "python3")
 (setq tcl-application "/usr/local/bin/tclsh8.6")
 
-(defun mpr/erc-connect ()
-  (erc :server "matthewroll.com" :port 5000 :nick "le4fy" :password "matt/freenode:red wall mouse"))
-; (mpr/erc-connect)
 
 (provide 'mpr-init)
 ;;; mpr-init.el ends here
