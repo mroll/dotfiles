@@ -247,28 +247,33 @@
   (epa-file-enable))
 
 
-
-(add-hook 'python-mode-hook 'jedi:setup)
-(defvar jedi:setup-keys t)                      ; optional
-(defvar jedi:complete-on-dot t)                 ; optional
-(defvar jedi:get-in-function-call-timeout 200)
-
-
 (add-to-list 'load-path
   (expand-file-name "/usr/local/Cellar/ledger/3.1.1_6/share/emacs/site-lisp/"))
 (add-to-list 'auto-mode-alist '("\_ledger.txt$" . ledger-mode))
 ;; after setting up the load-path
 (autoload 'ledger-mode "ledger-mode" "A major mode for Ledger" t)
 
+(setq shell-file-name "/bin/bash")
+
+(elpy-enable)
+(defvar elpy-rpc-python-command "/usr/local/bin/python3")
+
+(use-package request)
+
+(use-package docker)
+
+(use-package realgud)
+
 
 ;; make sure emacs uses environment variables from my shell
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
 
-
 ;;
 
 (load "~/.emacs.d/mpr-secrets.el.gpg")
+
+; depends on mpr-secrets
 (load "~/.emacs.d/gnus.el")
 
 ; depends on gnus
@@ -276,3 +281,21 @@
 
 (provide '.emacs)
 ;;; .emacs ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("8ec2e01474ad56ee33bc0534bdbe7842eea74dccfb576e09f99ef89a705f5501" "0b6cb9b19138f9a859ad1b7f753958d8a36a464c6d10550119b2838cedf92171" "ab04c00a7e48ad784b52f34aa6bfa1e80d0c3fcacc50e1189af3651013eb0d58" "7356632cebc6a11a87bc5fcffaa49bae528026a78637acd03cae57c091afd9b9" default)))
+ '(docker-global-mode t)
+ '(package-selected-packages
+   (quote
+    (clues-theme alect-themes realgud docker request elpy helm-ag web-mode use-package typescript-mode slime parse-csv org-edna org-bullets org-blog org-babel-eval-in-repl magit ledger-mode jedi helm-projectile hamburg-theme green-phosphor-theme grandshell-theme geiser flycheck-pycheckers flycheck-gdc firecode-theme exec-path-from-shell evil-paredit evil-multiedit diminish diff-hl darkburn-theme dark-krystal-theme cyberpunk-theme crosshairs color-theme-sanityinc-solarized cherry-blossom-theme atom-one-dark-theme))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

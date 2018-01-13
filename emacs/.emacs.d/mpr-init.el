@@ -15,6 +15,27 @@
   (setq-local comment-auto-fill-only-comments t)
   (auto-fill-mode 1))
 
+(defun rotate-windows (arg)
+  "Rotate your windows; use the prefix argument to rotate the other direction"
+  (interactive "P")
+  (if (not (> (count-windows) 1))
+      (message "You can't rotate a single window!")
+    (let* ((rotate-times (prefix-numeric-value arg))
+           (direction (if (or (< rotate-times 0) (equal arg '(4)))
+                          'reverse 'identity)))
+      (dotimes (_ (abs rotate-times))
+        (dotimes (i (- (count-windows) 1))
+          (let* ((w1 (elt (funcall direction (window-list)) i))
+                 (w2 (elt (funcall direction (window-list)) (+ i 1)))
+                 (b1 (window-buffer w1))
+                 (b2 (window-buffer w2))
+                 (s1 (window-start w1))
+                 (s2 (window-start w2))
+                 (p1 (window-point w1))
+                 (p2 (window-point w2)))
+            (set-window-buffer-start-and-point w1 b2 s2 p2)
+            (set-window-buffer-start-and-point w2 b1 s1 p1)))))))
+
 ; source: http://steve.yegge.googlepages.com/my-dot-emacs-file
 ; --------------------------------------------------
 
@@ -184,12 +205,15 @@
 (global-set-key (kbd "C-x C-k") 'kill-region)
 (global-set-key (kbd "C-c C-k") 'kill-region)
 (global-set-key (kbd "C-c h") 'help)
+(global-set-key (kbd "C-c m") 'rotate-windows)
 
 ; move between panes w/ Ctrl+<vi arrow keys>
 (define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
 (define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
 (define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
 (define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)
+(define-key evil-normal-state-map (kbd "C-c m") 'rotate-windows)
+(define-key evil-normal-state-map (kbd "q") 'nil)
 
 ; forgive fat-fingering buffer switch. run ibuffer explicitly
 (define-key global-map [remap list-buffers] 'switch-to-buffer)
@@ -238,7 +262,7 @@
     (menu-bar-mode -1))
 
 (set-face-attribute 'org-agenda-date-today nil :foreground "gray29" :weight 'bold :family "Courier New")
-(set-face-attribute 'org-level-1 nil :inherit 'variable-pitch :foreground "#cb4b16" :height 1.3 :family "Courier New")
+(set-face-attribute 'org-level-1 nil :inherit 'variable-pitch :foreground "#cb4b16" :height 1.0 :family "Courier New")
 (set-face-attribute 'org-done nil :foreground "gray29" :weight 'bold :family "Courier New")
 (set-face-attribute 'org-level-2 nil :inherit 'variable-pitch :foreground "#0EEB87" :height 1.2 :family "Courier New")
 (set-face-attribute 'org-level-3 nil :inherit 'variable-pitch :foreground "#268bd2" :height 1.15 :family "Courier New")
@@ -250,6 +274,7 @@
 (set-face-attribute 'sldb-condition-face nil :inherit font-lock-warning-face :foreground "gray81")
 (set-face-attribute 'slime-repl-output-face nil :foreground "gray88")
 (set-face-attribute 'variable-pitch nil :foreground "gray88" :family "Inconsolata" :height 1.0)
+(set-face-attribute 'erc-nick-default-face nil :foreground "#ff782b")
 
 (set-frame-font "Inconsolata 12")
 (global-font-lock-mode t)
@@ -257,7 +282,7 @@
 (load-theme 'grandshell t)
 
 ; for now i want fringe mode for trying out diff-hl mode
-; (set-fringe-mode '(0 . 0))
+(set-fringe-mode '(8 . 0))
 
 (setq display-time-mode 1)
 
@@ -351,6 +376,16 @@
 (setq python-shell-interpreter "python3")
 (setq tcl-application "/usr/local/bin/tclsh8.6")
 
+(defun my-org-clocktable-indent-string (level)
+  (if (= level 1)
+      ""
+    (let ((str "\\-"))
+      (while (> level 2)
+        (setq level (1- level)
+              str (concat str "  ")))
+      (concat str "   "))))
+
+(advice-add 'org-clocktable-indent-string :override #'my-org-clocktable-indent-string)
 
 (provide 'mpr-init)
 ;;; mpr-init.el ends here
