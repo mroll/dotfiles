@@ -16,6 +16,9 @@
 ;;
 
 
+(defvar bh/organization-task-id "FF5747E1-02B0-46D0-8CD7-0537D8DE16D4")
+
+
 (defun bh/clock-in-task-by-id (id)
   "Clock in a task by id"
   (org-with-point-at (org-id-find id 'marker)

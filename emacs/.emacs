@@ -29,10 +29,21 @@
   (normal-top-level-add-subdirs-to-load-path))
 
 (require 'package)
+
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
+
 (package-initialize)
 
-(push '("marmalade" . "http://marmalade-repo.org/packages/") package-archives)
-(push '("melpa" . "http://melpa.milkbox.net/packages/") package-archives)
+; (push '("marmalade" . "http://marmalade-repo.org/packages/") package-archives)
+; (push '("melpa" . "http://melpa.milkbox.net/packages/") package-archives)
 
 (eval-when-compile
   ;; Following line is not needed if use-package.el is in ~/.emacs.d
@@ -47,11 +58,39 @@
   (setq slime-contribs '(slime-fancy slime-repl)))
 
 
+(defun evil-global-keymap (keychord function)
+  (define-key evil-insert-state-map keychord function)
+  (define-key evil-normal-state-map keychord function))
+
+
 (use-package evil
-             :config
-             (evil-mode 1)
-             (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-             (define-key evil-normal-state-map (kbd ",,") 'evil-buffer))
+  :config
+  (evil-mode 1)
+  (evil-global-keymap (kbd "C-h") 'evil-window-left)
+  (evil-global-keymap (kbd "C-j") 'evil-window-down)
+  (evil-global-keymap (kbd "C-k") 'evil-window-up)
+  (evil-global-keymap (kbd "C-l") 'evil-window-right)
+  (evil-global-keymap(kbd "C-c m") 'rotate-windows)
+  (evil-global-keymap (kbd "C-c f") 'md-footnote)
+  (evil-global-keymap [remap list-buffers] 'switch-to-buffer)
+  (evil-global-keymap (kbd "C-x g") 'magit-status)
+  (evil-global-keymap (kbd "C-x |") 'toggle-window-split)
+  (evil-global-keymap (kbd "C-c j") 'insert-multiline-brace)
+  (evil-global-keymap (kbd "C-c s") 'insert-src-block)
+  (evil-global-keymap (kbd "C-c i") 'c-if)
+  (evil-global-keymap (kbd "C-c h") 'help)
+  (evil-global-keymap (kbd "M-.") 'nil)
+  (define-key evil-normal-state-map (kbd "q") 'nil)
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  (define-key evil-normal-state-map (kbd ",,") 'evil-buffer)
+  (define-key evil-insert-state-map (kbd "C-w") 'backward-kill-word)
+  (define-key evil-motion-state-map (kbd "C-x C-k") 'kill-region)
+  (define-key evil-motion-state-map (kbd "C-c C-k") 'kill-region)
+  (evil-define-key 'normal org-mode-map
+    (kbd "C-c C-x C-i") 'bh/punch-in
+    (kbd "C-c C-x C-o") 'bh/punch-out)
+  (evil-define-key 'normal gnus-group-mode-map
+    (kbd "o") 'my-gnus-group-list-subscribed-groups))
 
 
 (use-package crosshairs
@@ -85,7 +124,8 @@
   (setq helm-file-globstar t)
   (global-set-key "\C-x\C-m" 'helm-M-x)
   (global-set-key "\C-c\C-m" 'helm-M-x)
-  (global-set-key "\C-x\C-f" 'helm-find-files))
+  (global-set-key "\C-x\C-f" 'helm-find-files)
+  (global-set-key (kbd "C-c g") 'helm-ag))
 
 
 (use-package helm-projectile
@@ -139,6 +179,7 @@
   (setq org-log-done 'time)
   (setq org-cycle-separator-lines 16)
   (setq org-src-fontify-natively t)
+  (setq org-agenda-files '("/Users/mroll/org/work.org"))
   (setq org-todo-state-tags-triggers
         (quote (("CANCELLED" ("CANCELLED" . t))
                 ("WAITING" ("WAITING" . t))
@@ -264,6 +305,29 @@
 
 (use-package realgud)
 
+(use-package dired-subtree
+  :demand
+  :bind
+  (:map dired-mode-map
+    ("<tab>" . mhj/dwim-toggle-or-open))
+  :config
+  (progn
+    ;; Function to customize the line prefixes (I simply indent the lines a bit)
+    (setq dired-subtree-line-prefix (lambda (depth) (make-string (* 2 depth) ?\s)))
+    (setq dired-subtree-use-backgrounds nil)))
+
+(use-package dired
+  :ensure nil
+  :config
+  (progn
+    (setq insert-directory-program "/usr/local/opt/coreutils/libexec/gnubin/ls")
+    (setq dired-listing-switches "-lXGh --group-directories-first")
+    (add-hook 'dired-mode-hook 'dired-omit-mode)
+    (add-hook 'dired-mode-hook 'dired-hide-details-mode)))
+
+(require 'dired-x)
+(setq-default dired-omit-files-p t) ; Buffer-local variable
+(setq dired-omit-files (concat dired-omit-files "\\|^\\..+$"))
 
 ;; make sure emacs uses environment variables from my shell
 (when (memq window-system '(mac ns x))
@@ -279,6 +343,22 @@
 ; depends on gnus
 (load "~/.emacs.d/mpr-init.el")
 
+(setenv "WORKON_HOME" "/Users/mroll/.envs")
+# GREENPHIRE PROJECT ENV
+export DEBUG=true
+export DATABASE_NAME=bpa-db
+export DATABASE_USER=postgres
+export DATABASE_PASSWORD=notApassword1!
+export DATABASE_SERVICE_HOST=bpa-api-db
+
+(use-package eyebrowse                  ; Easy workspaces creation and switching
+  :ensure t
+  :config
+  (setq eyebrowse-mode-line-separator " "
+        eyebrowse-new-workspace t)
+
+  (eyebrowse-mode t))
+
 (provide '.emacs)
 ;;; .emacs ends here
 (custom-set-variables
@@ -288,11 +368,12 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("8ec2e01474ad56ee33bc0534bdbe7842eea74dccfb576e09f99ef89a705f5501" "0b6cb9b19138f9a859ad1b7f753958d8a36a464c6d10550119b2838cedf92171" "ab04c00a7e48ad784b52f34aa6bfa1e80d0c3fcacc50e1189af3651013eb0d58" "7356632cebc6a11a87bc5fcffaa49bae528026a78637acd03cae57c091afd9b9" default)))
+    ("d61fc0e6409f0c2a22e97162d7d151dee9e192a90fa623f8d6a071dbf49229c6" "82fce2cada016f736dbcef237780516063a17c2436d1ee7f42e395e38a15793b" "9b402e9e8f62024b2e7f516465b63a4927028a7055392290600b776e4a5b9905" "04dd0236a367865e591927a3810f178e8d33c372ad5bfef48b5ce90d4b476481" "d6922c974e8a78378eacb01414183ce32bc8dbf2de78aabcc6ad8172547cb074" "c158c2a9f1c5fcf27598d313eec9f9dceadf131ccd10abc6448004b14984767c" "715fdcd387af7e963abca6765bd7c2b37e76154e65401cd8d86104f22dd88404" "8ec2e01474ad56ee33bc0534bdbe7842eea74dccfb576e09f99ef89a705f5501" "0b6cb9b19138f9a859ad1b7f753958d8a36a464c6d10550119b2838cedf92171" "ab04c00a7e48ad784b52f34aa6bfa1e80d0c3fcacc50e1189af3651013eb0d58" "7356632cebc6a11a87bc5fcffaa49bae528026a78637acd03cae57c091afd9b9" default)))
  '(docker-global-mode t)
+ '(frame-brackground-mode (quote dark))
  '(package-selected-packages
    (quote
-    (clues-theme alect-themes realgud docker request elpy helm-ag web-mode use-package typescript-mode slime parse-csv org-edna org-bullets org-blog org-babel-eval-in-repl magit ledger-mode jedi helm-projectile hamburg-theme green-phosphor-theme grandshell-theme geiser flycheck-pycheckers flycheck-gdc firecode-theme exec-path-from-shell evil-paredit evil-multiedit diminish diff-hl darkburn-theme dark-krystal-theme cyberpunk-theme crosshairs color-theme-sanityinc-solarized cherry-blossom-theme atom-one-dark-theme))))
+    (eyebrowse heroku-theme badger-theme distinguished-theme hemisu-theme gruber-darker-theme gruvbox-theme dired-subtree js2-mode clues-theme alect-themes realgud docker request elpy helm-ag web-mode use-package typescript-mode slime parse-csv org-edna org-bullets org-blog org-babel-eval-in-repl magit ledger-mode jedi helm-projectile hamburg-theme green-phosphor-theme grandshell-theme geiser flycheck-pycheckers flycheck-gdc firecode-theme exec-path-from-shell evil-paredit evil-multiedit diminish diff-hl darkburn-theme dark-krystal-theme cyberpunk-theme crosshairs color-theme-sanityinc-solarized cherry-blossom-theme atom-one-dark-theme))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -11,6 +11,51 @@
 ;; functions
 ;; -------------------------------------------------------------------
 
+(defun mhj/dwim-toggle-or-open ()
+  "Toggle subtree or open the file."
+  (interactive)
+  (if (file-directory-p (dired-get-file-for-visit))
+      (progn
+    (dired-subtree-toggle)
+    (revert-buffer))
+    (dired-find-file)))
+
+(defun mhj/mouse-dwim-to-toggle-or-open (event)
+  "Toggle subtree or the open file on mouse-click in dired."
+  (interactive "e")
+  (let* ((window (posn-window (event-end event)))
+     (buffer (window-buffer window))
+     (pos (posn-point (event-end event))))
+    (progn
+      (with-current-buffer buffer
+    (goto-char pos)
+    (mhj/dwim-toggle-or-open)))))
+
+(defun mhj/toggle-project-explorer ()
+  "Toggle the project explorer window."
+  (interactive)
+  (let* ((buffer (dired-noselect (projectile-project-root)))
+    (window (get-buffer-window buffer)))
+    (if window
+    (mhj/hide-project-explorer)
+      (mhj/show-project-explorer))))
+
+(defun mhj/show-project-explorer ()
+  "Project dired buffer on the side of the frame.
+Shows the projectile root folder using dired on the left side of
+the frame and makes it a dedicated window for that buffer."
+  (let ((buffer (dired-noselect (projectile-project-root))))
+    (progn
+      (display-buffer-in-side-window buffer '((side . left) (window-width . 0.2)))
+      (set-window-dedicated-p (get-buffer-window buffer) t))))
+
+(defun mhj/hide-project-explorer ()
+  "Hide the project-explorer window."
+  (let ((buffer (dired-noselect (projectile-project-root))))
+    (progn
+      (delete-window (get-buffer-window buffer))
+      (kill-buffer buffer))))
+
 (defun comment-auto-fill ()
   (setq-local comment-auto-fill-only-comments t)
   (auto-fill-mode 1))
@@ -80,7 +125,7 @@
   (let ((string (buffer-substring start end)))
     (kill-new
      (mapconcat 'identity (split-string string "\n" nil "\s") delim))))
-  
+
 (defun output-files-to-buffer (pathstring regexp)
   "Use regexp to match files and insert them into the buffer at point."
   (interactive "sEnter paths as a space-separated list: \nsEnter regexp: ")
@@ -96,7 +141,7 @@
   (left-char)
   (c-indent-line-or-region)
   (evil-open-above 1))
-                                        
+
 (defun toggle-window-split ()
   (interactive)
   (if (= (count-windows) 2)
@@ -152,6 +197,13 @@
   (insert (format "if (%s)" condition))
   (insert-multiline-brace))
 
+(defun md-footnote (n content)
+  (interactive "snumber: \nscontent: \n")
+  (save-excursion
+    (insert (format "<sup>[%s](#fn%s)</sup>" n n))
+    (goto-char (point-max))
+    (insert (format "\n<a name=\"fn%s\">%s</a>: %s" n n content))))
+
 (defun my-gnus-group-list-subscribed-groups ()
   "List all subscribed groups with or without un-read messages"
   (interactive)
@@ -195,44 +247,24 @@
 
 (add-hook 'org-clock-out-hook 'bh/clock-out-maybe 'append)
 
-;; -------------------------------------------------------------------
+(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+(add-hook 'emacs-lisp-mode-hook 'evil-paredit-mode)
 
-;; -------------------------------------------------------------------
-;; keybindings
-;; -------------------------------------------------------------------
+(require 'mm-url)
+(defadvice mm-url-insert (after DE-convert-atom-to-rss () )
+  "Converts atom to RSS by calling xsltproc."
+  (when (re-search-forward "xmlns=\"http://www.w3.org/.*/Atom\"" 
+			   nil t)
+    (goto-char (point-min))
+    (message "Converting Atom to RSS... ")
+    (call-process-region (point-min) (point-max) 
+			 "xsltproc" 
+			 t t nil 
+			 (expand-file-name "~/atom2rss.xsl") "-")
+    (goto-char (point-min))
+    (message "Converting Atom to RSS... done")))
 
-(global-set-key (kbd "C-w") 'backward-kill-word)
-(global-set-key (kbd "C-x C-k") 'kill-region)
-(global-set-key (kbd "C-c C-k") 'kill-region)
-(global-set-key (kbd "C-c h") 'help)
-(global-set-key (kbd "C-c m") 'rotate-windows)
-
-; move between panes w/ Ctrl+<vi arrow keys>
-(define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
-(define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
-(define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
-(define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)
-(define-key evil-normal-state-map (kbd "C-c m") 'rotate-windows)
-(define-key evil-normal-state-map (kbd "q") 'nil)
-
-; forgive fat-fingering buffer switch. run ibuffer explicitly
-(define-key global-map [remap list-buffers] 'switch-to-buffer)
-
-(global-set-key (kbd "C-x g") 'magit-status)
-
-(global-set-key (kbd "C-x |") 'toggle-window-split)
-
-
-(define-key global-map "\C-cj" 'insert-multiline-brace)
-(define-key global-map "\C-cs" 'insert-src-block)
-(define-key global-map "\C-ci" 'c-if)
-
-(define-key global-map "\C-c\C-x\C-i" 'bh/punch-in)
-(define-key global-map "\C-c\C-x\C-o" 'bh/punch-out)
-
-(define-key gnus-group-mode-map
-  ;; list all the subscribed groups even they contain zero un-read messages
-  (kbd "o") 'my-gnus-group-list-subscribed-groups)
+(ad-activate 'mm-url-insert)
 
 ;; -------------------------------------------------------------------
 
@@ -279,9 +311,8 @@
 (set-frame-font "Inconsolata 12")
 (global-font-lock-mode t)
 
-(load-theme 'grandshell t)
+(load-theme 'gruber-darker t)
 
-; for now i want fringe mode for trying out diff-hl mode
 (set-fringe-mode '(8 . 0))
 
 (setq display-time-mode 1)
@@ -291,6 +322,13 @@
        mode-line-mule-info
        mode-line-modified
        mode-line-frame-identification
+
+       ;; add the time, with the date and the emacs uptime in the tooltip
+       '(:eval (propertize (format-time-string "%H:%M")
+                           'help-echo
+                           (concat (format-time-string "%c; ")
+                                   (emacs-uptime "Uptime:%hh"))))
+
        "    "
        '(:eval (substring
                 (system-name) 0 (string-match "\\..+" (system-name))))
@@ -320,35 +358,8 @@
                            'help-echo buffer-file-coding-system))
        "] "
 
+       mode-line-misc-info
 
-       "[" ;; insert vs overwrite mode, input-method in a tooltip
-       '(:eval (propertize (if overwrite-mode "Ovr" "Ins")
-                           'face 'font-lock-preprocessor-face
-                           'help-echo (concat "Buffer is in "
-                                              (if overwrite-mode "overwrite" "insert") " mode")))
-
-       ;; was this buffer modified since the last save?
-       '(:eval (when (buffer-modified-p)
-                 (concat ","  (propertize "Mod"
-                                          'face 'font-lock-warning-face
-                                          'help-echo "Buffer has been modified"))))
-
-       ;; is this buffer read-only?
-       '(:eval (when buffer-read-only
-                 (concat ","  (propertize "RO"
-                                          'face 'font-lock-type-face
-                                          'help-echo "Buffer is read-only"))))  
-       "] "
-
-       ;; add the time, with the date and the emacs uptime in the tooltip
-       '(:eval (propertize (format-time-string "%H:%M")
-                           'help-echo
-                           (concat (format-time-string "%c; ")
-                                   (emacs-uptime "Uptime:%hh"))))
-       " --"
-       ;; i don't want to see minor-modes; but if you want, uncomment this:
-       ;; minor-mode-alist  ;; list of minor modes
-       "%-" ;; fill with '-'
        ))
 
 ; --------------------------------------------------
