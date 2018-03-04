@@ -31,18 +31,17 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     org
+     ranger
+     python
+     ipython-notebook
+     rust
      yaml
      osx
      emacs-lisp
      git
-     (org :variables org-enable-github-support t)
      helm
      auto-completion
-     (python :variables
-             python-sort-imports-on-save t
-             python-test-runner 'pytest
-             :packages
-             (not hy-mode))
      django
      xkcd
      common-lisp
@@ -64,7 +63,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(company realgud nvm rjsx-mode multiple-cursors hy-mode)
+   dotspacemacs-additional-packages '(multiple-cursors company realgud nvm rjsx-mode multiple-cursors hy-mode)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -137,11 +136,7 @@ values."
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(
-                         noctilux
-                         material
-                         granger
-                         spacemacs-dark
-                         spacemacs-light
+                         omtose-darker
                          )
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
@@ -152,6 +147,7 @@ values."
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
+   dotspacemacs-mode-line-theme 'spacemacs
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -315,6 +311,7 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+
   (setq-default git-magit-status-fullscreen t)
 
   (defvar epa-pinentry-mode 'loopback)
@@ -328,201 +325,59 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  (setq-default default-frame-alist '((width . 170)
-                                      (height . 70)
-                                      (menu-bar-lines . 0)))
 
-  (defun evil-double-keymap (keychord function)
-    (define-key evil-insert-state-map keychord function)
-    (define-key evil-normal-state-map keychord function))
+  ;; make sure emacs uses environment variables from my shell
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize))
 
-  (define-key evil-insert-state-map (kbd "C-w") 'backward-kill-word)
-  (evil-define-key 'insert org-mode (kbd "M-RET") 'org-meta-return)
-  (evil-define-key 'normal org-mode (kbd "M-RET") 'org-meta-return)
-
-  ;; GREENPHIRE PROJECT ENV
-  (setenv "WORKON_HOME" "/Users/mroll/.envs")
-  (setenv "DEBUG" "true")
-  (setenv "DATABASE_NAME" "bpa-db")
-  (setenv "DATABASE_USER" "postgres")
-  (setenv "DATABASE_PASSWORD" "notApassword1!")
-  (setenv "DATABASE_SERVICE_HOST" "bpa-api-db")
-
-  (with-eval-after-load 'org
-    ;; here goes your Org config :)
-    ;; ....
-    (setq org-agenda-files '("/Users/mroll/org/work.org"))
-    (load "/Users/mroll/.emacs.d/custom/bh.el")
-    )
-
+  ;; load secret variables
   (load "~/.emacs.d/custom/mpr-secrets.el.gpg")
-  (load "~/.emacs.d/custom/gnus.el")
-  (setq-default evil-escape-key-sequence "kj")
 
+  ;; load obscure csv library
   (load "~/.emacs.d/custom/el-csv/parse-csv.el")
 
+  ;; load config variables
+  (load "~/.emacsconfig/variables.el")
 
-  (defun rename-file-and-buffer (new-name)
-    "Renames both current buffer and file it's visiting to NEW-NAME."
-    (interactive "sNew name: ")
-    (let ((name (buffer-name))
-          (filename (buffer-file-name)))
-      (if (not filename)
-          (message "Buffer '%s' is not visiting a file!" name)
-        (if (get-buffer new-name)
-            (message "A buffer named '%s' already exists!" new-name)
-          (progn
-            (rename-file filename new-name 1)
-            (rename-buffer new-name)
-            (set-visited-file-name new-name)
-            (set-buffer-modified-p nil))))))
+  ;; load functions
+  (load "~/.emacsconfig/functions.el")
 
+  ;; load keybindings
+  (load "~/.emacsconfig/keys.el")
 
-  (defun wc (&optional start end)
-    "Prints number of lines, words and characters in region or whole buffer."
-    (interactive)
-    (let ((n 0)
-          (start (if mark-active (region-beginning) (point-min)))
-          (end (if mark-active (region-end) (point-max))))
-      (save-excursion
-        (goto-char start)
-        (while (< (point) end) (if (forward-word 1) (setq n (1+ n)))))
-      (message "%3d %3d %3d" (count-lines start end) n (- end start))))
+  (with-eval-after-load 'erc
+    (load "~/.emacsconfig/pkgconfig/erc.el"))
 
-  (require 'nvm)
-  (nvm-use (caar (last (nvm--installed-versions))))
+  (with-eval-after-load 'gnus
+    (load "~/.emacsconfig/pkgconfig/gnus.el"))
 
+  (with-eval-after-load 'js2
+    (load "~/.emacsconfig/pkgconfig/js2.el"))
 
-  ;; (with-eval-after-load 'flycheck
-  ;;   (push 'rjsx-mode (flycheck-checker-get 'javascript-eslint 'modes)))
+  (with-eval-after-load 'org
+    (load "~/.emacsconfig/pkgconfig/bh.el")
+    (load "~/.emacsconfig/pkgconfig/org.el"))
 
-  (global-flycheck-mode)
+  (with-eval-after-load 'python
+    (load "~/.emacsconfig/pkgconfig/python.el"))
 
-  ;; turn on flychecking globally
-  ; (add-hook 'after-init-hook #'global-flycheck-mode)
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   ))
 
-  ;; disable jshint since we prefer eslint checking
-  ;; (setq-default flycheck-disabled-checkers
-  ;;               (append flycheck-disabled-checkers
-  ;;                       '(javascript-jshint)))
+(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
 
-  ;; use eslint with web-mode for jsx files
-  ; (flycheck-add-mode 'javascript-eslint 'web-mode)
-
-  (setq-default js2-basic-offset 2)
-  (setq-default js2-strict-missing-semi-warning nil)
-  (setq-default js2-missing-semi-one-line-override t)
-  (setq-default js2-mode-show-strict-warnings nil)
-
-  (add-to-list 'auto-mode-alist '("react-native\\/.*\\.js\\'" . rjsx-mode))
-  (add-to-list 'auto-mode-alist '(".*.hy" . hy-mode))
-
-  (add-to-list 'load-path "/Users/mroll/.emacs.d/elpa/hy-mode/")
-
-  (require 'hy-mode)
-  (require 'spacemacs-hy)
-
-  ;; use local eslint from node_modules before global
-  ;; http://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
-  ;; (defun my/use-eslint-from-node-modules ()
-  ;;   (let* ((root (locate-dominating-file
-  ;;                 (or (buffer-file-name) default-directory)
-  ;;                 "node_modules"))
-  ;;          (eslint (and root
-  ;;                       (expand-file-name "node_modules/eslint/bin/eslint.js"
-  ;;                                         root))))
-  ;;     (when (and eslint (file-executable-p eslint))
-  ;;       (setq-local flycheck-javascript-eslint-executable eslint))))
-  ;; (add-hook 'flycheck-mode-hook #'my/use-eslint-from-node-modules)
-
-  (defun insert-multiline-brace ()
-    (interactive)
-    (insert " {
-}")
-    (left-char)
-    (indent-for-tab-command)
-    (evil-open-above 1))
-  (define-key evil-insert-state-map (kbd "C-j") 'insert-multiline-brace)
-
-
-  (defun md-footnote (n content)
-    (interactive "snumber: \nscontent: \n")
-    (save-excursion
-      (insert (format "<sup>[%s](#fn%s)</sup>" n n))
-      (goto-char (point-max))
-      (insert (format "\n<a name=\"fn%s\">%s</a>: %s" n n content))))
-
-  (evil-define-key 'insert markdown-mode-map (kbd "C-c f") 'md-footnote)
-
-  (defun mathjax-equation ()
-    (interactive)
-    (insert (format "\\begin{equation}\n\\begin{split}\n\\end{split}\n\\end{equation}")))
-  (evil-define-key 'normal markdown-mode-map (kbd ",q") 'mathjax-equation)
-
-  (add-hook 'text-mode-hook 'turn-on-auto-fill)
-  (add-hook 'org-mode-hook 'turn-on-auto-fill)
-
-  (setq python-shell-interpreter "/usr/local/bin/python3")
-
-  (set-face-attribute 'org-level-6 nil :inherit 'variable-pitch :foreground "DeepSkyBlue1" :height 1.0 :family "Inconsolata")
-  (set-face-attribute 'erc-input-face nil :inherit 'variable-pitch :foreground "DeepSkyBlue1" :height 1.2 :family "Inconsolata")
-
-  (defun mpr/erc-connect ()
-    (erc :server "matthewroll.com" :port 5000 :nick "le4fy" :password mpr/znc-pass))
-                                        ; (mpr/erc-connect)
-
-  (defun ck/org-confirm-babel-evaluate (lang body)
-    (not (or (string= lang "latex")
-             (string= lang "tcl")
-             (string= lang "bash")
-             (string= lang "ledger")
-             (string= lang "python")
-             (string= lang "emacs-lisp")
-             (string= lang "shell")
-             (string= lang "lisp"))))
-  (setq org-confirm-babel-evaluate 'ck/org-confirm-babel-evaluate)
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((R . t)
-     (ditaa . nil)
-     (dot . nil)
-     (emacs-lisp . t)
-     (gnuplot . t)
-     (haskell . nil)
-     (latex . t)
-     (ledger . t)
-     (ocaml . nil)
-     (octave . nil)
-     (python . t)
-     (ruby . nil)
-     (screen . nil)
-     (shell . t)
-     (sql . nil)
-     (sqlite . nil)))
-  )
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
- '(background-color "#202020")
- '(background-mode dark)
- '(cursor-color "#cccccc")
- '(custom-safe-themes
-   (quote
-    ("4980e5ddaae985e4bae004280bd343721271ebb28f22b3e3b2427443e748cd3f" default)))
- '(evil-want-Y-yank-to-eol nil)
- '(foreground-color "#cccccc")
- '(package-selected-packages
-   (quote
-    (ox-gfm rjsx-mode nvm realgud test-simple loc-changes load-relative restclient-helm ob-restclient ob-http company-restclient restclient know-your-http-well csv-mode yaml-mode reveal-in-osx-finder pbcopy osx-trash osx-dictionary launchctl ledger-mode ibuffer-projectile erc-yt erc-view-log erc-terminal-notifier erc-social-graph erc-image erc-hl-nicks tide typescript-mode flycheck sql-indent smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit ghub async let-alist with-editor web-mode tagedit slim-mode scss-mode sass-mode pug-mode mmm-mode markdown-toc markdown-mode less-css-mode insert-shebang helm-css-scss haml-mode gh-md fish-mode emmet-mode company-web web-completion-data company-shell company-auctex auctex-latexmk auctex slime-company slime common-lisp-snippets web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc company-tern tern coffee-mode xkcd pony-mode yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gnuplot fuzzy flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump diminish define-word company-statistics column-enforce-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:foreground "#cccccc" :background "#202020"))))
- '(org-mode-line-clock ((t (:foreground "red" :box (:line-width -1 :style released-button))))))
+ '(default ((((class color) (min-colors 257)) nil) (((class color) (min-colors 89)) (:background "#1c1c1c" :foreground "#eeeeee")))))
+)
