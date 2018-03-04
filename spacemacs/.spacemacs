@@ -331,10 +331,10 @@ you should place your code here."
     (exec-path-from-shell-initialize))
 
   ;; load secret variables
-  (load "~/.emacs.d/custom/mpr-secrets.el.gpg")
+  (load "~/.emacsconfig/mpr-secrets.el.gpg")
 
   ;; load obscure csv library
-  (load "~/.emacs.d/custom/el-csv/parse-csv.el")
+  (load "~/.emacsconfig/lib/el-csv/parse-csv.el")
 
   ;; load config variables
   (load "~/.emacsconfig/variables.el")
