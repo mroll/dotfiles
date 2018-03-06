@@ -40,3 +40,7 @@
     (insert (format "<sup>[%s](#fn%s)</sup>" n n))
     (goto-char (point-max))
     (insert (format "\n<a name=\"fn%s\">%s</a>: %s" n n content))))
+
+(defun mpr/erc-connect ()
+  (erc :server "matthewroll.com" :port 5000 :nick "le4fy" :password mpr/znc-pass))
+;; (mpr/erc-connect)

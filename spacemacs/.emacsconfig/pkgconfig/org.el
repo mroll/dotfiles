@@ -1,4 +1,7 @@
-(setq org-agenda-files '("/Users/matt/org/todo.org"))
+(setq org-agenda-files '("~/org/money.org"
+                         "~/org/hack.org"
+                         "~/org/irl.org"))
+
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
 (defun ck/org-confirm-babel-evaluate (lang body)
