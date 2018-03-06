@@ -34,11 +34,11 @@
 
 (setq org-todo-keyword-faces
       (quote (("TODO" :foreground "red" :weight bold)
-              ("NEXT" :foreground "pink" :weight bold)
-              ("DONE" :foreground "forest green" :weight bold)
+              ("NEXT" :foreground "orange" :weight bold)
+              ("DONE" :foreground "gray38" :weight bold)
               ("WAITING" :foreground "orange" :weight bold)
               ("HOLD" :foreground "magenta" :weight bold)
-              ("CANCELLED" :foreground "forest green" :weight bold)
+              ("CANCELLED" :foreground "gray38" :weight bold)
               ("MEETING" :foreground "forest green" :weight bold)
               ("PHONE" :foreground "forest green" :weight bold))))
 
@@ -991,9 +991,9 @@ so change the default 'F' binding in the agenda to allow both"
 (setq org-agenda-start-on-weekday 1)
 
 ;; Enable display of the time grid so we can see the marker for the current time
-(setq org-agenda-time-grid (quote ((daily today remove-match)
-                                   #("----------------" 0 16 (org-heading t))
-                                   (0900 1100 1300 1500 1700))))
+; (setq org-agenda-time-grid (quote ((daily today remove-match)
+;                                    #("----------------" 0 16 (org-heading t))
+;                                    (0900 1100 1300 1500 1700))))
 
 ;; Display tags farther right
 (setq org-agenda-tags-column -102)

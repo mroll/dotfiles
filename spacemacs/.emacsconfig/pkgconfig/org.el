@@ -34,3 +34,5 @@
    (sql . nil)
    (sqlite . nil)))
 
+(set-face-foreground 'org-level-3 "maroon1")
+
