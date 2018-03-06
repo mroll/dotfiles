@@ -1,4 +1,4 @@
-(setq org-agenda-files '("/Users/matt/org/todo.org"))
+(setq org-agenda-files '("/Users/mroll/org/work.org"))
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
 (defun ck/org-confirm-babel-evaluate (lang body)
@@ -30,4 +30,6 @@
    (shell . t)
    (sql . nil)
    (sqlite . nil)))
+
+(set-face-foreground 'org-level-3 "maroon1")
 

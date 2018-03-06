@@ -34,11 +34,11 @@
 
 (setq org-todo-keyword-faces
       (quote (("TODO" :foreground "red" :weight bold)
-              ("NEXT" :foreground "pink" :weight bold)
-              ("DONE" :foreground "forest green" :weight bold)
+              ("NEXT" :foreground "orange" :weight bold)
+              ("DONE" :foreground "gray38" :weight bold)
               ("WAITING" :foreground "orange" :weight bold)
               ("HOLD" :foreground "magenta" :weight bold)
-              ("CANCELLED" :foreground "forest green" :weight bold)
+              ("CANCELLED" :foreground "gray38" :weight bold)
               ("MEETING" :foreground "forest green" :weight bold)
               ("PHONE" :foreground "forest green" :weight bold))))
 
