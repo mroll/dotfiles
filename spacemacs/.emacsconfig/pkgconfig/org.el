@@ -1,6 +1,7 @@
-(setq org-agenda-files '("~/org/money.org"
-                         "~/org/hack.org"
-                         "~/org/irl.org"))
+(setq org-agenda-files '("~/Dropbox/org/money.org"
+                         "~/Dropbox/org/hack.org"
+                         "~/Dropbox/org/irl.org"
+                         "~/Dropbox/org/work.org"))
 
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
