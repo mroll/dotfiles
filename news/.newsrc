@@ -1,12 +1,12 @@
-gmane.comp.lang.tcl.core! 1-22091,22099-22100,22115
-gmane.comp.encryption.gpg.user! 1-46984,46990,46993,47028-47030,47037,47043
-gmane.comp.encryption.gpg.devel! 1-23591
-gmane.comp.lang.tcl.tcllib.devel! 1-62
-gmane.comp.terminal-emulators.tmux.user! 1-8500
-gmane.comp.version-control.git.magit! 1-2031
-gmane.comp.version-control.git.user! 1-11894
-gmane.emacs.devel! 1-221475,221478-221484
-gmane.emacs.gnus.user! 1-18788
+gmane.comp.lang.tcl.core: 1-22091,22099-22100,22115
+gmane.comp.encryption.gpg.user: 1-46984,46990,46993,47028-47030,47037,47043
+gmane.comp.encryption.gpg.devel: 1-23591
+gmane.comp.lang.tcl.tcllib.devel: 1-62
+gmane.comp.terminal-emulators.tmux.user: 1-8500
+gmane.comp.version-control.git.magit: 1-2031
+gmane.comp.version-control.git.user: 1-11894
+gmane.emacs.devel: 1-221475,221478-221484
+gmane.emacs.gnus.user: 1-18788
 gwene.com.slatestarcodex! 1-775
 gwene.com.aaronsw.feeds.pgessays! 1-190
 gwene.com.codinghorror! 1-51
@@ -16,7 +16,7 @@ gwene.com.lesswrong! 1-564
 gwene.com.lesswrong.new! 1-3213
 gwene.com.linux! 1-21378
 gwene.com.pragmaticemacs! 1-193
-gwene.com.putanumonit! 1-87
+gwene.com.putanumonit! 1-87,90
 gwene.com.raganwald! 1-106
 gwene.com.xkcd! 1-1184,1188
 gwene.org.slashdot.linux!
