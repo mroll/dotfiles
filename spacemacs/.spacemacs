@@ -319,7 +319,8 @@ before packages are loaded. If you are unsure, you should try in setting them in
 
   (setq-default git-magit-status-fullscreen t)
 
-  (defvar epa-pinentry-mode 'loopback)
+  (setq-default epa-pinentry-mode 'loopback)
+  (pinentry-start)
   (display-time-mode 1)
   )
 

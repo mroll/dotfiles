@@ -8,13 +8,13 @@
 ;;
 
 
-(defvar mml2015-encrypt-to-self t)
-(defvar epa-file-cache-passphrase-for-symmetric-entryption t)
-(add-hook 'message-setup-hook 'mml-secure-message-encrypt)
+;; (defvar mml2015-encrypt-to-self t)
+;; (defvar epa-file-cache-passphrase-for-symmetric-entryption t)
+;; (add-hook 'message-setup-hook 'mml-secure-message-encrypt)
 (setq gnus-agent nil)
 (setq gnus-message-archive-group nil)
 (setq mail-host-address "fitz")
-(setq gnus-use-cache nil)
+;; (setq gnus-use-cache nil)
 (setq gnus-select-method '(nntp "news.gmane.org"))
 (setq gnus-secondary-select-methods '((nnimap "mproll"
                                               (nnimap-address "127.0.0.1")
@@ -55,4 +55,5 @@
                                "nnimap+mproll:INBOX"
                                "nnimap+mproll:Sent"
                                "nnimap+mproll:Spam"
-                               "nnimap+mproll:Trash")))))
+                               "nnimap+mproll:Trash"
+                               "nnimap+mproll:Folders/python-dev")))))

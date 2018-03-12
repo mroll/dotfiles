@@ -7,3 +7,5 @@
 (setq-default evil-escape-key-sequence "kj")
 
 (setq-default neo-theme 'ascii)
+
+(setq erc-hide-list '("JOIN" "PART" "QUIT"))
