@@ -337,6 +337,7 @@ you should place your code here."
     (exec-path-from-shell-initialize))
 
   (global-company-mode)
+  (global-flycheck-mode 1)
 
   ;; load secret variables
   (load "~/.emacsconfig/mpr-secrets.el.gpg")
@@ -359,8 +360,8 @@ you should place your code here."
   (with-eval-after-load 'erc
     (load "~/.emacsconfig/pkgconfig/erc.el"))
 
-  (with-eval-after-load 'gnus
-    (load "~/.emacsconfig/pkgconfig/gnus.el"))
+  ;; (with-eval-after-load 'gnus
+  ;;   (load "~/.emacsconfig/pkgconfig/gnus.el"))
 
   (with-eval-after-load 'js2
     (load "~/.emacsconfig/pkgconfig/js2.el"))

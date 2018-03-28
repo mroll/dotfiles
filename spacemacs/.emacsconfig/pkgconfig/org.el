@@ -37,3 +37,4 @@
 
 (set-face-foreground 'org-level-3 "maroon1")
 
+(setq org-babel-python-command "python3")
