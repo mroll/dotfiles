@@ -373,6 +373,9 @@ you should place your code here."
   (with-eval-after-load 'python
     (load "~/.emacsconfig/pkgconfig/python.el"))
 
+  (add-hook 'realgud-short-key-mode-hook
+            (lambda ()
+              (local-set-key "\C-c" realgud:shortkey-mode-map)))
   )
 
 (defun dotspacemacs/emacs-custom-settings ()
