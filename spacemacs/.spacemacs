@@ -344,6 +344,8 @@ you should place your code here."
   ;; load obscure csv library
   ;; (load "~/.emacsconfig/lib/el-csv/parse-csv.el")
 
+  (load "~/.emacsconfig/lib/ob-restclient.el/ob-restclient.el")
+
   ;; load frame-cmds library
   (load "~/.emacsconfig/lib/frame-cmds/frame-cmds.el")
 
@@ -365,12 +367,23 @@ you should place your code here."
   (with-eval-after-load 'js2
     (load "~/.emacsconfig/pkgconfig/js2.el"))
 
+  (with-eval-after-load 'tide
+    (load "~/.emacsconfig/pkgconfig/tide.el"))
+
   (with-eval-after-load 'org
     (load "~/.emacsconfig/pkgconfig/bh.el")
     (load "~/.emacsconfig/pkgconfig/org.el"))
 
   (with-eval-after-load 'python
     (load "~/.emacsconfig/pkgconfig/python.el"))
+
+  ;; Gobabl project env
+  (setenv "WORKON_HOME" "~/.envs")
+  (setenv "DEBUG" "true")
+  (setenv "GOBABL_DATABASE_NAME" "gobabl-db")
+  (setenv "GOBABL_DATABASE_USER" "postgres")
+  (setenv "GOBABL_DATABASE_PASSWORD" "CsFoOWdmsnUrFDCYr")
+  (setenv "GOBABL_DATABASE_SERVICE_HOST" "gobabl-db")
 
   )
 

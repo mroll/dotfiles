@@ -43,13 +43,13 @@
          (display . all)
          (posting-style
           (name "matt roll")
-          (address "mproll@protonmail.com"))
+          (address "mproll@pm.me"))
          (expiry-target . delete))))
 
 (eval-after-load 'gnus-topic
   '(progn
      (setq gnus-topic-topology '(("Gnus" visible)
-                                 (("mproll@protonmail.com" visible))))
+                                 (("mproll@pm.me" visible))))
 
      (setq gnus-topic-alist '(("mproll@protonmail.com" ; the key of topic
                                "nnimap+mproll:INBOX"
