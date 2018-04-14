@@ -1,0 +1,3 @@
+[submodule "spacemacs/.emacsconfig/lib/ob-restclient.el"]
+	path = spacemacs/.emacsconfig/lib/ob-restclient.el
+	url = git@github.com:alf/ob-restclient.el.git

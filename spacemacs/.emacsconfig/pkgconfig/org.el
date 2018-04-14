@@ -1,7 +1,8 @@
 (setq org-agenda-files '("~/Dropbox/org/money.org"
                          "~/Dropbox/org/hack.org"
                          "~/Dropbox/org/irl.org"
-                         "~/Dropbox/org/work.org"))
+                         "~/Dropbox/org/work.org"
+                         "~/Dropbox/org/agenda-refile-beorg.org"))
 
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
@@ -33,7 +34,8 @@
    (screen . nil)
    (shell . t)
    (sql . nil)
-   (sqlite . nil)))
+   (sqlite . nil)
+   (restclient . t)))
 
 (set-face-foreground 'org-level-3 "maroon1")
 

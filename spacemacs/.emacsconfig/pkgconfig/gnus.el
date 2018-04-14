@@ -43,7 +43,7 @@
          (display . all)
          (posting-style
           (name "matt roll")
-          (address "mproll@protonmail.com"))
+          (address "mproll@pm.me"))
          (expiry-target . delete))))
 
 (eval-after-load 'gnus-topic
