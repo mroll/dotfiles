@@ -11,6 +11,8 @@
 ;; (defvar mml2015-encrypt-to-self t)
 ;; (defvar epa-file-cache-passphrase-for-symmetric-entryption t)
 ;; (add-hook 'message-setup-hook 'mml-secure-message-encrypt)
+
+
 (setq gnus-agent nil)
 (setq gnus-message-archive-group nil)
 (setq mail-host-address "fitz")
@@ -40,45 +42,24 @@
 (setq gnus-use-correct-string-widths nil)
 (setq gnus-parameters
       '(("mproll:INBOX"
-         (display . all)
-         (posting-style
+        (display . all)
+        (posting-style
           (name "matt roll")
           (address "mproll@pm.me"))
-         (expiry-target . delete))))
+        (expiry-target . delete))))
 
+;; Use topics per default
+(add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
 (eval-after-load 'gnus-topic
   '(progn
-     (setq gnus-topic-topology '(("Gnus" visible)
-                                 (("rationality" visible))
-                                 (("programming" visible))
-                                 (("math" visible))
-                                 (("mproll@protonmail.com" visible))))
 
-     (setq gnus-topic-alist '(("rationality"
-                               "nntp+news.gwene.org:gwene.com.slatestarcodex"
-                               "nntp+news.gwene.org:gwene.com.lesserwrong"
-                               "nntp+news.gwene.org:gwene.net.gwern"
-                               "nntp+news.gwene.org:gwene.com.wordpress.meteuphoric"
-                               "nntp+news.gwene.org:gwene.com.wordpress.thezvi"
-                               "nntp+news.gwene.org:gwene.com.mindingourway")
-                              ("programming"
-                               "nntp+news.gwene.org:gwene.com.high.scalability"
-                               "nntp+news.gwene.org:gwene.com.danluu"
-                               "nntp+news.gwene.org:gwene.com.blogspot.paulbuchheit"
-                               "nntp+news.gwene.org:gwene.com.blogspot.fexpr"
-                               "nntp+news.gwene.org:gwene.codinghorror.com"
-                               "nntp+news.gwene.org:gwene.ca.jvns"
-                               "nntp+news.gwene.org:gwene.antirez"
-                               "nntp+news.gwene.org:gmane.comp.lang.tcl.tcllib.devel"
-                               "nntp+news.gwene.org:gmane.comp.lang.tcl.core")
-                              ("math"
-                               "nntp+news.gwene.org:gwene.com.andrewgelman"
-                               "nntp+news.gwene.org:gwene.blog.n-categorycafe")
-                              ("mproll@protonmail.com" ; the key of topic
-                               "nnimap+mproll:INBOX"
-                               "nnimap+mproll:Sent"
-                               "nnimap+mproll:Spam"
-                               "nnimap+mproll:Trash"
-                               "nnimap+mproll:Folders/python-dev")))))
+     (setq-default gnus-topic-topology '(("Gnus" visible)
+                                         (("mproll" visible))))
+
+    (setq-default gnus-topic-alist '(("mproll" ; the key of topic
+                                      "nnimap+mproll:INBOX"
+                                      "nnimap+mproll:Sent"
+                                      "nnimap+mproll:Spam"
+                                      "nnimap+mproll:Trash")))))
 
 (set-face-attribute 'variable-pitch nil :family "Inconsolata")

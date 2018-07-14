@@ -56,7 +56,7 @@
               ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
 
 (setq org-directory "~/org")
-(setq org-default-notes-file "~/org/refile.org")
+(setq org-default-notes-file "~/Dropbox/org/refile.org")
 
 ;; I use C-c c to start capture mode
 ; (global-set-key (kbd "C-c c") 'org-capture)
@@ -596,28 +596,27 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
 
 (setq org-alphabetical-lists t)
 ; Make babel results blocks lowercase
-(setq org-babel-results-keyword "results")
+;; (setq org-babel-results-keyword "results")
 
 (defun bh/display-inline-images ()
   (condition-case nil
       (org-display-inline-images)
     (error nil)))
 
-(org-babel-do-load-languages
- (quote org-babel-load-languages)
- (quote ((emacs-lisp . t)
-         (dot . t)
-         (ditaa . t)
-         (R . t)
-         (python . t)
-         (ruby . t)
-         (gnuplot . t)
-         (clojure . t)
-         (sh . t)
-         (ledger . t)
-         (org . t)
-         (plantuml . t)
-         (latex . t))))
+;; (org-babel-do-load-languages
+;;  (quote org-babel-load-languages)
+;;  (quote ((emacs-lisp . t)
+;;          (dot . t)
+;;          (ditaa . t)
+;;          (R . t)
+;;          (python . t)
+;;          (ruby . t)
+;;          (gnuplot . t)
+;;          (clojure . t)
+;;          (ledger . t)
+;;          (org . t)
+;;          (plantuml . t)
+;;          (latex . t))))
 
 ; Do not prompt to confirm evaluation
 ; This may be dangerous - make sure you understand the consequences
