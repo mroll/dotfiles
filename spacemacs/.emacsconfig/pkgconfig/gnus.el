@@ -15,7 +15,7 @@
 
 (setq gnus-agent nil)
 (setq gnus-message-archive-group nil)
-(setq mail-host-address "fitz")
+(setq mail-host-address "hogwarts")
 ;; (setq gnus-use-cache nil)
 (setq gnus-select-method '(nntp "news.gmane.org"))
 (setq gnus-secondary-select-methods '((nnimap "mproll"
@@ -59,6 +59,21 @@
     (setq-default gnus-topic-alist '(("mproll" ; the key of topic
                                       "nnimap+mproll:INBOX"
                                       "nnimap+mproll:Sent"
+                                      "nnimap+mproll:Folders/air travel"
+                                      "nnimap+mproll:Folders/amazon"
+                                      "nnimap+mproll:Folders/apple"
+                                      "nnimap+mproll:Folders/chase"
+                                      "nnimap+mproll:Folders/creditkarma"
+                                      "nnimap+mproll:Folders/discover"
+                                      "nnimap+mproll:Folders/edX"
+                                      "nnimap+mproll:Folders/github"
+                                      "nnimap+mproll:Folders/google"
+                                      "nnimap+mproll:Folders/mia"
+                                      "nnimap+mproll:Folders/mint"
+                                      "nnimap+mproll:Folders/news"
+                                      "nnimap+mproll:Folders/robinhood"
+                                      "nnimap+mproll:Folders/utilities"
+                                      "nnimap+mproll:Folders/vote"
                                       "nnimap+mproll:Spam"
                                       "nnimap+mproll:Trash")))))
 

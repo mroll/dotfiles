@@ -16,26 +16,35 @@
            (string= lang "lisp"))))
 (setq-default org-confirm-babel-evaluate 'ck/org-confirm-babel-evaluate)
 
-;; (org-babel-do-load-languages
-;;  'org-babel-load-languages
-;;  '((R . t)
-;;    (ditaa . nil)
-;;    (dot . nil)
-;;    (emacs-lisp . t)
-;;    (gnuplot . t)
-;;    (haskell . nil)
-;;    (latex . t)
-;;    (ledger . t)
-;;    (ocaml . nil)
-;;    (octave . nil)
-;;    (python . t)
-;;    (ruby . nil)
-;;    (screen . nil)
-;;    (shell . t)
-;;    (sql . nil)
-;;    (sqlite . nil)
-;;    (restclient . t)))
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((R . t)
+   (ditaa . nil)
+   (dot . nil)
+   (emacs-lisp . t)
+   (gnuplot . t)
+   (haskell . t)
+   (latex . t)
+   (ledger . t)
+   (ocaml . nil)
+   (octave . nil)
+   (python . t)
+   (ruby . nil)
+   (screen . nil)
+   (shell . t)
+   (sql . nil)
+   (sqlite . nil)
+   (restclient . t)))
 
 (set-face-foreground 'org-level-3 "maroon1")
 
 (setq org-babel-python-command "python3")
+
+;; (add-to-list 'org-latex-classes
+;;              '("book"
+;;                "\\documentclass{book}"
+;;                ("\\part{%s}" . "\\part*{%s}")
+;;                ("\\chapter{%s}" . "\\chapter*{%s}")
+;;                ("\\section{%s}" . "\\section*{%s}")
+;;                ("\\subsection{%s}" . "\\subsection*{%s}")
+;;                ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
