@@ -1,7 +1,4 @@
-(setq org-agenda-files '("~/Dropbox/org/money/money.org"
-                         "~/Dropbox/org/project"
-                         "~/Dropbox/org/today.org"
-                         "~/Dropbox/org/agenda-refile-beorg.org"))
+(setq org-agenda-files '("~/Dropbox/idiomatic.org"))
 
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
@@ -36,6 +33,12 @@
 ;;    (sqlite . nil)
 ;;    (restclient . t)))
 
+(set-face-foreground 'org-level-2 "cyan3")
 (set-face-foreground 'org-level-3 "maroon1")
 
 (setq org-babel-python-command "python3")
+
+(spacemacs/set-leader-keys-for-major-mode 'org-mode "C-t" 'org-set-tags-command)
+
+(setq org-hide-emphasis-markers t)
+

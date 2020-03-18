@@ -70,3 +70,27 @@
         (forward-char))
       (newline)
       (indent-for-tab-command))))
+
+
+(defun module-file-contents (modulename)
+  (format "angular.module('%s', []);" modulename))
+
+
+(defun component-file-contents (modulename)
+  (format "angular.
+module('%s', []).
+component('%s', {
+    templateUrl: '%s/%s.template.html'
+});" modulename modulename modulename modulename))
+
+
+(defun new-component (componentName)
+  (interactive "scomponent name: \n")
+  (let* ((module-filename (format "%s/%s.module.js" componentName componentName))
+        (component-filename (format "%s/%s.component.js" componentName componentName))
+        (template-filename (format "enduser/templates/postauth/%s.html" componentName)))
+    (mkdir componentName)
+    (with-temp-file module-filename
+      (insert (module-file-contents componentName)))
+    (with-temp-file component-filename
+      (insert (component-file-contents componentName)))))

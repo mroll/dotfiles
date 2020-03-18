@@ -37,6 +37,7 @@
               ("NEXT" :foreground "orange" :weight bold)
               ("DONE" :foreground "gray38" :weight bold)
               ("WAITING" :foreground "orange" :weight bold)
+              ("TESTING" :forground "orange" :weight bold)
               ("HOLD" :foreground "magenta" :weight bold)
               ("CANCELLED" :foreground "gray38" :weight bold)
               ("MEETING" :foreground "forest green" :weight bold)
@@ -292,7 +293,7 @@ A prefix arg forces clock in of the default task."
 
 ; global Effort estimate values
 ; global STYLE property values for completion
-(setq org-global-properties (quote (("Effort_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00")
+(setq org-global-properties (quote (("Effort_ALL" . "2:00 4:00 8:00 16:00")
                                     ("STYLE_ALL" . "habit"))))
 
 ;; Agenda log mode items to display (closed and state changes by default)
@@ -1351,20 +1352,20 @@ Late deadlines first, then scheduled, then non-late deadlines"
 
 (setq org-src-fontify-natively t)
 
-(setq org-structure-template-alist
-      (quote (("s" "#+begin_src ?\n\n#+end_src" "<src lang=\"?\">\n\n</src>")
-              ("e" "#+begin_example\n?\n#+end_example" "<example>\n?\n</example>")
-              ("q" "#+begin_quote\n?\n#+end_quote" "<quote>\n?\n</quote>")
-              ("v" "#+begin_verse\n?\n#+end_verse" "<verse>\n?\n</verse>")
-              ("c" "#+begin_center\n?\n#+end_center" "<center>\n?\n</center>")
-              ("l" "#+begin_latex\n?\n#+end_latex" "<literal style=\"latex\">\n?\n</literal>")
-              ("L" "#+latex: " "<literal style=\"latex\">?</literal>")
-              ("h" "#+begin_html\n?\n#+end_html" "<literal style=\"html\">\n?\n</literal>")
-              ("H" "#+html: " "<literal style=\"html\">?</literal>")
-              ("a" "#+begin_ascii\n?\n#+end_ascii")
-              ("A" "#+ascii: ")
-              ("i" "#+index: ?" "#+index: ?")
-              ("I" "#+include %file ?" "<include file=%file markup=\"?\">"))))
+;; (setq org-structure-template-alist
+;;       (quote (("s" "#+begin_src ?\n\n#+end_src" "<src lang=\"?\">\n\n</src>")
+;;               ("e" "#+begin_example\n?\n#+end_example" "<example>\n?\n</example>")
+;;               ("q" "#+begin_quote\n?\n#+end_quote" "<quote>\n?\n</quote>")
+;;               ("v" "#+begin_verse\n?\n#+end_verse" "<verse>\n?\n</verse>")
+;;               ("c" "#+begin_center\n?\n#+end_center" "<center>\n?\n</center>")
+;;               ("l" "#+begin_latex\n?\n#+end_latex" "<literal style=\"latex\">\n?\n</literal>")
+;;               ("L" "#+latex: " "<literal style=\"latex\">?</literal>")
+;;               ("h" "#+begin_html\n?\n#+end_html" "<literal style=\"html\">\n?\n</literal>")
+;;               ("H" "#+html: " "<literal style=\"html\">?</literal>")
+;;               ("a" "#+begin_ascii\n?\n#+end_ascii")
+;;               ("A" "#+ascii: ")
+;;               ("i" "#+index: ?" "#+index: ?")
+;;               ("I" "#+include %file ?" "<include file=%file markup=\"?\">"))))
 
 (defun bh/mark-next-parent-tasks-todo ()
   "Visit each parent task and change NEXT states to TODO"
