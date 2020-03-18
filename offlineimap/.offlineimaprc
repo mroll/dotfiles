@@ -1,0 +1,43 @@
+[general]
+accounts = main
+
+
+[Account main]
+localrepository = main-local
+remoterepository = main-remote
+
+# full refresh, in min
+autorefresh = 0.2
+
+# quick refreshs between each full refresh
+quick = 10
+
+# update mu index after sync
+postsynchook = mu index --maildir ~/.mail/pm
+
+[Repository main-local]
+type = Maildir
+localfolders = ~/.mail/pm
+
+# delete remote mails that were deleted locally
+sync_deletes = yes
+
+
+[Repository main-remote]
+type = IMAP
+remoteport = 1143
+remotehost = 127.0.0.1
+remoteuser = mproll@pm.me
+remotepass = qqzXbWMg0K8iXpNQtXANow
+keepalive = 60
+holdconnectionopen = yes
+
+# delete local mails that were deleted on the remote server
+expunge = yes
+
+# sync only these folders
+folderfilter = lambda foldername: foldername not in ['All Mail']
+
+# is broken, but connecting locally to bridge so should be ok
+ssl = no
+# sslcacertfile = /usr/local/etc/openssl/cert.pem 

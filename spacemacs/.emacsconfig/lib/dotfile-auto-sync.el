@@ -50,7 +50,7 @@
 (defun das--pull-and-rebase ()
   "Pull new changes from remote origin."
   (with-helm-default-directory dotfile-auto-sync-repo-path
-    )
+    (vc-git-pull nil)))
 
 
 

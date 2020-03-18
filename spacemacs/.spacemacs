@@ -33,6 +33,12 @@ values."
    '(
      theming
      themes-megapack
+     (mu4e :variables
+           mu4e-installation-path "/usr/local/share/emacs/site-lisp/mu/mu4e"
+           mu4e-enable-notifications t)
+     themes-megapack
+     haskell
+     ruby-on-rails
      nginx
      (scala
       :variables scala-indent:indent-value-expression t
@@ -44,9 +50,10 @@ values."
      dash
      syntax-checking
      spotify
-     (ruby :variables ruby-enable-enh-ruby-mode t)
      (org :variables
           org-use-speed-commands t)
+     (ruby :variables ruby-enable-enh-ruby-mode t
+           ruby-version-manager 'rvm)
      python
      ipython-notebook
      rust
@@ -89,6 +96,9 @@ values."
                                       beacon
                                       string-inflection
                                       helm-org-rifle
+                                      mu4e-alert
+                                      keyfreq
+                                      js2-refactor
                                       yasnippet-snippets
                                       vimish-fold
                                       elpy
@@ -173,18 +183,6 @@ values."
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(
                          spacemacs-light
-                         white-sand
-                         dorsey
-                         hemisu-light
-                         phoenix-dark-pink
-                         subatomic
-                         underwater
-                         rebecca
-                         noctilux
-                         ample-flat
-                         bubbleberry
-                         phoenix-dark-pink
-                         omtose-darker
                          )
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
@@ -452,6 +450,68 @@ you should place your code here."
   ;;                                '((tramp-parse-sconfig "/etc/ssh_config")
   ;;                                  (tramp-parse-sconfig "~/.ssh/config")))
 
+  (display-time-mode t)
+  (scroll-bar-mode -1)
+
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1)
+  (setq vc-follow-symlinks t)
+
+  (setq mail-user-agent 'mu4e-user-agent)
+  ;; default
+  (setq mu4e-mu-binary "/usr/local/bin/mu")
+  (setq mu4e-maildir "~/.mail/pm")
+  (setq mu4e-drafts-folder "/Drafts")
+  (setq mu4e-sent-folder   "/Sent")
+  (setq mu4e-trash-folder  "/Trash")
+  (setq mu4e-refile-folder  "/All")
+
+  (setq mu4e-headers-fields
+        '( (:human-date       .   12)
+           (:flags            .    6)
+           (:mailing-list     .   10)
+           (:from             .   22)
+           (:thread-subject   .   nil)))
+
+  (setq mu4e-search-result-limit 5000)
+  (setq message-kill-buffer-on-exit t)
+
+  (mu4e-alert-set-default-style 'notifier)
+  (mu4e-alert-enable-mode-line-display)
+
+  ;; This allows me to use 'helm' to select mailboxes
+  (setq mu4e-completing-read-function 'completing-read)
+  ;; Why would I want to leave my message open after I've sent it?
+  (setq message-kill-buffer-on-exit t)
+  ;; Don't ask for a 'context' upon opening mu4e
+  (setq mu4e-context-policy 'pick-first)
+  ;; Don't ask to quit... why is this the default?
+  (setq mu4e-confirm-quit nil)
+
+  (setq user-mail-address "mproll@pm.me")
+  (setq smtpmail-default-smtp-server "127.0.0.1"
+        smtpmail-smtp-server "127.0.0.1"
+        smtpmail-smtp-service 1025)
+  (setq message-send-mail-function 'smtpmail-send-it)
+
+  (setq mu4e-update-interval 300)
+  (setq mu4e-view-show-addresses 't)
+
+  (setq mu4e-get-mail-command "offlineimap")
+
+  (setq mu4e-maildir-shortcuts
+        '( ("/INBOX"                       . ?i)
+           ("/Sent"                        . ?s)
+           ("/Trash"                       . ?T)
+           ("/Folders.travel"              . ?t)
+           ("/Folders.finance"             . ?f)
+           ("/Folders.receipts"            . ?r)
+           ("/Folders.important.contacts"  . ?c)
+           ("/Folders.subscriptions"       . ?u)
+           ("/Folders.projects"            . ?p)))
+
+  (add-hook 'js2-mode-hook #'js2-refactor-mode)
+
   ;; make sure emacs uses environment variables from my shell
   (when (memq window-system '(mac ns x))
     (exec-path-from-shell-initialize))
@@ -494,9 +554,19 @@ you should place your code here."
 
   (setq helm-ag-use-grep-ignore-list t)
   (setq heml-ag-use-agignore t)
+  (add-to-list 'auto-mode-alist '("\\.jsx$" . rjsx-mode))
+
+  (setq-default flycheck-temp-prefix ".flycheck")
+
+  (flycheck-add-mode 'javascript-eslint 'javascript-mode)
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(javascript-jshint)))
+
+  (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
 
   (global-company-mode)
-  (global-flycheck-mode 1)
+  ; (global-flycheck-mode 1)
 
   (require 'vimish-fold)
   (spacemacs/set-leader-keys "off" 'vimish-fold)
@@ -506,6 +576,8 @@ you should place your code here."
 
   (require 'helm-org-rifle)
   (setq helm-org-rifle-show-path t)
+
+  (delete-selection-mode 1)
 
   (require 'yasnippet)
   (setq yas-snippet-dirs '("~/.emacsconfig/snippets"))
@@ -564,8 +636,56 @@ you should place your code here."
 
   (setq ensime-startup-notification nil)
 
-  ;; (with-eval-after-load 'gnus
-  ;;   (load "~/.emacsconfig/pkgconfig/gnus.el"))
+  (define-abbrev-table 'org-mode-abbrev-table
+    '(
+      ("sact" "" skel-org-block-plantuml-activity 0)
+      ("sblk" "" skel-org-block 0)
+      ("sditaa" "" skel-org-block-ditaa 0)
+      ("sdot" "" skel-org-block-dot 0)
+      ("selisp" "" skel-org-block-elisp 0)
+      ("sfor" "" skel-org-block-plantuml-activity-for 0)
+      ("sif" "" skel-org-block-plantuml-activity-if 0)
+      ("splantuml" "" skel-org-block-plantuml 0)
+      ("sseq" "" skel-org-block-plantuml-sequence 0)
+      ("tn" "then")
+      ("Tn" "Then")
+      ("tr" "there")
+      ("Tr" "There")
+      ("ts" "things")
+      ("Ts" "Things")
+      ("Tt" "That")
+      ("tt" "that")
+      ("Tk" "Think")
+      ("tk" "think")
+      ("Tg" "Thing")
+      ("tg" "thing")
+      ("Bc" "Because")
+      ("bc" "because")
+      ("nd" "and")
+      ))
+
+
+  (defun div-with-class ()
+    (interactive)
+    (insert "<div class=\"\"></div>")
+    (backward-char 8))
+
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (local-set-key (kbd "\C-c \C-d") (quote div-with-class))))
+
+  (defun md-strikethrough-region (beginning end)
+    (interactive "r")
+    (let ((insert-strikethrough-chars-at (lambda (pos)
+                                           (goto-char pos)
+                                           (insert "~~"))))
+      (if (region-active-p)
+          (progn
+            (funcall insert-strikethrough-chars-at beginning)
+            (funcall insert-strikethrough-chars-at (+ end 2))))))
+
+  (with-eval-after-load 'gnus
+    (load "~/.emacsconfig/pkgconfig/gnus.el"))
 
   ;; Get email, and store in nnml
   ;; (setq gnus-secondary-select-methods
@@ -579,6 +699,9 @@ you should place your code here."
 
   (with-eval-after-load 'js2
     (load "~/.emacsconfig/pkgconfig/js2.el"))
+
+  (add-to-list 'auto-mode-alist '("components\\/.*\\.js\\'" . rjsx-mode))
+  (add-to-list 'auto-mode-alist '("src\\/.*\\.js\\'" . rjsx-mode))
 
   (with-eval-after-load 'tide
     (load "~/.emacsconfig/pkgconfig/tide.el"))
@@ -638,182 +761,12 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(Linum-format "%7i ")
- '(ansi-color-faces-vector
-   [default bold shadow italic underline bold bold-italic bold])
- '(ansi-color-names-vector
-   ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
- '(ansi-term-color-vector
-   [unspecified "#1F1611" "#660000" "#144212" "#EFC232" "#5798AE" "#BE73FD" "#93C1BC" "#E6E1DC"] t)
- '(background-color "#202020")
- '(background-mode dark)
- '(beacon-color "#F8BBD0")
- '(company-quickhelp-color-background "#b0b0b0")
- '(company-quickhelp-color-foreground "#232333")
- '(compilation-message-face (quote default))
- '(cua-global-mark-cursor-color "#2aa198")
- '(cua-normal-cursor-color "#657b83")
- '(cua-overwrite-cursor-color "#b58900")
- '(cua-read-only-cursor-color "#859900")
- '(cursor-color "#cccccc")
- '(cursor-type (quote bar))
- '(diary-entry-marker (quote font-lock-variable-name-face))
- '(emms-mode-line-icon-image-cache
-   (quote
-    (image :type xpm :ascent center :data "/* XPM */
-static char *note[] = {
-/* width height num_colors chars_per_pixel */
-\"    10   11        2            1\",
-/* colors */
-\". c #358d8d\",
-\"# c None s None\",
-/* pixels */
-\"###...####\",
-\"###.#...##\",
-\"###.###...\",
-\"###.#####.\",
-\"###.#####.\",
-\"#...#####.\",
-\"....#####.\",
-\"#..######.\",
-\"#######...\",
-\"######....\",
-\"#######..#\" };")))
- '(evil-emacs-state-cursor (quote ("#D50000" hbar)) t)
- '(evil-insert-state-cursor (quote ("#D50000" bar)) t)
- '(evil-normal-state-cursor (quote ("#F57F17" box)) t)
- '(evil-visual-state-cursor (quote ("#66BB6A" box)) t)
- '(evil-want-Y-yank-to-eol nil)
- '(fci-rule-character-color "#452E2E")
- '(fci-rule-color "#202325" t)
- '(flycheck-color-mode-line-face-to-color (quote mode-line-buffer-id))
- '(foreground-color "#cccccc")
- '(frame-background-mode (quote dark))
- '(frame-brackground-mode (quote dark))
- '(fringe-mode 6 nil (fringe))
- '(gnus-logo-colors (quote ("#0d7b72" "#adadad")) t)
- '(gnus-mode-line-image-cache
-   (quote
-    (image :type xpm :ascent center :data "/* XPM */
-static char *gnus-pointer[] = {
-/* width height num_colors chars_per_pixel */
-\"    18    13        2            1\",
-/* colors */
-\". c #358d8d\",
-\"# c None s None\",
-/* pixels */
-\"##################\",
-\"######..##..######\",
-\"#####........#####\",
-\"#.##.##..##...####\",
-\"#...####.###...##.\",
-\"#..###.######.....\",
-\"#####.########...#\",
-\"###########.######\",
-\"####.###.#..######\",
-\"######..###.######\",
-\"###....####.######\",
-\"###..######.######\",
-\"###########.######\" };")) t)
- '(highlight-changes-colors (quote ("#ff8eff" "#ab7eff")))
- '(highlight-indent-guides-auto-enabled nil)
- '(highlight-symbol-colors
-   (quote
-    ("#F57F17" "#66BB6A" "#0097A7" "#42A5F5" "#7E57C2" "#D84315")))
- '(highlight-symbol-foreground-color "#546E7A")
- '(highlight-tail-colors
-   (quote
-    (("#424748" . 0)
-     ("#63de5d" . 20)
-     ("#4BBEAE" . 30)
-     ("#1DB4D0" . 50)
-     ("#9A8F21" . 60)
-     ("#A75B00" . 70)
-     ("#F309DF" . 85)
-     ("#424748" . 100))))
- '(hl-bg-colors
-   (quote
-    ("#DEB542" "#F2804F" "#FF6E64" "#F771AC" "#9EA0E5" "#69B7F0" "#69CABF" "#B4C342")))
- '(hl-fg-colors
-   (quote
-    ("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3")))
- '(hl-paren-background-colors (quote ("#2492db" "#95a5a6" nil)))
- '(hl-paren-colors (quote ("#ecf0f1" "#ecf0f1" "#c0392b")) t)
- '(hl-sexp-background-color "#1c1f26")
- '(jdee-db-active-breakpoint-face-colors (cons "#1E2029" "#bd93f9"))
- '(jdee-db-requested-breakpoint-face-colors (cons "#1E2029" "#50fa7b"))
- '(jdee-db-spec-breakpoint-face-colors (cons "#1E2029" "#565761"))
- '(linum-format " %7i ")
- '(magit-diff-use-overlays nil)
- '(main-line-color1 "#222232")
- '(main-line-color2 "#333343")
- '(main-line-separator-style (quote chamfer))
- '(notmuch-search-line-faces
-   (quote
-    (("unread" :foreground "#aeee00")
-     ("flagged" :foreground "#0a9dff")
-     ("deleted" :foreground "#ff2c4b" :bold t))))
- '(nrepl-message-colors
-   (quote
-    ("#336c6c" "#205070" "#0f2050" "#806080" "#401440" "#6c1f1c" "#6b400c" "#23733c")))
- '(objed-cursor-color "#ff5555")
- '(org-src-block-faces (quote (("emacs-lisp" (:background "#F0FFF0")))))
  '(package-selected-packages
    (quote
-    (kaolin-valley-light-theme olivetti kaolin-themes doom-modeline shrink-path all-the-icons memoize doom-dracula-theme anaphora org-roam emacsql-sqlite emacsql evil-string-inflection doom-nord-light-theme doom-themes dash-docs transient polymode lv parseedn parseclj a beacon string-inflection flx-ido treepy graphql ample-theme helm-gtags ggtags helm-org-rifle zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme alect-themes afternoon-theme stekene-theme sesman nginx-mode enh-ruby-mode racket-mode faceup yasnippet-snippets vimish-fold noflet ensime sbt-mode scala-mode dockerfile-mode docker tablist docker-tramp clojure-snippets clj-refactor inflections edn paredit peg cider-eval-sexp-fu cider seq queue clojure-mode elpy find-file-in-project ivy helm-dash flycheck-rust flycheck-pos-tip flycheck-ledger dash-at-point spotify helm-spotify-plus multi rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake minitest chruby bundler inf-ruby auctex-latexmk yapfify yaml-mode xkcd ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toml-mode toc-org tide typescript-mode flycheck tagedit sql-indent spaceline powerline smeargle slime-company slime slim-mode scss-mode sass-mode rjsx-mode reveal-in-osx-finder restclient-helm restart-emacs realgud test-simple loc-changes load-relative ranger rainbow-delimiters racer pos-tip pyvenv pytest pyenv-mode py-isort pug-mode popwin pony-mode pip-requirements persp-mode pcre2el pbcopy paradox spinner osx-trash osx-dictionary orgit org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-plus-contrib org-mime org-download org-bullets open-junk-file ob-restclient ob-http nvm neotree move-text mmm-mode markdown-toc markdown-mode magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode linum-relative link-hint less-css-mode ledger-mode launchctl json-mode json-snatcher json-reformat js2-refactor multiple-cursors js-doc insert-shebang indent-guide ibuffer-projectile hydra hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haml-mode google-translate golden-ratio gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flx fish-mode fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit magit magit-popup git-commit ghub let-alist with-editor evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight erc-yt erc-view-log erc-terminal-notifier erc-social-graph erc-image erc-hl-nicks emmet-mode elisp-slime-nav ein skewer-mode request-deferred websocket request deferred js2-mode simple-httpd dumb-jump diminish cython-mode csv-mode company-web web-completion-data company-tern dash-functional tern company-statistics company-shell company-restclient restclient know-your-http-well company-auctex company-anaconda company common-lisp-snippets column-enforce-mode coffee-mode clean-aindent-mode cargo rust-mode bind-map bind-key auto-yasnippet yasnippet auto-highlight-symbol auto-compile packed auctex anaconda-mode pythonic f dash s aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core async ac-ispell auto-complete popup omtose-phellack-theme)))
- '(pdf-view-midnight-colors (quote ("#232333" . "#c7c7c7")))
- '(pos-tip-background-color "#414E63")
- '(pos-tip-foreground-color "#BEC8DB")
- '(powerline-color1 "#3d3d68")
- '(powerline-color2 "#292945")
- '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
- '(sml/active-background-color "#34495e")
- '(sml/active-foreground-color "#ecf0f1")
- '(sml/inactive-background-color "#dfe4ea")
- '(sml/inactive-foreground-color "#34495e")
- '(tabbar-background-color "#ffffffffffff")
- '(term-default-bg-color "#fdf6e3")
- '(term-default-fg-color "#657b83")
- '(vc-annotate-background "#1f2124")
- '(vc-annotate-background-mode nil)
- '(vc-annotate-color-map
-   (quote
-    ((20 . "#ff0000")
-     (40 . "#ff4a52")
-     (60 . "#f6aa11")
-     (80 . "#f1e94b")
-     (100 . "#f5f080")
-     (120 . "#f6f080")
-     (140 . "#41a83e")
-     (160 . "#40b83e")
-     (180 . "#b6d877")
-     (200 . "#b7d877")
-     (220 . "#b8d977")
-     (240 . "#b9d977")
-     (260 . "#93e0e3")
-     (280 . "#72aaca")
-     (300 . "#8996a8")
-     (320 . "#afc4db")
-     (340 . "#cfe2f2")
-     (360 . "#dc8cc3"))))
- '(vc-annotate-very-old-color "#dc8cc3")
- '(weechat-color-list
-   (unspecified "#242728" "#424748" "#F70057" "#ff0066" "#86C30D" "#63de5d" "#BEB244" "#E6DB74" "#40CAE4" "#06d8ff" "#FF61FF" "#ff8eff" "#00b2ac" "#53f2dc" "#f8fbfc" "#ffffff"))
- '(when
-      (or
-       (not
-        (boundp
-         (quote ansi-term-color-vector)))
-       (not
-        (facep
-         (aref ansi-term-color-vector 0)))))
- '(xterm-color-names
-   ["#414E63" "#CC71D1" "#88D6CB" "#C79474" "#76A2D1" "#4A4B6B" "#96A9D6" "#8E95A3"])
- '(xterm-color-names-bright
-   ["#555B77" "#E074DB" "#8BE8D8" "#B2DEC1" "#75B5EB" "#9198EB" "#C3C3E8" "#838791"]))
+    (projectile-rails mu4e-maildirs-extension mu4e-alert ht keyfreq intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell feature-mode company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode define-word zenburn-theme zen-and-art-theme yasnippet-snippets yapfify yaml-mode xkcd ws-butler winum white-sand-theme which-key web-mode web-beautify volatile-highlights vimish-fold vi-tilde-fringe uuidgen use-package underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme toml-mode toc-org tide tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme sql-indent spotify spaceline spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slime-company slim-mode seti-theme scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rjsx-mode reverse-theme reveal-in-osx-finder restclient-helm restart-emacs rebecca-theme realgud rbenv rake rainbow-delimiters railscasts-theme racket-mode racer pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme popwin pony-mode planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme persp-mode pbcopy paradox osx-trash osx-dictionary orgit organic-green-theme org-present org-pomodoro org-mime org-download org-bullets open-junk-file omtose-phellack-theme olivetti oldlace-theme occidental-theme obsidian-theme ob-restclient ob-http nvm noflet noctilux-theme nginx-mode neotree naquadah-theme mustang-theme move-text monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minitest minimal-theme material-theme markdown-toc majapahit-theme magit-gitflow madhat2r-theme lush-theme lorem-ipsum livid-mode live-py-mode linum-relative link-hint light-soap-theme ledger-mode launchctl kaolin-themes js2-refactor js-doc jbeans-theme jazz-theme ir-black-theme insert-shebang inkpot-theme indent-guide ibuffer-projectile hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers heroku-theme hemisu-theme helm-themes helm-swoop helm-spotify-plus helm-pydoc helm-projectile helm-org-rifle helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-dash helm-css-scss helm-company helm-c-yasnippet helm-ag hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md gandalf-theme fuzzy flycheck-rust flycheck-pos-tip flycheck-ledger flx-ido flatui-theme flatland-theme fish-mode fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exotica-theme exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-string-inflection evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu espresso-theme erc-yt erc-view-log erc-terminal-notifier erc-social-graph erc-image erc-hl-nicks ensime enh-ruby-mode emmet-mode elpy elisp-slime-nav ein dumb-jump dracula-theme doom-themes doom-modeline dockerfile-mode docker django-theme diminish dash-at-point darktooth-theme darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme csv-mode company-web company-tern company-statistics company-shell company-restclient company-auctex company-anaconda common-lisp-snippets column-enforce-mode color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clues-theme clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu chruby cherry-blossom-theme cargo busybee-theme bundler bubbleberry-theme birds-of-paradise-plus-theme beacon badwolf-theme auto-yasnippet auto-highlight-symbol auto-compile apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes aggressive-indent afternoon-theme adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-mode-line-clock ((t (:foreground "red" :box (:line-width -1 :style released-button))))))
+ '(variable-pitch ((t (:family "EtBembo" :background nil :height 1.4 :foreground "#1c1e1f")))))

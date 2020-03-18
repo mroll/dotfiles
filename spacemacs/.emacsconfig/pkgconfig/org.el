@@ -13,25 +13,25 @@
            (string= lang "lisp"))))
 (setq-default org-confirm-babel-evaluate 'ck/org-confirm-babel-evaluate)
 
-;; (org-babel-do-load-languages
-;;  'org-babel-load-languages
-;;  '((R . t)
-;;    (ditaa . nil)
-;;    (dot . nil)
-;;    (emacs-lisp . t)
-;;    (gnuplot . t)
-;;    (haskell . nil)
-;;    (latex . t)
-;;    (ledger . t)
-;;    (ocaml . nil)
-;;    (octave . nil)
-;;    (python . t)
-;;    (ruby . nil)
-;;    (screen . nil)
-;;    (shell . t)
-;;    (sql . nil)
-;;    (sqlite . nil)
-;;    (restclient . t)))
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((R . t)
+   (ditaa . nil)
+   (dot . nil)
+   (emacs-lisp . t)
+   (gnuplot . t)
+   (haskell . t)
+   (latex . t)
+   (ledger . t)
+   (ocaml . nil)
+   (octave . nil)
+   (python . t)
+   (ruby . nil)
+   (screen . nil)
+   (shell . t)
+   (sql . nil)
+   (sqlite . nil)
+   (restclient . t)))
 
 (set-face-foreground 'org-level-2 "cyan3")
 (set-face-foreground 'org-level-3 "maroon1")
@@ -41,4 +41,3 @@
 (spacemacs/set-leader-keys-for-major-mode 'org-mode "C-t" 'org-set-tags-command)
 
 (setq org-hide-emphasis-markers t)
-
