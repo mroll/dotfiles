@@ -38,9 +38,10 @@
 (when sys/mac-x-p
   (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
   (add-to-list 'default-frame-alist '(ns-appearance . light))
+  (add-to-list 'default-frame-alist '(width . 200))
+  (add-to-list 'default-frame-alist '(height . 80))
   (add-hook 'after-load-theme-hook
             (lambda ()
-              (print "HERE")
               (let ((bg (frame-parameter nil 'background-mode)))
                 (set-frame-parameter nil 'ns-appearance bg)
                 (setcdr (assq 'ns-appearance default-frame-alist) bg)))))

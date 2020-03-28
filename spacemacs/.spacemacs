@@ -36,23 +36,18 @@ values."
      (mu4e :variables
            mu4e-installation-path "/usr/local/share/emacs/site-lisp/mu/mu4e"
            mu4e-enable-notifications t)
-     themes-megapack
      haskell
      ruby-on-rails
      nginx
      racket
      docker
-     clojure
-     dash
      syntax-checking
-     spotify
      (org :variables
           org-use-speed-commands t)
      (ruby :variables ruby-enable-enh-ruby-mode t
            ruby-version-manager 'rvm)
      python
      ipython-notebook
-     rust
      yaml
      osx
      emacs-lisp
@@ -61,7 +56,6 @@ values."
      (auto-completion :variables
                       auto-completion-enable-snippets-in-popup t
                       :disabled-for org git)
-     django
      xkcd
      common-lisp
      javascript
@@ -72,7 +66,6 @@ values."
      sql
      typescript
      finance
-     gnus
      ibuffer
      erc
      csv
@@ -90,7 +83,6 @@ values."
                                       treemacs-projectile
                                       olivetti
                                       kaolin-themes
-                                      doom-modeline
                                       evil-string-inflection
                                       eyebrowse
                                       doom-themes
@@ -173,7 +165,8 @@ values."
    ;; `recents' `bookmarks' `projects' `agenda' `todos'."
    ;; List sizes may be nil, in which case
    ;; `spacemacs-buffer-startup-lists-length' takes effect.
-   dotspacemacs-startup-lists '((recents . 5)
+   dotspacemacs-startup-lists '((agenda . 5)
+                                (recents . 5)
                                 (projects . 7))
    ;; True if the home buffer should respond to resize events.
    dotspacemacs-startup-buffer-responsive t
@@ -194,7 +187,7 @@ values."
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
-   dotspacemacs-mode-line-theme 'spacemacs
+   dotspacemacs-mode-line-theme 'doom
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -225,7 +218,7 @@ values."
    dotspacemacs-retain-visual-state-on-shift t
    ;; If non-nil, J and K move lines up and down when in visual mode.
    ;; (default nil)
-   dotspacemacs-visual-line-move-text nil
+   dotspacemacs-visual-line-move-text t
    ;; If non nil, inverse the meaning of `g' in `:substitute' Evil ex-command.
    ;; (default nil)
    dotspacemacs-ex-substitute-global nil
@@ -317,7 +310,7 @@ values."
    ;;                       text-mode
    ;;   :size-limit-kb 1000)
    ;; (default nil)
-   dotspacemacs-line-numbers nil
+   dotspacemacs-line-numbers t
    ;; Code folding method. Possible values are `evil' and `origami'.
    ;; (default 'evil)
    dotspacemacs-folding-method 'evil
@@ -334,7 +327,7 @@ values."
    dotspacemacs-highlight-delimiters 'all
    ;; If non nil, advise quit functions to keep server open when quitting.
    ;; (default nil)
-   dotspacemacs-persistent-server nil
+   dotspacemacs-persistent-server t
    ;; List of search tool executable names. Spacemacs uses the first installed
    ;; tool of the list. Supported tools are `ag', `pt', `ack' and `grep'.
    ;; (default '("ag" "pt" "ack" "grep"))
@@ -348,7 +341,7 @@ values."
    ;; `trailing' to delete only the whitespace at end of lines, `changed'to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup nil
+   dotspacemacs-whitespace-cleanup 'all
    ))
 
 (defun dotspacemacs/user-init ()
@@ -365,7 +358,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
     "Update `load-path'."
     (push "~/.emacsconfig/lisp" load-path))
 
-  (push '("melpa-stable" . "stable.melpa.org/packages/") configuration-layer--elpa-archives)
+  (setq-default git-magit-status-fullscreen t)
 
   (update-load-path)
 

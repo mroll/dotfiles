@@ -1,5 +1,4 @@
-(setq org-agenda-files '("~/Dropbox/idiomatic.org"
-                         "~/Dropbox/org/"))
+(setq org-agenda-files '("~/Dropbox/org/"))
 
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
