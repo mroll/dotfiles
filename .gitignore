@@ -1,5 +1,6 @@
 emacs/.emacs.d/*
 */**/*.swp
+*/**/*.DS_Store
 !emacs/.emacs.d/custom
 !emacs/.emacs.d/mpr-init.el
 !emacs/.emacs.d/mpr-secrets.el.gpg

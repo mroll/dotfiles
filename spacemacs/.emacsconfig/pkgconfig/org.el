@@ -1,4 +1,5 @@
-(setq org-agenda-files '("~/Dropbox/idiomatic.org"))
+(setq org-agenda-files '("~/Dropbox/idiomatic.org"
+                         "~/Dropbox/org/"))
 
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
@@ -41,3 +42,12 @@
 (spacemacs/set-leader-keys-for-major-mode 'org-mode "C-t" 'org-set-tags-command)
 
 (setq org-hide-emphasis-markers t)
+
+(defadvice org-goto (around make-it-evil activate)
+  (let ((orig-state evil-state)
+        (evil-emacs-state-modes (cons 'org-mode evil-emacs-state-modes)))
+    ad-do-it
+    (evil-change-state orig-state)))
+
+
+(setq org-use-speed-commands t)

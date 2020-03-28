@@ -40,10 +40,6 @@ values."
      haskell
      ruby-on-rails
      nginx
-     (scala
-      :variables scala-indent:indent-value-expression t
-      scala-indent:align-forms nil
-      scala-indent:align-parameters nil)
      racket
      docker
      clojure
@@ -87,6 +83,11 @@ values."
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
+                                      all-the-icons-dired
+                                      all-the-icons
+                                      treemacs
+                                      treemacs-evil
+                                      treemacs-projectile
                                       olivetti
                                       kaolin-themes
                                       doom-modeline
@@ -182,14 +183,14 @@ values."
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(
-                         spacemacs-light
+                         doom-one
                          )
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Inconsolata"
-                               :size 12
+                               :size 14
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -358,12 +359,17 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
+  ;; Load path
+  ;; Optimize: Force "lisp"" and "site-lisp" at the head to reduce the startup time.
+  (defun update-load-path (&rest _)
+    "Update `load-path'."
+    (push "~/.emacsconfig/lisp" load-path))
+
   (push '("melpa-stable" . "stable.melpa.org/packages/") configuration-layer--elpa-archives)
-  (push '("ensime" . "melpa-stable") package-pinned-packages)
 
-  (setq-default git-magit-status-fullscreen t)
+  (update-load-path)
 
-  (display-time-mode 1)
+  (require 'init-ui)
   )
 
 (defun dotspacemacs/user-config ()
@@ -377,6 +383,13 @@ you should place your code here."
   (setq olivetti-body-width 0.85)
   ;; (add-hook 'text-mode-hook 'olivetti-mode)
 
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+
+  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+
+  (setq treemacs-use-follow-mode t
+        treemacs-use-filewatch-mode t)
+
   (doom-modeline-mode 1)
   (setq doom-modeline-icon (display-graphic-p))
   (setq doom-modeline-major-mode-icon t)
@@ -386,50 +399,14 @@ you should place your code here."
 
   (define-key evil-insert-state-map (kbd "C-w") 'backward-kill-word)
 
-  (global-set-key (kbd "M-<up>")                    (lambda () (interactive) (move-frame-up)))
-  (global-set-key (kbd "M-<down>")                  (lambda () (interactive) (move-frame-down)))
-  (global-set-key (kbd "M-<left>")                  (lambda () (interactive) (move-frame-left)))
-  (global-set-key (kbd "M-<right>")                 (lambda () (interactive) (move-frame-right)))
+  (global-set-key (kbd "M-<up>")                (lambda () (interactive) (move-frame-up)))
+  (global-set-key (kbd "M-<down>")              (lambda () (interactive) (move-frame-down)))
+  (global-set-key (kbd "M-<left>")              (lambda () (interactive) (move-frame-left)))
+  (global-set-key (kbd "M-<right>")             (lambda () (interactive) (move-frame-right)))
   (global-set-key (kbd "C-M-S-<down>")          (lambda () (interactive) (enlarge-frame 5)))
   (global-set-key (kbd "C-M-S-<right>")         (lambda () (interactive) (enlarge-frame-horizontally 5)))
   (global-set-key (kbd "C-M-S-<up>")            (lambda () (interactive) (shrink-frame 5)))
   (global-set-key (kbd "C-M-S-<left>")          (lambda () (interactive) (shrink-frame-horizontally 5)))
-
-  ;; (load "~/.emacsconfig/lib/org-variable-pitch.el")
-  ;; (require 'org-variable-pitch)
-  ;; (add-hook 'org-mode-hook 'org-variable-pitch-minor-mode)
-  ;; (setq org-variable-pitch-fixed-font '(:family "Inconsolata"
-  ;;                                               :height 1
-  ;;                                               :weight normal
-  ;;                                               :width normal
-  ;;                                               :powerline-scale 1.1))
-  ;; (setq org-variable-pitch-fixed-faces
-  ;;       '(org-block
-  ;;         org-block-begin-line
-  ;;         org-block-end-line
-  ;;         org-code
-  ;;         org-document-info-keyword
-  ;;         org-done
-  ;;         org-formula
-  ;;         org-indent
-  ;;         org-meta-line
-  ;;         org-special-keyword
-  ;;         org-table
-  ;;         org-todo
-  ;;         org-verbatim
-  ;;         org-date
-
-  ;;         ;; additional
-  ;;         org-level-1
-  ;;         org-level-2
-  ;;         org-level-3
-  ;;         org-level-4
-  ;;         org-level-5
-  ;;         org-level-6
-  ;;         org-level-7
-  ;;         org-level-8))
-
-  ;; (load "~/.emacsconfig/lib/docker-explorer.el")
 
   ;; Turn off the tildes in the fringe
   (global-vi-tilde-fringe-mode -1)
@@ -441,83 +418,20 @@ you should place your code here."
           org-pretty-entities t
           org-hide-emphasis-markers t
           org-agenda-block-separator ""))
-          ;; org-fontify-whole-heading-line t
-          ;; org-fontify-done-headline t
-          ;; org-fontify-quote-and-verse-blocks t))
 
   (ido-mode -1)
 
-  ;; (tramp-set-completion-function "ssh"
-  ;;                                '((tramp-parse-sconfig "/etc/ssh_config")
-  ;;                                  (tramp-parse-sconfig "~/.ssh/config")))
-
-  (display-time-mode t)
   (scroll-bar-mode -1)
 
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1)
   (setq vc-follow-symlinks t)
 
-  (setq mail-user-agent 'mu4e-user-agent)
-  ;; default
-  (setq mu4e-mu-binary "/usr/local/bin/mu")
-  (setq mu4e-maildir "~/.mail/pm")
-  (setq mu4e-drafts-folder "/Drafts")
-  (setq mu4e-sent-folder   "/Sent")
-  (setq mu4e-trash-folder  "/Trash")
-  (setq mu4e-refile-folder  "/All")
-
-  (setq mu4e-headers-fields
-        '( (:human-date       .   12)
-           (:flags            .    6)
-           (:mailing-list     .   10)
-           (:from             .   22)
-           (:thread-subject   .   nil)))
-
-  (setq mu4e-search-result-limit 5000)
-  (setq message-kill-buffer-on-exit t)
-
-  (mu4e-alert-set-default-style 'notifier)
-  (mu4e-alert-enable-mode-line-display)
-
-  ;; This allows me to use 'helm' to select mailboxes
-  (setq mu4e-completing-read-function 'completing-read)
-  ;; Why would I want to leave my message open after I've sent it?
-  (setq message-kill-buffer-on-exit t)
-  ;; Don't ask for a 'context' upon opening mu4e
-  (setq mu4e-context-policy 'pick-first)
-  ;; Don't ask to quit... why is this the default?
-  (setq mu4e-confirm-quit nil)
-
-  (setq user-mail-address "mproll@pm.me")
-  (setq smtpmail-default-smtp-server "127.0.0.1"
-        smtpmail-smtp-server "127.0.0.1"
-        smtpmail-smtp-service 1025)
-  (setq message-send-mail-function 'smtpmail-send-it)
-
-  (setq mu4e-update-interval 300)
-  (setq mu4e-view-show-addresses 't)
-
-  (setq mu4e-get-mail-command "offlineimap")
-
-  (setq mu4e-maildir-shortcuts
-        '( ("/INBOX"                       . ?i)
-           ("/Sent"                        . ?s)
-           ("/Trash"                       . ?T)
-           ("/Folders.travel"              . ?t)
-           ("/Folders.finance"             . ?f)
-           ("/Folders.receipts"            . ?r)
-           ("/Folders.important.contacts"  . ?c)
-           ("/Folders.subscriptions"       . ?u)
-           ("/Folders.projects"            . ?p)))
-
   (add-hook 'js2-mode-hook #'js2-refactor-mode)
 
   ;; make sure emacs uses environment variables from my shell
-  (when (memq window-system '(mac ns x))
-    (exec-path-from-shell-initialize))
-
-  ;; (setq ensime-startup-notification nil)
+  ;; (when (memq window-system '(mac ns x))
+  ;;   (exec-path-from-shell-initialize))
 
   (setq vc-follow-symlinks t)
 
@@ -535,17 +449,6 @@ you should place your code here."
 
   (setq visible-bell t)
 
-  ;; (defun things ()
-  ;;   "Open main 'org-mode' file and start 'org-agenda' for today."
-  ;;   (interactive)
-  ;;   (find-file (concat org-directory "things.org"))
-  ;;   (set-org-agenda-files)
-  ;;   (org-agenda-list)
-  ;;   (org-agenda-day-view)
-  ;;   (shrink-window-if-larger-than-buffer)
-  ;;   (other-window 1))
-
-  ;; (setq-default flycheck-scalastylerc "/usr/local/etc/scalastyle_config.xml")
   (setq flycheck-scalastyle-jar
         "/usr/local/Cellar/scalastyle/1.0.0/libexec/scalastyle_2.12-1.0.0-batch.jar")
   (setq flycheck-scalastylerc
@@ -559,15 +462,15 @@ you should place your code here."
 
   (setq-default flycheck-temp-prefix ".flycheck")
 
-  (flycheck-add-mode 'javascript-eslint 'javascript-mode)
-  (setq-default flycheck-disabled-checkers
-                (append flycheck-disabled-checkers
-                        '(javascript-jshint)))
+  ;; (flycheck-add-mode 'javascript-eslint 'javascript-mode)
+  ;; (setq-default flycheck-disabled-checkers
+  ;;              (append flycheck-disabled-checkers
+  ;;                      '(javascript-jshint)))
 
-  (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
+  ;; (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
 
   (global-company-mode)
-  ; (global-flycheck-mode 1)
+  (global-flycheck-mode 1)
 
   (require 'vimish-fold)
   (spacemacs/set-leader-keys "off" 'vimish-fold)
@@ -586,56 +489,12 @@ you should place your code here."
 
   (scroll-bar-mode -1)
 
-  (defun insert-db-block (dbname)
-    (interactive "sDB Name: ")
-    (insert (concat dbname ".withConnection { implicit conn => {
-\t
-}}")))
-
-  ;; load secret variables
-  ;; (load "~/.emacsconfig/mpr-secrets.el.gpg")
-
-  ;; load obscure csv library
-  ;; (load "~/.emacsconfig/lib/el-csv/parse-csv.el")
-
-  ;; (load "~/.emacsconfig/lib/ob-restclient.el/ob-restclient.el")
-
-  ;; load frame-cmds library
-  (load "~/.emacsconfig/lib/frame-cmds/frame-cmds.el")
-
-  (defun wrap-in-db-conn (start end dbname)
-    (interactive "r\nsdbname: ")
-    (let ((selection (buffer-substring start end)))
-      (delete-region start end)
-      (insert (format "%s.withConnection { implicit conn => {\n" dbname))
-      (indent-for-tab-command)
-      (insert selection)
-      (insert "\n")
-      (indent-for-tab-command)
-      (insert "}}")
-      (indent-for-tab-command)))
-
-  (defun implicit-conn-arg ()
-    (interactive)
-    (forward-char)
-    (insert "(implicit conn: Connection)"))
-
-  ;; load config variables
-  (load "~/.emacsconfig/variables.el")
-
-  ;; load functions
-  (load "~/.emacsconfig/functions.el")
-
   (with-eval-after-load 'company
     (define-key company-active-map (kbd "C-w") 'backward-kill-word))
 
-  ;; load keybindings
-  (load "~/.emacsconfig/keys.el")
+  (with-eval-after-load 'org
+    (load "~/.emacsconfig/pkgconfig/org.el"))
 
-  (with-eval-after-load 'erc
-    (load "~/.emacsconfig/pkgconfig/erc.el"))
-
-  (setq ensime-startup-notification nil)
 
   (define-abbrev-table 'org-mode-abbrev-table
     '(
@@ -665,16 +524,6 @@ you should place your code here."
       ("nd" "and")
       ))
 
-
-  (defun div-with-class ()
-    (interactive)
-    (insert "<div class=\"\"></div>")
-    (backward-char 8))
-
-  (add-hook 'web-mode-hook
-            (lambda ()
-              (local-set-key (kbd "\C-c \C-d") (quote div-with-class))))
-
   (defun md-strikethrough-region (beginning end)
     (interactive "r")
     (let ((insert-strikethrough-chars-at (lambda (pos)
@@ -685,55 +534,18 @@ you should place your code here."
             (funcall insert-strikethrough-chars-at beginning)
             (funcall insert-strikethrough-chars-at (+ end 2))))))
 
-  (with-eval-after-load 'gnus
-    (load "~/.emacsconfig/pkgconfig/gnus.el"))
-
-  ;; Get email, and store in nnml
-  ;; (setq gnus-secondary-select-methods
-  ;;       '(
-  ;;         (nntp "gmane"
-  ;;               (nntp-address "news.gmane.org"))
-  ;;         (nntp "news.eternal-september.org")
-  ;;         (nntp "nntp.aioe.org")
-  ;;         (nntp "news.gwene.org")
-  ;;         ))
-
-  (with-eval-after-load 'js2
-    (load "~/.emacsconfig/pkgconfig/js2.el"))
-
-  (add-to-list 'auto-mode-alist '("components\\/.*\\.js\\'" . rjsx-mode))
-  (add-to-list 'auto-mode-alist '("src\\/.*\\.js\\'" . rjsx-mode))
-
-  (with-eval-after-load 'tide
-    (load "~/.emacsconfig/pkgconfig/tide.el"))
-
-  (with-eval-after-load 'org
-    (load "~/.emacsconfig/pkgconfig/bh.el")
-    (load "~/.emacsconfig/pkgconfig/org.el"))
-
-  (setq org-use-speed-commands t)
-
   (load "~/.emacsconfig/pkgconfig/bh.el")
-  (load "~/.emacsconfig/pkgconfig/org.el")
   (load "~/.emacsconfig/pkgconfig/js2.el")
+  (load "~/.emacsconfig/pkgconfig/python.el")
 
-  ;; TODO: get this working
-  ;; (defadvice org-goto (around enter-insert-mode activate compile)
-  ;;   ad-do-it
-  ;;   (evil-insert-state))
+  ;; load config variables
+  (load "~/.emacsconfig/variables.el")
 
-  (with-eval-after-load 'python
-    (load "~/.emacsconfig/pkgconfig/python.el"))
+  ;; load functions
+  (load "~/.emacsconfig/functions.el")
 
-  (add-hook 'realgud-short-key-mode-hook
-            (lambda ()
-              (local-set-key "\C-c" realgud:shortkey-mode-map)))
 
-  (defadvice org-goto (around make-it-evil activate)
-    (let ((orig-state evil-state)
-          (evil-emacs-state-modes (cons 'org-mode evil-emacs-state-modes)))
-      ad-do-it
-      (evil-change-state orig-state)))
+  (load "~/.emacsconfig/lib/frame-cmds/frame-cmds.el")
 
   )
 
@@ -764,10 +576,11 @@ This function is called at the very end of Spacemacs initialization."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (string-inflection shrink-path all-the-icons memoize auctex-latexmk projectile-rails mu4e-maildirs-extension mu4e-alert ht keyfreq intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell feature-mode company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode define-word zenburn-theme zen-and-art-theme yasnippet-snippets yapfify yaml-mode xkcd ws-butler winum white-sand-theme which-key web-mode web-beautify volatile-highlights vimish-fold vi-tilde-fringe uuidgen use-package underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme toml-mode toc-org tide tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme sql-indent spotify spaceline spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slime-company slim-mode seti-theme scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rjsx-mode reverse-theme reveal-in-osx-finder restclient-helm restart-emacs rebecca-theme realgud rbenv rake rainbow-delimiters railscasts-theme racket-mode racer pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme popwin pony-mode planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme persp-mode pbcopy paradox osx-trash osx-dictionary orgit organic-green-theme org-present org-pomodoro org-mime org-download org-bullets open-junk-file omtose-phellack-theme olivetti oldlace-theme occidental-theme obsidian-theme ob-restclient ob-http nvm noflet noctilux-theme nginx-mode neotree naquadah-theme mustang-theme move-text monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minitest minimal-theme material-theme markdown-toc majapahit-theme magit-gitflow madhat2r-theme lush-theme lorem-ipsum livid-mode live-py-mode linum-relative link-hint light-soap-theme ledger-mode launchctl kaolin-themes js2-refactor js-doc jbeans-theme jazz-theme ir-black-theme insert-shebang inkpot-theme indent-guide ibuffer-projectile hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers heroku-theme hemisu-theme helm-themes helm-swoop helm-spotify-plus helm-pydoc helm-projectile helm-org-rifle helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-dash helm-css-scss helm-company helm-c-yasnippet helm-ag hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md gandalf-theme fuzzy flycheck-rust flycheck-pos-tip flycheck-ledger flx-ido flatui-theme flatland-theme fish-mode fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exotica-theme exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-string-inflection evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu espresso-theme erc-yt erc-view-log erc-terminal-notifier erc-social-graph erc-image erc-hl-nicks ensime enh-ruby-mode emmet-mode elpy elisp-slime-nav ein dumb-jump dracula-theme doom-themes doom-modeline dockerfile-mode docker django-theme diminish dash-at-point darktooth-theme darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme csv-mode company-web company-tern company-statistics company-shell company-restclient company-auctex company-anaconda common-lisp-snippets column-enforce-mode color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clues-theme clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu chruby cherry-blossom-theme cargo busybee-theme bundler bubbleberry-theme birds-of-paradise-plus-theme beacon badwolf-theme auto-yasnippet auto-highlight-symbol auto-compile apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes aggressive-indent afternoon-theme adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+    (treemacs-projectile treemacs-evil all-the-icons-dired major-mode-hydra pretty-hydra nadvice evil-evilified-state typescript-mode powerline slime scala-mode sbt-mode test-simple loc-changes load-relative faceup pcre2el org-plus-contrib alert log4e gntp magit-popup macrostep skewer-mode simple-httpd js2-mode parent-mode multi projectile dash-docs haml-mode gitignore-mode pos-tip flycheck flx highlight magit git-commit with-editor smartparens iedit anzu evil goto-chg undo-tree pyvenv highlight-indentation polymode deferred request anaphora websocket transient tablist json-mode docker-tramp json-snatcher json-reformat autothemer web-completion-data dash-functional tern restclient know-your-http-well company hydra inflections multiple-cursors paredit eval-sexp-fu cider sesman spinner queue pkg-info parseedn clojure-mode parseclj a epl markdown-mode rust-mode inf-ruby bind-map bind-key yasnippet packed auctex anaconda-mode pythonic f dash s helm avy helm-core async auto-complete popup treemacs pfuture lv string-inflection shrink-path all-the-icons memoize auctex-latexmk projectile-rails mu4e-maildirs-extension mu4e-alert ht keyfreq intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell feature-mode company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode define-word zenburn-theme zen-and-art-theme yasnippet-snippets yapfify yaml-mode xkcd ws-butler winum white-sand-theme which-key web-mode web-beautify volatile-highlights vimish-fold vi-tilde-fringe uuidgen use-package underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme toml-mode toc-org tide tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme sql-indent spotify spaceline spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slime-company slim-mode seti-theme scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rjsx-mode reverse-theme reveal-in-osx-finder restclient-helm restart-emacs rebecca-theme realgud rbenv rake rainbow-delimiters railscasts-theme racket-mode racer pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme popwin pony-mode planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme persp-mode pbcopy paradox osx-trash osx-dictionary orgit organic-green-theme org-present org-pomodoro org-mime org-download org-bullets open-junk-file omtose-phellack-theme olivetti oldlace-theme occidental-theme obsidian-theme ob-restclient ob-http nvm noflet noctilux-theme nginx-mode neotree naquadah-theme mustang-theme move-text monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minitest minimal-theme material-theme markdown-toc majapahit-theme magit-gitflow madhat2r-theme lush-theme lorem-ipsum livid-mode live-py-mode linum-relative link-hint light-soap-theme ledger-mode launchctl kaolin-themes js2-refactor js-doc jbeans-theme jazz-theme ir-black-theme insert-shebang inkpot-theme indent-guide ibuffer-projectile hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers heroku-theme hemisu-theme helm-themes helm-swoop helm-spotify-plus helm-pydoc helm-projectile helm-org-rifle helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-dash helm-css-scss helm-company helm-c-yasnippet helm-ag hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md gandalf-theme fuzzy flycheck-rust flycheck-pos-tip flycheck-ledger flx-ido flatui-theme flatland-theme fish-mode fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exotica-theme exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-string-inflection evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu espresso-theme erc-yt erc-view-log erc-terminal-notifier erc-social-graph erc-image erc-hl-nicks enh-ruby-mode emmet-mode elpy elisp-slime-nav ein dumb-jump dracula-theme doom-themes doom-modeline dockerfile-mode docker django-theme diminish dash-at-point darktooth-theme darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme csv-mode company-web company-tern company-statistics company-shell company-restclient company-auctex company-anaconda common-lisp-snippets column-enforce-mode color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clues-theme clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu chruby cherry-blossom-theme cargo busybee-theme bundler bubbleberry-theme birds-of-paradise-plus-theme beacon badwolf-theme auto-yasnippet auto-highlight-symbol auto-compile apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes aggressive-indent afternoon-theme adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(org-mode-line-clock ((t (:foreground "red" :box (:line-width -1 :style released-button)))))
  '(variable-pitch ((t (:family "EtBembo" :background nil :height 1.4 :foreground "#1c1e1f")))))
