@@ -55,34 +55,11 @@
          ("/Folders.subscriptions"       . ?u)
          ("/Folders.projects"            . ?p)))
 
-(bbdb-initialize 'gnus
-                 ;;bbdb-insinuate-gnus adds bindings for the default
-                 ;;keys to Gnus and configures Gnus to notify the
-                 ;;BBDB when new messages are loaded. This
-                 ;;notification is required if the BBDB is to be
-                 ;;able to display BBDB entries for messages
-                 ;;displayed in Gnus.
+(setq mu4e-headers-fields
+      '( (:human-date       .   12)
+         (:flags            .    6)
+         (:mailing-list     .   10)
+         (:from             .   22)
+         (:thread-subject   .   nil)))
 
-                 'message
-                 ;; bbdb-insinuate-message adds a binding for M-TAB
-                 ;; to Message mode. This will enable completion of
-                 ;; addressees based on BBDB records.
-
-                 'mu4e
-                 'anniv)
-
-(bbdb-mua-auto-update-init 'gnus 'message 'mu4e)
-
-;; size of the bbdb popup
-(setq bbdb-mua-pop-up-window-size 1)
-
-;; how to handle new entries
-;; (setq bbdb-mua-update-interactive-p '(query . create))
-
-;; look at every address; not only the first one
-;; (setq bbdb-message-all-addresses t)
-
-(setq bbdb-phone-style 'nil
-      bbdb-add-mails t
-      bbdb-completion-list t
-      )
+(setq mu4e-view-prefer-html t)

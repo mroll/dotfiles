@@ -13,7 +13,7 @@ autorefresh = 0.2
 quick = 10
 
 # update mu index after sync
-postsynchook = mu index --maildir ~/.mail/pm
+postsynchook = mu index --maildir ~/.mail
 
 [Repository main-local]
 type = Maildir
@@ -40,4 +40,4 @@ folderfilter = lambda foldername: foldername not in ['All Mail']
 
 # is broken, but connecting locally to bridge so should be ok
 ssl = no
-# sslcacertfile = /usr/local/etc/openssl/cert.pem 
+# sslcacertfile = /usr/local/etc/openssl/cert.pem
