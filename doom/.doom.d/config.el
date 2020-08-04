@@ -138,11 +138,11 @@
 
 (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
 
-(add-to-list 'auto-mode-alist '("\\.jsx?$" . web-mode)) ;; auto-enable for .js/.jsx files
-(setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'")))
-
+(require 'flycheck)
 (require 'web-mode)
+
 (add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
+(setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'")))
 ;; (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
 (defun my-web-mode-hook ()
   "Hooks for Web mode."
@@ -150,11 +150,9 @@
   (setq web-mode-code-indent-offset 2)
   (setq web-mode-css-indent-offset 2)
   (when (string-equal "jsx" (file-name-extension buffer-file-name))
-              (setup-tide-mode))
-)
+    (setup-tide-mode))
+  )
 (add-hook 'web-mode-hook  'my-web-mode-hook)
-
-(require 'flycheck)
 
 (defun setup-tide-mode ()
   (interactive)
@@ -167,6 +165,8 @@
   ;; install it separately via package-install
   ;; `M-x package-install [ret] company`
   (company-mode +1))
+
+(setq company-tooltip-align-annotations t)
 
 (setq-default flycheck-disabled-checkers
               (append flycheck-disabled-checkers
