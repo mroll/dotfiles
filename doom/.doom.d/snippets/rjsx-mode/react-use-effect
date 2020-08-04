@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: react-use-effect
+# key: react-use-effect
+# --
+useEffect(() => {
+  $1
+}, [])

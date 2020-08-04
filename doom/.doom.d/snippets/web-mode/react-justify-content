@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: react-justify-content
+# key: react-justify-content
+# --
+justifyContent: '${1:$$(yas-choose-value '("space-between" "space-around" "space-evently" "center" "flex-start" "flex-end"))}',

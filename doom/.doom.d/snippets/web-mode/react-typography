@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: react-typography
+# key: react-typography
+# --
+<Typography className={classes.$1}>
+  $2
+</Typography>

@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: react-component-map
+# key: react-component-map
+# --
+{
+  $1.map(($2) => {
+    return $3
+  })
+}

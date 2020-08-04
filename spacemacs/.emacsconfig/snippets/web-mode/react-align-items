@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: react-align-items
+# key: react-align-items
+# --
+alignItems: '${1:$$(yas-choose-value '("space-between" "space-around" "space-evently" "center" "flex-start" "flex-end"))}',

@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: react-textfield
+# key: react-textfield
+# --
+<TextField
+  value={$1}
+  onChange={(event) => setField('$1', event.target.value)}
+  className={classes.$2}
+  label={$1}
+/>

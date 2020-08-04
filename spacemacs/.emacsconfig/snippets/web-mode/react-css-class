@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: react-css-class
+# key: react-css-class
+# --
+$1: {
+  $2,
+},

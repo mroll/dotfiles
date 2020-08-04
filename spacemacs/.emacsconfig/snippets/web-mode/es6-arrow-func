@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: es6-arrow-func
+# key: es6-arrow-func
+# --
+const $1 = ($2) => {
+  $3
+}

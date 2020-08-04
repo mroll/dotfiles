@@ -1,3 +1,6 @@
 [submodule "spacemacs/.emacsconfig/lib/ob-restclient.el"]
 	path = spacemacs/.emacsconfig/lib/ob-restclient.el
 	url = git@github.com:alf/ob-restclient.el.git
+[submodule "spacemacs/.emacsconfig/lib/flow-minor-mode"]
+	path = spacemacs/.emacsconfig/lib/flow-minor-mode
+	url = git@github.com:an-sh/flow-minor-mode.git

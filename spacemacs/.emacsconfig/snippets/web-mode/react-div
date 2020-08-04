@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: react-div
+# key: react-div
+# --
+<div className={classes.$1}>
+  $2
+</div>

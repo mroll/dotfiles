@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: react-button
+# key: react-button
+# --
+<Button
+  variant="contained"
+  className={classes.$1}
+>
+  $2
+</Button>

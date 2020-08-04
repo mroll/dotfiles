@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: es6-import-colors
+# key: es6-import-colors
+# --
+import * as COLORS from './constants/colors'

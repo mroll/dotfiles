@@ -1233,16 +1233,16 @@ Late deadlines first, then scheduled, then non-late deadlines"
 ;                                       ("Y" . ignore)
 ;                                       ("Z" . ignore))))
 
-(defun bh/show-org-agenda ()
-  (interactive)
-  (if org-agenda-sticky
-      (switch-to-buffer "*Org Agenda( )*")
-    (switch-to-buffer "*Org Agenda*"))
-  (delete-other-windows))
+;; (defun bh/show-org-agenda ()
+;;   (interactive)
+;;   (if org-agenda-sticky
+;;       (switch-to-buffer "*Org Agenda( )*")
+;;     (switch-to-buffer "*Org Agenda*"))
+;;   (delete-other-windows))
 
 ; (require 'org-protocol)
 
-(setq require-final-newline t)
+;; (setq require-final-newline t)
 
 (defvar bh/insert-inactive-timestamp t)
 
@@ -1344,7 +1344,7 @@ Late deadlines first, then scheduled, then non-late deadlines"
 ;                             ("\\.pdf\\'" . system))))
 
 ; Overwrite the current window with the agenda
-(setq org-agenda-window-setup 'current-window)
+;; (setq org-agenda-window-setup 'current-window)
 
 (setq org-clone-delete-id t)
 

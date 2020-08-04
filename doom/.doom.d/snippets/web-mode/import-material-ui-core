@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: import-material-ui/core
+# key: import-material-ui/core
+# --
+import { $1 } from '@material-ui/core'

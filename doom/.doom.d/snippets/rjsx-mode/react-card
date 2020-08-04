@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: react-card
+# key: react-card
+# --
+<Card className={classes.card}>
+  <CardHeader className={classes.header} />
+  <CardContent className={classes.content}>
+    $2
+  </CardContent>
+</Card>
