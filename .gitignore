@@ -7,3 +7,5 @@ emacs/.emacs.d/*
 !emacs/.emacs.d/gnus.el
 
 news/.newsrc.eld
+
+.DS_Store
