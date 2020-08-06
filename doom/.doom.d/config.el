@@ -27,7 +27,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-dracula)
+(setq doom-theme 'doom-one-light)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -120,11 +120,12 @@
       #'other-frame)
 
 (require 'company)
+(require 'flycheck)
+(require 'web-mode)
+
+;; Company Configuration
 (setq company-idle-delay 0.2
       company-minimum-prefix-length 1)
-
-(use-package! doom-snippets
-  :after yasnippet)
 
 ;; Add yasnippet support for all company backends
 ;; https://github.com/syl20bnr/spacemacs/pull/179
@@ -138,21 +139,19 @@
             '(:with company-yasnippet))))
 
 (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
+(setq company-tooltip-align-annotations t)
+;;
 
-(require 'flycheck)
-(require 'web-mode)
 
+;; YASnippet Configuration
+(yas-global-mode 1)
+(use-package! doom-snippets
+  :after yasnippet)
+
+
+;; Web Mode Configuration
 (add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
 (setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'")))
-(defun my-web-mode-hook ()
-  "Hooks for Web mode."
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (when (string-equal "jsx" (file-name-extension buffer-file-name))
-    (setup-tide-mode))
-  )
-(add-hook 'web-mode-hook  'my-web-mode-hook)
 
 (defun setup-tide-mode ()
   (interactive)
@@ -161,23 +160,16 @@
   (setq flycheck-check-syntax-automatically '(save mode-enabled))
   (eldoc-mode +1)
   (tide-hl-identifier-mode +1)
-  ;; company is an optional dependency. You have to
-  ;; install it separately via package-install
-  ;; `M-x package-install [ret] company`
   (company-mode +1))
 
-(setq company-tooltip-align-annotations t)
-
-(setq-default flycheck-disabled-checkers
-              (append flycheck-disabled-checkers
-                      '(javascript-jshint json-jsonlist)))
-;; Enable eslint checker for web-mode
-(flycheck-add-mode 'javascript-eslint 'web-mode)
-;; (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
-;; Enable flycheck globally
-(add-hook 'after-init-hook #'global-flycheck-mode)
-
-(add-hook 'flycheck-mode-hook 'add-node-modules-path)
+(defun my-web-mode-hook ()
+  "Hooks for Web mode."
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (when (string-equal "jsx" (file-name-extension buffer-file-name))
+    (setup-tide-mode))
+  )
 
 (defun web-mode-init-prettier-hook ()
   (setq web-mode-markup-indent-offset 2)
@@ -186,15 +178,30 @@
   (add-node-modules-path)
   (prettier-js-mode))
 
+(add-hook 'web-mode-hook  'my-web-mode-hook)
 (add-hook 'web-mode-hook  'web-mode-init-prettier-hook)
 
+
+;; Flycheck Configuration
+(setq-default flycheck-disabled-checkers
+              (append flycheck-disabled-checkers
+                      '(javascript-jshint json-jsonlist)))
+;; Enable eslint checker for web-mode
+(flycheck-add-mode 'javascript-eslint 'web-mode)
+(flycheck-add-mode 'javascript-eslint 'js2-mode)
+
+;; Enable flycheck globally
+(add-hook 'after-init-hook #'global-flycheck-mode)
+(add-hook 'flycheck-mode-hook 'add-node-modules-path)
+
+;; JS2 Mode Configuration
 (defun js2-mode-init-prettier-hook ()
   (add-node-modules-path)
   (prettier-js-mode))
 
 (add-to-list 'js2-mode-hook 'flycheck-mode)
 (add-hook 'js2-mode-hook 'js2-mode-init-prettier-hook)
-(flycheck-add-mode 'javascript-eslint 'js2-mode)
+
 
 (setq doom-localleader-key ",")
 
