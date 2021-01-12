@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: react-use-effect
-# key: react-use-effect
+# key: ue
 # --
 useEffect(() => {
   $1

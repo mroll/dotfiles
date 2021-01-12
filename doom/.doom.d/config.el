@@ -3,11 +3,25 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
+(setq comp-speed 2)
+
+(when (boundp 'comp-eln-load-path)
+  (let ((eln-cache-dir (expand-file-name "cache/eln-cache/" user-emacs-directory))
+        (find-exec (executable-find "find")))
+    (setcar comp-eln-load-path eln-cache-dir)
+    ;; Quitting emacs while native compilation in progress can leave zero byte
+    ;; sized *.eln files behind. Hence delete such files during startup.
+    (when find-exec
+      (call-process find-exec nil nil nil eln-cache-dir
+                    "-name" "*.eln" "-size" "0" "-delete"))))
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Matt Roll"
       user-mail-address "matt@idiomatic.io")
+
+(setq with-editor-emacsclient-executable "/Users/matt/homebrew/opt/gccemacs/lib-src/emacsclient")
+
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -54,6 +68,17 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+
+(defun wc (&optional start end)
+  "Prints number of lines, words and characters in region or whole buffer."
+  (interactive)
+  (let ((n 0)
+        (start (if mark-active (region-beginning) (point-min)))
+        (end (if mark-active (region-end) (point-max))))
+    (save-excursion
+      (goto-char start)
+      (while (< (point) end) (if (forward-word 1) (setq n (1+ n)))))
+    (message "%3d %3d %3d" (count-lines start end) n (- end start))))
 
 (setq org-roam-directory "~/Dropbox/org/notes/")
 
@@ -124,7 +149,7 @@
 (require 'web-mode)
 
 ;; Company Configuration
-(setq company-idle-delay 0.2
+(setq company-idle-delay 0.01
       company-minimum-prefix-length 1)
 
 ;; Add yasnippet support for all company backends
@@ -171,15 +196,15 @@
     (setup-tide-mode))
   )
 
-(defun web-mode-init-prettier-hook ()
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (add-node-modules-path)
-  (prettier-js-mode))
+;; (defun web-mode-init-prettier-hook ()
+;;   (setq web-mode-markup-indent-offset 2)
+;;   (setq web-mode-code-indent-offset 2)
+;;   (setq web-mode-css-indent-offset 2)
+;;   (add-node-modules-path)
+;;   (prettier-js-mode))
 
 (add-hook 'web-mode-hook  'my-web-mode-hook)
-(add-hook 'web-mode-hook  'web-mode-init-prettier-hook)
+;; (add-hook 'web-mode-hook  'web-mode-init-prettier-hook)
 
 
 ;; Flycheck Configuration
@@ -195,12 +220,12 @@
 (add-hook 'flycheck-mode-hook 'add-node-modules-path)
 
 ;; JS2 Mode Configuration
-(defun js2-mode-init-prettier-hook ()
-  (add-node-modules-path)
-  (prettier-js-mode))
+;; (defun js2-mode-init-prettier-hook ()
+;;   (add-node-modules-path)
+;;   (prettier-js-mode))
 
 (add-to-list 'js2-mode-hook 'flycheck-mode)
-(add-hook 'js2-mode-hook 'js2-mode-init-prettier-hook)
+;; (add-hook 'js2-mode-hook 'js2-mode-init-prettier-hook)
 
 
 (setq doom-localleader-key ",")

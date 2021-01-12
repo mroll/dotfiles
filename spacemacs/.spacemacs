@@ -79,7 +79,8 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(writeroom-mode
+   dotspacemacs-additional-packages '((org-roam :location (recipe :fetcher github :repo "jethrokuan/org-roam"))
+                                      writeroom-mode
                                       org-super-agenda
                                       flycheck-flow
                                       flow-minor-mode
@@ -379,6 +380,18 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
+
+  (use-package org-roam
+    :after org
+    :hook (org-mode . org-roam-mode)
+    :custom
+    (org-roam-directory "~/Dropbox/org/roam/")
+    :bind
+    ("C-c n l" . org-roam)
+    ("C-c n t" . org-roam-today)
+    ("C-c n f" . org-roam-find-file)
+    ("C-c n i" . org-roam-insert)
+    ("C-c n g" . org-roam-show-graph))
 
 (defun writing-mode ()
   (interactive)

@@ -63,3 +63,21 @@
 (package! add-node-modules-path)
 
 (package! prettier-js)
+
+;; (use-package! exec-path-from-shell
+;;   :ensure t
+;;   :config
+;;   (exec-path-from-shell-initialize)
+;;   (if (and (fboundp 'native-comp-available-p)
+;;            (native-comp-available-p))
+;;       (progn
+;;         (message "Native comp is available")
+;;         (add-to-list 'exec-path (expand-file-name "~/homebrew/opt/gccemacs/bin"))
+;;         (setenv "LIBRARY_PATH" (concat (getenv "LIBRARY_PATH")
+;;                                        (when (getenv "LIBRARY_PATH")
+;;                                          ":")
+;;                                        (car (file-expand-wildcards
+;;                                              (expand-file-name "~/homebrew/opt/gcc/lib/gcc/*")))))
+;;         ;; Only set after LIBRARY_PATH can find gcc libraries.
+;;         (setq comp-deferred-compilation t))
+;;     (message "Native comp is *not* available")))
