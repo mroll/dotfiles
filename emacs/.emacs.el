@@ -24,6 +24,101 @@
 ;; Packages
 ;; ------------------------
 
+(use-package add-node-modules-path
+  :straight t
+  :hook (rjsx-mode . add-node-modules-path))
+
+(use-package all-the-icons
+  :straight t)
+
+(use-package bind-map
+  :straight t
+  :after helm helm-rg helm-swoop helm-projectile
+  :config
+  (bind-map my-base-leader-map
+    :keys ("M-m")
+    :evil-keys ("SPC")
+    :evil-states (normal motion visual))
+
+  (bind-map-set-keys my-base-leader-map
+    ;; M-x
+    "SPC" 'helm-M-x
+    
+    ;; File commands
+    "ff" 'helm-find-files
+    "fs" 'save-buffer
+    "feR" 'reload-config
+    "fed" 'open-config-file
+    "fj"  'dired-this-buffer
+
+    ;; Window commands
+    "wm" 'delete-other-windows
+    "wd" 'delete-window
+    "ws" 'split-window-below
+    "wv" 'split-window-right
+    "wl" 'windmove-right
+    "wh" 'windmove-left
+    "wk" 'windmove-up
+    "wj" 'windmove-down
+    "wF" 'make-frame
+    "wo" 'other-frame
+
+    ;; Buffer commands
+    "TAB" 'switch-to-last-buffer
+    "bb"  'helm-buffers-list
+    "bd"  'kill-this-buffer
+    "ss"  'helm-swoop
+    "br"  'revert-buffer
+
+    ;; Frame commands
+    "tF" 'toggle-frame-fullscreen
+
+    ;; Project commands
+    "gs"  'magit-status
+    "pf"  'projectile-find-file
+    "pp"  'projectile-switch-project
+    "/"   'helm-projectile-rg
+
+    ;; Syntax commands
+    "el" 'flycheck-list-errors
+
+    ;; Help
+    "hk" 'describe-key
+    "hf" 'describe-function
+    "hv" 'describe-variable
+    "hm" 'describe-mode
+
+    ;; Emacs
+    "qr" 'restart-emacs
+    )
+
+  (bind-map-set-keys helm-find-files-map
+    "C-h" 'helm-find-files-up-one-level
+    "C-l" 'helm-execute-persistent-action
+    "TAB" 'helm-execute-persistent-action
+    "C-j" 'helm-next-line
+    "C-k" 'helm-previous-line))
+
+(use-package company
+  :straight t
+  :init
+  (global-company-mode)
+  (setq company-tooltip-align-annotations t))
+
+(use-package doom-modeline
+  :straight t
+  :init (doom-modeline-mode 1))
+
+(use-package doom-themes
+  :straight t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+    ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
 (use-package evil
   :straight t
   :init
@@ -37,6 +132,12 @@
   :config
   (evil-collection-init))
 
+(use-package evil-escape
+  :straight t
+  :config
+  (evil-escape-mode)
+  (setq-default evil-escape-key-sequence "kj"))
+
 (use-package evil-leader
   :straight t
   :config
@@ -46,20 +147,15 @@
   (define-key evil-normal-state-map (kbd "C-u") 'scroll-down-half-page)
   (define-key evil-normal-state-map (kbd "C-d") 'scroll-up-half-page))
 
-(use-package evil-escape
+(use-package exec-path-from-shell
   :straight t
   :config
-  (evil-escape-mode)
-  (setq-default evil-escape-key-sequence "kj"))
+  (exec-path-from-shell-initialize))
 
-(use-package js2-mode
+(use-package flycheck
   :straight t
-  :mode "\\.js\\'"
-  :config
-  (setq js2-mode-show-parse-errors nil)
-  (setq js2-mode-show-strict-warnings nil)
-
-  )
+  :init
+  (global-flycheck-mode))
 
 (use-package helm
   :straight t
@@ -70,9 +166,6 @@
   (define-key helm-map (kbd "C-k") 'helm-previous-line)
 
   (setq helm-split-window-in-side-p t))
-
-(use-package helm-swoop
-  :straight t)
 
 (use-package helm-projectile
   :straight t
@@ -85,86 +178,15 @@
 (use-package helm-rg
   :straight t)
 
-(use-package undo-tree
-  :straight t
-  :config
-  (global-undo-tree-mode)
-  (evil-set-undo-system 'undo-tree))
-
-(use-package magit
+(use-package helm-swoop
   :straight t)
 
-(use-package sublime-themes
+(use-package js2-mode
   :straight t
+  :mode "\\.js\\'"
   :config
-  (add-to-list 'custom-theme-load-path "~/.emacs.d/themes"))
-
-(use-package projectile
-  :straight t
-  :config
-  (projectile-mode +1))
-
-(use-package exec-path-from-shell
-  :straight t
-  :config
-  (exec-path-from-shell-initialize))
-
-;; this is cute but it gets in the way of minibuffer messages
-;; (use-package symon
-;;   :straight t
-;;   :config
-;;   (symon-mode))
-
-(use-package all-the-icons
-  :straight t)
-
-(use-package doom-modeline
-  :straight t
-  :init (doom-modeline-mode 1))
-
-(use-package doom-themes
-  :straight t
-  :config
-  ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  ;; (load-theme 'doom-dracula t)
-
-    ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
-
-(use-package restart-emacs
-  :straight t)
-
-(use-package poet-theme
-  :straight t
-  :config
-  (add-hook 'text-mode-hook
-	    (lambda ()
-	      (variable-pitch-mode 1))))
-
-(use-package rjsx-mode
-  :straight t
-  :mode "\\.jsx\\'"
-  )
-
-(use-package flycheck
-  :straight t
-  :init
-  (global-flycheck-mode))
-
-(use-package prettier-js
-  :straight t
-  :config
-  (add-hook 'js2-mode-hook 'prettier-js-mode)
-  (add-hook 'rjsx-mode-hook 'prettier-js-mode)
-  )
-
-(use-package company
-  :straight t
-  :init
-  (global-company-mode)
-  (setq company-tooltip-align-annotations t))
+  (setq js2-mode-show-parse-errors nil)
+  (setq js2-mode-show-strict-warnings nil))
 
 (use-package lsp-mode
   :straight t
@@ -172,38 +194,10 @@
   (js2-mode . lsp)
   (rjsx-mode . lsp)
   :config
-  (setq lsp-headerline-breadcrumb-enable nil)
-	 
-  )
+  (setq lsp-headerline-breadcrumb-enable nil))
 
-(use-package company-quickhelp
-  :straight t
-  :config
-  (company-quickhelp-mode))
-
-(use-package add-node-modules-path
-  :straight t
-  :hook (rjsx-mode . add-node-modules-path))
-
-(use-package popwin
-  :straight t
-  :config
-  (popwin-mode 1))
-
-(use-package web-mode
-  :straight t
-  :config
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-
-  (defun my-web-mode-hook ()
-    "Hooks for Web mode."
-    (setq web-mode-markup-indent-offset 2)
-    (setq web-mode-code-indent-offset 2)
-    (setq web-mode-css-indent-offset 2)
-    )
-  (add-hook 'web-mode-hook  'my-web-mode-hook)
-
-  )
+(use-package magit
+  :straight t)
 
 (use-package org
   :straight t
@@ -268,7 +262,7 @@
 
   (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
-  (defun ck/org-confirm-babel-evaluate (lang body)
+  (defun mr/org-confirm-babel-evaluate (lang body)
     (not (or (string= lang "latex")
 	     (string= lang "tcl")
 	     (string= lang "bash")
@@ -277,7 +271,7 @@
 	     (string= lang "emacs-lisp")
 	     (string= lang "shell")
 	     (string= lang "lisp"))))
-  (setq-default org-confirm-babel-evaluate 'ck/org-confirm-babel-evaluate)
+  (setq-default org-confirm-babel-evaluate 'mr/org-confirm-babel-evaluate)
 
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -307,13 +301,7 @@
   (evil-define-key 'normal org-mode-map (kbd "<") 'org-promote-subtree)
 
   (evil-define-key 'normal org-mode-map (kbd ", I") 'org-clock-in)
-  (evil-define-key 'normal org-mode-map (kbd ", O") 'org-clock-out)
-  )
-
-(use-package org-variable-pitch
-  :straight t
-  :config
-  (add-hook 'org-mode-hook 'org-variable-pitch-minor-mode))
+  (evil-define-key 'normal org-mode-map (kbd ", O") 'org-clock-out))
 
 (use-package org-bullets
   :straight t
@@ -335,79 +323,74 @@
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate))))
 
+(use-package org-variable-pitch
+  :straight t
+  :config
+  (add-hook 'org-mode-hook 'org-variable-pitch-minor-mode))
+
+(use-package poet-theme
+  :straight t
+  :config
+  (add-hook 'text-mode-hook
+	    (lambda ()
+	      (variable-pitch-mode 1))))
+
+(use-package popwin
+  :straight t
+  :config
+  (popwin-mode 1))
+
+(use-package prettier-js
+  :straight t
+  :config
+  (add-hook 'js2-mode-hook 'prettier-js-mode)
+  (add-hook 'rjsx-mode-hook 'prettier-js-mode))
+
+(use-package projectile
+  :straight t
+  :config
+  (projectile-mode +1))
+
+(use-package restart-emacs
+  :straight t)
+
+(use-package rjsx-mode
+  :straight t
+  :mode "\\.jsx\\'")
+
 (use-package scala-mode
   :straight t
   :interpreter
   ("scala" . scala-mode))
 
-(use-package bind-map
+(use-package sublime-themes
   :straight t
   :config
-  (bind-map my-base-leader-map
-    :keys ("M-m")
-    :evil-keys ("SPC")
-    :evil-states (normal motion visual))
+  (add-to-list 'custom-theme-load-path "~/.emacs.d/themes"))
 
-  (bind-map-set-keys my-base-leader-map
-    ;; M-x
-    "SPC" 'helm-M-x
-    
-    ;; File commands
-    "ff" 'helm-find-files
-    "fs" 'save-buffer
-    "feR" 'reload-config
-    "fed" 'open-config-file
-    "fj"  'dired-this-buffer
+;; this is cute but it gets in the way of minibuffer messages
+;; (use-package symon
+;;   :straight t
+;;   :config
+;;   (symon-mode))
 
-    ;; Window commands
-    "wm" 'delete-other-windows
-    "wd" 'delete-window
-    "ws" 'split-window-below
-    "wv" 'split-window-right
-    "wl" 'windmove-right
-    "wh" 'windmove-left
-    "wk" 'windmove-up
-    "wj" 'windmove-down
-    "wF" 'make-frame
-    "wo" 'other-frame
+(use-package undo-tree
+  :straight t
+  :config
+  (global-undo-tree-mode)
+  (evil-set-undo-system 'undo-tree))
 
-    ;; Buffer commands
-    "TAB" 'switch-to-last-buffer
-    "bb"  'helm-buffers-list
-    "bd"  'kill-this-buffer
-    "ss"  'helm-swoop
-    "br"  'revert-buffer
+(use-package web-mode
+  :straight t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
 
-    ;; Frame commands
-    "tF" 'toggle-frame-fullscreen
-
-    ;; Project commands
-    "gs"  'magit-status
-    "pf"  'projectile-find-file
-    "pp"  'projectile-switch-project
-    "/"   'helm-projectile-rg
-
-    ;; Syntax commands
-    "el" 'flycheck-list-errors
-
-    ;; Help
-    "hk" 'describe-key
-    "hf" 'describe-function
-    "hv" 'describe-variable
-    "hm" 'describe-mode
-
-    ;; Emacs
-    "qr" 'restart-emacs
-    )
-
-  (bind-map-set-keys helm-find-files-map
-    "C-h" 'helm-find-files-up-one-level
-    "C-l" 'helm-execute-persistent-action
-    "TAB" 'helm-execute-persistent-action
-    "C-j" 'helm-next-line
-    "C-k" 'helm-previous-line)
-
-  )
+  (defun my-web-mode-hook ()
+    "Hooks for Web mode."
+    (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-code-indent-offset 2)
+    (setq web-mode-css-indent-offset 2))
+  (add-hook 'web-mode-hook  'my-web-mode-hook))
 
 
 ;; Functions
@@ -415,7 +398,7 @@
 
 (defun open-config-file ()
   (interactive)
-  (find-file "~/.emacs.d/init.el"))
+  (find-file "~/.emacs.d/.emacs.el"))
 
 (defun reload-config ()
   (interactive)
@@ -473,7 +456,7 @@
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 
 
-;; Variables
+;; Variables/Modes
 ;; ------------------------
 
 (scroll-bar-mode -1)
@@ -482,13 +465,15 @@
 
 (setq backup-directory-alist '(("." . "~/.emacs.d/.backups/")))
 
+(setq vc-follow-symlinks t)
+
 (when window-system
   (set-frame-size (selected-frame) 100 75))
 
 (add-to-list
-   'default-frame-alist'(ns-transparent-titlebar . t))
-  (add-to-list
-   'default-frame-alist'(ns-appearance . light))
+ 'default-frame-alist'(ns-transparent-titlebar . t))
+(add-to-list
+ 'default-frame-alist'(ns-appearance . light))
 
 (load-theme 'doom-acario-light)
 
