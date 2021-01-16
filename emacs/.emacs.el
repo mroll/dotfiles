@@ -242,6 +242,8 @@
 (use-package org
   :straight t
   :config
+  (require 'org-capture)
+
   (setq org-agenda-files '("~/Dropbox/org/idiomatic.org"
 			   "~/Dropbox/org/projects.org"
 			   "~/Dropbox/org/next.org"))
@@ -251,6 +253,7 @@
   (setq org-default-notes-file "~/Dropbox/org/inbox.org")
 
   (setq matt/org-agenda-directory "~/Dropbox/org/")
+
   (add-to-list 'org-capture-templates
 	     `("i" "inbox" entry (file ,(concat matt/org-agenda-directory "inbox.org"))
 	       "* TODO %?"))
@@ -643,7 +646,7 @@
   (add-to-list
    'default-frame-alist'(ns-appearance . light))
 
-(load-theme 'doom-moonlight)
+(load-theme 'doom-moonlight t)
 
 (set-face-attribute 'default nil :height 140)
 
