@@ -35,6 +35,7 @@
 
 (use-package bind-map
   :straight t
+  :after (helm helm-projectile helm-rg helm-swoop)
   :config
 
   (bind-map my-base-leader-map
@@ -563,7 +564,7 @@
 
 (defun open-config-file ()
   (interactive)
-  (find-file "~/.emacs.d/init.el"))
+  (find-file "~/.emacs.el"))
 
 (defun reload-config ()
   (interactive)
@@ -646,6 +647,8 @@
 
 (set-face-attribute 'default nil :height 140)
 
+(setq vc-follow-symlinks t)
+
 ;; Join the #emacs and #erc channels whenever connecting to Freenode.
 (setq erc-autojoin-channels-alist '(("freenode.net" "#emacs" "#erc")))
 
@@ -657,19 +660,46 @@
 
 ;; Interpret mIRC-style color commands in IRC chats
 (setq erc-interpret-mirc-color t)
-
-
-;; Custom
-;; -----------------------
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector
+   ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
  '(custom-safe-themes
-   '("c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "99ea831ca79a916f1bd789de366b639d09811501e8c092c85b2cb7d697777f93" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "71e5acf6053215f553036482f3340a5445aee364fb2e292c70d9175fb0cc8af7" "08a27c4cde8fcbb2869d71fdc9fa47ab7e4d31c27d40d59bf05729c4640ce834" "bf387180109d222aee6bb089db48ed38403a1e330c9ec69fe1f52460a8936b66" "4bca89c1004e24981c840d3a32755bf859a6910c65b829d9441814000cf6c3d0" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "54cf3f8314ce89c4d7e20ae52f7ff0739efb458f4326a2ca075bf34bc0b4f499" "3c2f28c6ba2ad7373ea4c43f28fcf2eed14818ec9f0659b1c97d4e89c99e091e" "aaa4c36ce00e572784d424554dcc9641c82d1155370770e231e10c649b59a074" "730a87ed3dc2bf318f3ea3626ce21fb054cd3a1471dcd59c81a4071df02cb601" "5036346b7b232c57f76e8fb72a9c0558174f87760113546d3a9838130f1cdb74" "6084dce7da6b7447dcb9f93a981284dc823bab54f801ebf8a8e362a5332d2753" "188fed85e53a774ae62e09ec95d58bb8f54932b3fd77223101d036e3564f9206" "c4bdbbd52c8e07112d1bfd00fee22bf0f25e727e95623ecb20c4fa098b74c1bd" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "d5a878172795c45441efcd84b20a14f553e7e96366a163f742b95d65a3f55d71" "3cd28471e80be3bd2657ca3f03fbb2884ab669662271794360866ab60b6cb6e6" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
- '(helm-completion-style 'emacs)
- '(helm-minibuffer-history-key "M-p"))
+   '("c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
+ '(fci-rule-color "#444a73")
+ '(helm-minibuffer-history-key "M-p")
+ '(jdee-db-active-breakpoint-face-colors (cons "#161a2a" "#82aaff"))
+ '(jdee-db-requested-breakpoint-face-colors (cons "#161a2a" "#c3e88d"))
+ '(jdee-db-spec-breakpoint-face-colors (cons "#161a2a" "#444a73"))
+ '(objed-cursor-color "#ff757f")
+ '(pdf-view-midnight-colors (cons "#c8d3f5" "#212337"))
+ '(rustic-ansi-faces
+   ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
+ '(vc-annotate-background "#212337")
+ '(vc-annotate-color-map
+   (list
+    (cons 20 "#c3e88d")
+    (cons 40 "#d7dd85")
+    (cons 60 "#ebd27e")
+    (cons 80 "#ffc777")
+    (cons 100 "#ffb76e")
+    (cons 120 "#ffa866")
+    (cons 140 "#ff995e")
+    (cons 160 "#ea9993")
+    (cons 180 "#d599c9")
+    (cons 200 "#c099ff")
+    (cons 220 "#d58dd4")
+    (cons 240 "#ea81a9")
+    (cons 260 "#ff757f")
+    (cons 280 "#d06a7c")
+    (cons 300 "#a15f79")
+    (cons 320 "#725476")
+    (cons 340 "#444a73")
+    (cons 360 "#444a73")))
+ '(vc-annotate-very-old-color nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
