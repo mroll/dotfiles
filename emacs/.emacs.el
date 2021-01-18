@@ -332,8 +332,8 @@
 		 :action      (lambda (docid msg target)
 				;; must come before proc-move since retag runs
 				;; 'sed' on the file
-				(mu4e-action-retag-message msg "-\\Inbox")
-				(mu4e~proc-move docid nil "+S-u-N"))))
+				(mu4e-action-retag-message msg "-/Inbox")
+				(mu4e~proc-move docid "/Archive" "+S-u-N"))))
 
   (mu4e~headers-defun-mark-for archive)
 
