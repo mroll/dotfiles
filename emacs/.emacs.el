@@ -254,6 +254,9 @@
               :files ("mu4e/*")   
               :pre-build (("./autogen.sh") ("make"))) 
   :custom   (mu4e-mu-binary (expand-file-name "mu/mu" (straight--repos-dir "mu")))
+  :hook (evil-collection-setup . (lambda (&rest a)
+				   (evil-define-key 'normal mu4e-headers-mode-map
+				     (kbd "a") 'mu4e-headers-mark-for-archive)))
   :config
 
   (set-face-attribute 'variable-pitch nil :height 200)
@@ -319,6 +322,20 @@
 	   (:thread-subject   .   nil)))
 
   (setq mu4e-view-prefer-html t)
+
+  ;; Mark as read and archive
+  (add-to-list 'mu4e-marks
+	       '(archive
+		 :char       "A"
+		 :prompt     "Archive"
+		 :show-target (lambda (target) "archive")
+		 :action      (lambda (docid msg target)
+				;; must come before proc-move since retag runs
+				;; 'sed' on the file
+				(mu4e-action-retag-message msg "-\\Inbox")
+				(mu4e~proc-move docid nil "+S-u-N"))))
+
+  (mu4e~headers-defun-mark-for archive)
 
   )
 
@@ -823,7 +840,7 @@ abort completely with `C-g'."
  '(ansi-color-names-vector
    ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
  '(custom-safe-themes
-   '("6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
+   '("730a87ed3dc2bf318f3ea3626ce21fb054cd3a1471dcd59c81a4071df02cb601" "6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
  '(fci-rule-color "#444a73")
  '(helm-completion-style 'emacs)
  '(helm-minibuffer-history-key "M-p")
