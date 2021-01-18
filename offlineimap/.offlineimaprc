@@ -13,7 +13,7 @@ autorefresh = 0.2
 quick = 10
 
 # update mu index after sync
-postsynchook = mu index --maildir ~/.mail
+postsynchook = mu index
 
 [Repository main-local]
 type = Maildir

@@ -6,6 +6,11 @@
 
 ;;; Code:
 
+;; For native-comp
+(setq comp-speed 2)
+
+(setq straight-repository-branch "develop")
+
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -68,6 +73,7 @@
     ;; Application commands
     "aoc" 'org-capture
     "aoa" 'org-agenda
+    "am"  'mu4e
 
     ;; File commands
     "ff" 'helm-find-files
@@ -131,7 +137,9 @@
   :straight t
   :init
   (global-company-mode)
-  (setq company-tooltip-align-annotations t))
+  (setq company-tooltip-align-annotations t)
+  (setq company-dabbrev-downcase 0)
+  (setq company-idle-delay 0))
 
 (use-package evil
   :straight t
@@ -144,7 +152,7 @@
   :after evil
   :straight t
   :custom (evil-collection-mode-list
-	   '(magit calc calendar dired flycheck company))
+	   '(magit calc calendar dired flycheck company ibuffer mu4e))
   :config
   (evil-collection-init))
 
@@ -238,6 +246,81 @@
 
 (use-package magit
   :straight t)
+
+(use-package mu4e
+  :straight ( :host github 
+              :repo "djcb/mu"  
+              :branch "master"
+              :files ("mu4e/*")   
+              :pre-build (("./autogen.sh") ("make"))) 
+  :custom   (mu4e-mu-binary (expand-file-name "mu/mu" (straight--repos-dir "mu")))
+  :config
+
+  (set-face-attribute 'variable-pitch nil :height 200)
+  (set-face-attribute 'mu4e-highlight-face nil :inherit 'default)
+
+  (setq mail-user-agent 'mu4e-user-agent)
+
+  ;; default
+  (setq mu4e-maildir "~/.mail/pm")
+  (setq mu4e-drafts-folder "/Drafts")
+  (setq mu4e-sent-folder   "/Sent")
+  (setq mu4e-trash-folder  "/Trash")
+  (setq mu4e-refile-folder  "/Archive")
+
+  (setq mu4e-headers-fields
+	'( (:human-date       .   12)
+	   (:flags            .    6)
+	   (:mailing-list     .   10)
+	   (:from             .   22)
+	   (:thread-subject   .   nil)))
+
+  (setq mu4e-headers-full-search nil)
+  (setq mu4e-headers-result-limit 1000)
+  (setq message-kill-buffer-on-exit t)
+
+  (setq mu4e-view-show-images t)
+
+  ;; (mu4e-alert-set-default-style 'notifier)
+  ;; (mu4e-alert-enable-mode-line-display)
+
+  ;; This allows me to use 'helm' to select mailboxes
+  (setq mu4e-completing-read-function 'completing-read)
+  ;; Why would I want to leave my message open after I've sent it?
+  (setq message-kill-buffer-on-exit t)
+  ;; Don't ask for a 'context' upon opening mu4e
+  (setq mu4e-context-policy 'pick-first)
+  ;; Don't ask to quit... why is this the default?
+  (setq mu4e-confirm-quit nil)
+
+  (setq user-mail-address "mproll@pm.me")
+  (setq smtpmail-default-smtp-server "127.0.0.1"
+	smtpmail-smtp-server "127.0.0.1"
+	smtpmail-smtp-service 1025)
+  (setq message-send-mail-function 'smtpmail-send-it)
+
+  (setq mu4e-update-interval 300)
+  (setq mu4e-view-show-addresses 't)
+
+  (setq mu4e-get-mail-command "offlineimap -o")
+
+  (setq mu4e-maildir-shortcuts
+	'( ("/INBOX"                       . ?i)
+	   ("/Sent"                        . ?s)
+	   ("/Archive"                     . ?a)
+	   ("/Trash"                       . ?T)
+	   ("/Folders.newsletters"         . ?n)))
+
+  (setq mu4e-headers-fields
+	'( (:human-date       .   12)
+	   (:flags            .    6)
+	   (:mailing-list     .   10)
+	   (:from             .   22)
+	   (:thread-subject   .   nil)))
+
+  (setq mu4e-view-prefer-html t)
+
+  )
 
 (use-package org
   :straight t
@@ -562,6 +645,9 @@
 
   (which-key-mode))
 
+(use-package writeroom-mode
+  :straight t)
+
 ;; Functions
 ;; ------------------------
 
@@ -646,7 +732,7 @@
   (add-to-list
    'default-frame-alist'(ns-appearance . light))
 
-(load-theme 'doom-moonlight t)
+(load-theme 'doom-plain t)
 
 (set-face-attribute 'default nil :height 140)
 
@@ -661,8 +747,74 @@
 ;; connections to the same server.
 (setq erc-rename-buffers t)
 
+
+;; writeroom mode
+(setq-default markdown-header-scaling t)
+(setq-default markdown-hide-markup t)
+(setq-default writeroom-maximize-window nil)
+(setq-default writeroom-width 90)
+
+(defun writing-mode ()
+  (interactive)
+  (setq buffer-face-mode-face '(:family "San Francisco" :height 172))
+  (buffer-face-mode)
+  (linum-mode 0)
+  (writeroom-mode 1)
+  (blink-cursor-mode)
+  (visual-line-mode 1)
+  (setq truncate-lines nil)
+  (setq line-spacing 5)
+  (setq global-hl-line-mode nil))
+(add-hook 'markdown-mode-hook 'writing-mode)
+
+(setq debug-on-error t)
+
+(define-key ctl-x-map "\C-i"
+  #'mpr/ispell-word-then-abbrev)
+
+(defun mpr/simple-get-word ()
+  (car-safe (save-excursion (ispell-get-word nil))))
+
+(defun mpr/ispell-word-then-abbrev (p)
+  "Call `ispell-word', then create an abbrev for it.
+With prefix P, create local abbrev. Otherwise it will
+be global.
+If there's nothing wrong with the word at point, keep
+looking for a typo until the beginning of buffer. You can
+skip typos you don't want to fix with `SPC', and you can
+abort completely with `C-g'."
+  (interactive "P")
+  (let (bef aft)
+    (save-excursion
+      (while (if (setq bef (mpr/simple-get-word))
+                 ;; Word was corrected or used quit.
+                 (if (ispell-word nil 'quiet)
+                     nil ; End the loop.
+                   ;; Also end if we reach `bob'.
+                   (not (bobp)))
+               ;; If there's no word at point, keep looking
+               ;; until `bob'.
+               (not (bobp)))
+        (backward-word)
+        (backward-char))
+      (setq aft (mpr/simple-get-word)))
+    (if (and aft bef (not (equal aft bef)))
+        (let ((aft (downcase aft))
+              (bef (downcase bef)))
+          (define-abbrev
+            (if p local-abbrev-table global-abbrev-table)
+            bef aft)
+          (message "\"%s\" now expands to \"%s\" %sally"
+                   bef aft (if p "loc" "glob")))
+      (user-error "No typo at or before point"))))
+
+(setq save-abbrevs 'silently)
+(setq-default abbrev-mode t)
+
+
 ;; Interpret mIRC-style color commands in IRC chats
 (setq erc-interpret-mirc-color t)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -671,8 +823,9 @@
  '(ansi-color-names-vector
    ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
  '(custom-safe-themes
-   '("c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
+   '("6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
  '(fci-rule-color "#444a73")
+ '(helm-completion-style 'emacs)
  '(helm-minibuffer-history-key "M-p")
  '(jdee-db-active-breakpoint-face-colors (cons "#161a2a" "#82aaff"))
  '(jdee-db-requested-breakpoint-face-colors (cons "#161a2a" "#c3e88d"))
