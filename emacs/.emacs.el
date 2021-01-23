@@ -8,6 +8,7 @@
 
 ;; For native-comp
 (setq comp-speed 2)
+(setq comp-deferred-compilation-deny-list '("\\(?:[^z-a]*-autoloads\\.el$\\)"))
 
 (setq straight-repository-branch "develop")
 
@@ -245,9 +246,9 @@
   (defun mpr/helm-rg-from-dir ()
     (interactive)
     (let ((helm-rg--current-dir
-     (expand-file-name
-      (projectile-complete-dir (projectile-acquire-root))
-      (projectile-acquire-root))))
+	   (expand-file-name
+	    (projectile-complete-dir (projectile-acquire-root))
+	    (projectile-acquire-root))))
       (helm-rg helm-pattern)))
 
   (defun mpr/helm-rg--from-dir (dir)
@@ -709,7 +710,7 @@
 
 (defun reload-config ()
   (interactive)
-  (load-file "~/.emacs.d/init.el"))
+  (load-file "~/.emacs.el"))
 
 (defun dired-this-buffer ()
   (interactive)
@@ -784,7 +785,7 @@
   (add-to-list
    'default-frame-alist'(ns-appearance . light))
 
-(load-theme 'doom-plain t)
+(load-theme 'doom-horizon t)
 
 (set-face-attribute 'default nil :height 140)
 
@@ -818,8 +819,6 @@
   (setq line-spacing 5)
   (setq global-hl-line-mode nil))
 (add-hook 'markdown-mode-hook 'writing-mode)
-
-(setq debug-on-error t)
 
 (define-key ctl-x-map "\C-i"
   #'mpr/ispell-word-then-abbrev)
@@ -874,7 +873,7 @@ abort completely with `C-g'."
  '(ansi-color-names-vector
    ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
  '(custom-safe-themes
-   '("58c6711a3b568437bab07a30385d34aacf64156cc5137ea20e799984f4227265" "b3775ba758e7d31f3bb849e7c9e48ff60929a792961a2d536edec8f68c671ca5" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
+   '("5036346b7b232c57f76e8fb72a9c0558174f87760113546d3a9838130f1cdb74" "cae81b048b8bccb7308cdcb4a91e085b3c959401e74a0f125e7c5b173b916bf9" "58c6711a3b568437bab07a30385d34aacf64156cc5137ea20e799984f4227265" "b3775ba758e7d31f3bb849e7c9e48ff60929a792961a2d536edec8f68c671ca5" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
  '(fci-rule-color "#444a73")
  '(helm-completion-style 'emacs)
  '(helm-minibuffer-history-key "M-p")
