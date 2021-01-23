@@ -1,8 +1,8 @@
+;; -*- lexical-binding: t -*-
 ;;; package --- matt's emacs config
 
 ;;; Commentary:
 ;;
-
 
 ;;; Code:
 
@@ -17,9 +17,9 @@
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
-	(url-retrieve-synchronously
-	 "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-	 'silent 'inhibit-cookies)
+  (url-retrieve-synchronously
+   "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+   'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
@@ -109,6 +109,7 @@
     "pf"  'projectile-find-file
     "pp"  'projectile-switch-project
     "/"   'helm-projectile-rg
+    "d/"  'mpr/helm-rg-from-dir
 
     ;; Service commands
     "sm" 'prodigy
@@ -152,7 +153,7 @@
   :after evil
   :straight t
   :custom (evil-collection-mode-list
-	   '(magit calc calendar dired flycheck company ibuffer mu4e))
+     '(magit calc calendar dired flycheck company ibuffer mu4e))
   :config
   (evil-collection-init))
 
@@ -192,7 +193,7 @@
   :straight t
   :config
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-	doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
@@ -209,6 +210,7 @@
 
   (define-key helm-map (kbd "C-j") 'helm-next-line)
   (define-key helm-map (kbd "C-k") 'helm-previous-line)
+  (define-key helm-map (kbd "M-d") 'mpr/helm-rg--set-dir)
 
   (setq helm-split-window-in-side-p t))
 
@@ -218,10 +220,47 @@
   (helm-projectile-on)
 
   (setq projectile-globally-ignored-directories '("node_modules"
-						  "target")))
+              "target"))
+
+
+
+  )
 
 (use-package helm-rg
-  :straight t)
+  :straight t
+  :config
+
+  (defun mpr/helm-rg--set-dir ()
+    "Set the directory in which to invoke ripgrep and search again."
+    (interactive)
+    (let ((pat helm-pattern))
+      (helm-run-after-exit
+       (lambda ()
+         (let ((helm-rg--current-dir
+                (expand-file-name
+                 (projectile-complete-dir (projectile-acquire-root))
+                 (projectile-acquire-root))))
+           (helm-rg--do-helm-rg pat))))))
+
+  (defun mpr/helm-rg-from-dir ()
+    (interactive)
+    (let ((helm-rg--current-dir
+     (expand-file-name
+      (projectile-complete-dir (projectile-acquire-root))
+      (projectile-acquire-root))))
+      (helm-rg helm-pattern)))
+
+  (defun mpr/helm-rg--from-dir (dir)
+    (let ((helm-rg--current-dir dir))
+      (helm-rg helm-pattern)))
+
+  (defmacro mpr/def-rg-from-dir-fn (name dir)
+    `(defun ,name ()
+       (interactive)
+       (mpr/helm-rg--from-dir ,dir)))
+
+  (mpr/def-rg-from-dir-fn mpr/rg-from-storyblanks-web "/Users/matt/src/storyblanks/web/")
+  (mpr/def-rg-from-dir-fn mpr/rg-from-storyblanks-functions "/Users/matt/src/storyblanks/functions/"))
 
 (use-package helm-swoop
   :straight t)
@@ -248,15 +287,15 @@
   :straight t)
 
 (use-package mu4e
-  :straight ( :host github 
-              :repo "djcb/mu"  
+  :straight ( :host github
+              :repo "djcb/mu"
               :branch "master"
-              :files ("mu4e/*")   
-              :pre-build (("./autogen.sh") ("make"))) 
+              :files ("mu4e/*")
+              :pre-build (("./autogen.sh") ("make")))
   :custom   (mu4e-mu-binary (expand-file-name "mu/mu" (straight--repos-dir "mu")))
   :hook (evil-collection-setup . (lambda (&rest a)
-				   (evil-define-key 'normal mu4e-headers-mode-map
-				     (kbd "a") 'mu4e-headers-mark-for-archive)))
+           (evil-define-key 'normal mu4e-headers-mode-map
+             (kbd "a") 'mu4e-headers-mark-for-archive)))
   :config
 
   (set-face-attribute 'variable-pitch nil :height 200)
@@ -272,11 +311,11 @@
   (setq mu4e-refile-folder  "/Archive")
 
   (setq mu4e-headers-fields
-	'( (:human-date       .   12)
-	   (:flags            .    6)
-	   (:mailing-list     .   10)
-	   (:from             .   22)
-	   (:thread-subject   .   nil)))
+  '( (:human-date       .   12)
+     (:flags            .    6)
+     (:mailing-list     .   10)
+     (:from             .   22)
+     (:thread-subject   .   nil)))
 
   (setq mu4e-headers-full-search nil)
   (setq mu4e-headers-result-limit 1000)
@@ -298,8 +337,8 @@
 
   (setq user-mail-address "mproll@pm.me")
   (setq smtpmail-default-smtp-server "127.0.0.1"
-	smtpmail-smtp-server "127.0.0.1"
-	smtpmail-smtp-service 1025)
+  smtpmail-smtp-server "127.0.0.1"
+  smtpmail-smtp-service 1025)
   (setq message-send-mail-function 'smtpmail-send-it)
 
   (setq mu4e-update-interval 300)
@@ -308,32 +347,32 @@
   (setq mu4e-get-mail-command "offlineimap -o")
 
   (setq mu4e-maildir-shortcuts
-	'( ("/INBOX"                       . ?i)
-	   ("/Sent"                        . ?s)
-	   ("/Archive"                     . ?a)
-	   ("/Trash"                       . ?T)
-	   ("/Folders.newsletters"         . ?n)))
+  '( ("/INBOX"                       . ?i)
+     ("/Sent"                        . ?s)
+     ("/Archive"                     . ?a)
+     ("/Trash"                       . ?T)
+     ("/Folders.newsletters"         . ?n)))
 
   (setq mu4e-headers-fields
-	'( (:human-date       .   12)
-	   (:flags            .    6)
-	   (:mailing-list     .   10)
-	   (:from             .   22)
-	   (:thread-subject   .   nil)))
+  '( (:human-date       .   12)
+     (:flags            .    6)
+     (:mailing-list     .   10)
+     (:from             .   22)
+     (:thread-subject   .   nil)))
 
   (setq mu4e-view-prefer-html t)
 
   ;; Mark as read and archive
   (add-to-list 'mu4e-marks
-	       '(archive
-		 :char       "A"
-		 :prompt     "Archive"
-		 :show-target (lambda (target) "archive")
-		 :action      (lambda (docid msg target)
-				;; must come before proc-move since retag runs
-				;; 'sed' on the file
-				(mu4e-action-retag-message msg "-/Inbox")
-				(mu4e~proc-move docid "/Archive" "+S-u-N"))))
+         '(archive
+     :char       "A"
+     :prompt     "Archive"
+     :show-target (lambda (target) "archive")
+     :action      (lambda (docid msg target)
+        ;; must come before proc-move since retag runs
+        ;; 'sed' on the file
+        (mu4e-action-retag-message msg "-/Inbox")
+        (mu4e~proc-move docid "/Archive" "+S-u-N"))))
 
   (mu4e~headers-defun-mark-for archive)
 
@@ -344,9 +383,8 @@
   :config
   (require 'org-capture)
 
-  (setq org-agenda-files '("~/Dropbox/org/idiomatic.org"
-			   "~/Dropbox/org/projects.org"
-			   "~/Dropbox/org/next.org"))
+  (setq org-agenda-files '("~/Dropbox/org/projects.org"
+         "~/Dropbox/org/next.org"))
   (setq org-hide-emphasis-markers t)
   (setq org-use-speed-commands t)
   (setq org-directory "~/Dropbox/org")
@@ -355,8 +393,8 @@
   (setq matt/org-agenda-directory "~/Dropbox/org/")
 
   (add-to-list 'org-capture-templates
-	     `("i" "inbox" entry (file ,(concat matt/org-agenda-directory "inbox.org"))
-	       "* TODO %?"))
+       `("i" "inbox" entry (file ,(concat matt/org-agenda-directory "inbox.org"))
+         "* TODO %?"))
 
   (setq org-log-done 'time
       org-log-into-drawer t
@@ -391,7 +429,7 @@
   (setq org-cycle-separator-lines 0)
 
   (setq org-blank-before-new-entry (quote ((heading)
-					   (plain-list-item . auto))))
+             (plain-list-item . auto))))
 
   (setq org-insert-heading-respect-content t)
 
@@ -406,45 +444,42 @@
   (setq org-log-state-notes-insert-after-drawers nil)
 
   (setq org-todo-keywords
-	(quote ((sequence "TODO(t)" "NEXT(n)" "IN-PROGRESS(i)" "|" "DONE(d)")
-		(sequence "HOLD(h)"))))
+  (quote ((sequence "TODO(t)" "NEXT(n)" "IN-PROGRESS(i)" "|" "DONE(d)")
+    (sequence "HOLD(h)"))))
 
   (setq org-todo-keyword-faces
-	(quote (("TODO" :foreground "orange" :weight bold)
-		("NEXT" :foreground "#32ed5e")
-		("DONE" :foreground "gray38" :weight bold)
-		("HOLD" :foreground "magenta" :weight bold)
-		("CANCELLED" :foreground "gray38" :weight bold))))
+  (quote (("TODO" :foreground "orange" :weight bold)
+    ("NEXT" :foreground "#32ed5e")
+    ("DONE" :foreground "gray38" :weight bold)
+    ("HOLD" :foreground "magenta" :weight bold)
+    ("CANCELLED" :foreground "gray38" :weight bold))))
 
   (setq matt/org-agenda-todo-view
-	`("." "Agenda"
-	  ((agenda ""
-		   ((org-agenda-span 'day)
-		    (org-deadline-warning-days 365)))
-	   (todo "TODO"
-		 ((org-agenda-overriding-header "To Refile")
-		  (org-agenda-files '(,(concat matt/org-agenda-directory "inbox.org")))))
-	   (todo '("NEXT" "TODO")
-		 ((org-agenda-overriding-header "Idiomatic")
-		  (org-agenda-files '(,(concat matt/org-agenda-directory "idiomatic.org")))))
-	   (todo "TODO"
-		 ((org-agenda-overriding-header "Projects")
-		  (org-agenda-files '(,(concat matt/org-agenda-directory "projects.org")))
-		  ))
-	   (todo "TODO"
-		 ((org-agenda-overriding-header "One-off Tasks")
-		  (org-agenda-files '(,(concat matt/org-agenda-directory "next.org")))
-		  (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
-	   nil)))
+  `("." "Agenda"
+    ((agenda ""
+       ((org-agenda-span 'day)
+        (org-deadline-warning-days 365)))
+     (todo '("NEXT" "TODO")
+     ((org-agenda-overriding-header "To Refile")
+      (org-agenda-files '(,(concat matt/org-agenda-directory "inbox.org")))))
+     (todo "TODO"
+     ((org-agenda-overriding-header "Projects")
+      (org-agenda-files '(,(concat matt/org-agenda-directory "projects.org")))
+      ))
+     (todo '("NEXT" "TODO")
+     ((org-agenda-overriding-header "One-off Tasks")
+      (org-agenda-files '(,(concat matt/org-agenda-directory "next.org")))
+      (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
+     nil)))
 
   (setq org-agenda-custom-commands `(,matt/org-agenda-todo-view))
 
   (setq org-refile-use-outline-path 'file
-	org-outline-path-complete-in-steps nil)
+  org-outline-path-complete-in-steps nil)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
   (setq org-refile-targets '(("next.org" :level . 0)
-			     ("idiomatic.org" :maxlevel . 5)
-			     ("projects.org" :maxlevel . 5)))
+           ("idiomatic.org" :maxlevel . 5)
+           ("projects.org" :maxlevel . 5)))
 
   (org-clock-persistence-insinuate)
 
@@ -452,13 +487,13 @@
 
   (defun ck/org-confirm-babel-evaluate (lang body)
     (not (or (string= lang "latex")
-	     (string= lang "tcl")
-	     (string= lang "bash")
-	     (string= lang "ledger")
-	     (string= lang "python")
-	     (string= lang "emacs-lisp")
-	     (string= lang "shell")
-	     (string= lang "lisp"))))
+       (string= lang "tcl")
+       (string= lang "bash")
+       (string= lang "ledger")
+       (string= lang "python")
+       (string= lang "emacs-lisp")
+       (string= lang "shell")
+       (string= lang "lisp"))))
   (setq-default org-confirm-babel-evaluate 'ck/org-confirm-babel-evaluate)
 
   (org-babel-do-load-languages
@@ -501,12 +536,12 @@
       :custom
       (org-roam-directory "~/Dropbox/org/notes")
       :bind (:map org-roam-mode-map
-	      (("C-c n l" . org-roam)
-	       ("C-c n f" . org-roam-find-file)
-	       ("C-c n g" . org-roam-graph))
-	      :map org-mode-map
-	      (("C-c n i" . org-roam-insert))
-	      (("C-c n I" . org-roam-insert-immediate))))
+        (("C-c n l" . org-roam)
+         ("C-c n f" . org-roam-find-file)
+         ("C-c n g" . org-roam-graph))
+        :map org-mode-map
+        (("C-c n i" . org-roam-insert))
+        (("C-c n I" . org-roam-insert-immediate))))
 
 (use-package popwin
   :straight t
@@ -535,9 +570,9 @@
     :name "idiomatic-enduser"
     :command "~/src/product/activator"
     :args '("-d" "-J-Xmx2048M" "-J-XX:MaxMetaspaceSize=512M" "enduser/run"
-	    "-Dconfig.resource=enduser.matt.application.conf" "-Dhttp.port=9000"
-	    "-Duser.timezone=UTC" "-Dlogger.resource=enduser.matt.logback.xml"
-	    "-Dlogback.debug=true")
+      "-Dconfig.resource=enduser.matt.application.conf" "-Dhttp.port=9000"
+      "-Duser.timezone=UTC" "-Dlogger.resource=enduser.matt.logback.xml"
+      "-Dlogback.debug=true")
     :port 9000
     :cwd "~/src/product"
     :stop-signal 'sigkill
@@ -547,9 +582,9 @@
     :name "idiomatic-engine"
     :command "~/src/product/activator"
     :args '("-d" "-J-Xmx6000M" "-J-XX:MaxMetaspaceSize=512M" "engine/run"
-	    "-Dconfig.resource=engine.matt.application.conf" "-Dhttp.port=9000"
-	    "-Duser.timezone=UTC" "-Dlogger.resource=engine.matt.logback.xml"
-	    "-Dlogback.debug=true")
+      "-Dconfig.resource=engine.matt.application.conf" "-Dhttp.port=9000"
+      "-Duser.timezone=UTC" "-Dlogger.resource=engine.matt.logback.xml"
+      "-Dlogback.debug=true")
     :port 9000
     :cwd "~/src/product"
     :stop-signal 'sigkill
@@ -559,9 +594,9 @@
     :name "idiomatic-internal"
     :command "~/src/product/activator"
     :args '("-d" "-J-Xmx2048M" "-J-XX:MaxMetaspaceSize=512M" "internal/run"
-	    "-Dconfig.resource=internal.matt.application.conf" "-Dhttp.port=8080"
-	    "-Duser.timezone=UTC" "-Dlogger.resource=internal.matt.logback.xml"
-	    "-Dlogback.debug=true")
+      "-Dconfig.resource=internal.matt.application.conf" "-Dhttp.port=8080"
+      "-Duser.timezone=UTC" "-Dlogger.resource=internal.matt.logback.xml"
+      "-Dlogback.debug=true")
     :port 8080
     :cwd "~/src/product"
     :stop-signal 'sigkill
@@ -571,9 +606,9 @@
     :name "idiomatic-jobrunner"
     :command "~/src/product/activator"
     :args '("-d" "-J-Xmx2048M" "-J-XX:MaxMetaspaceSize=512M" "jobrunner/run"
-	    "-Dconfig.resource=jobrunner.matt.application.conf" "-Dhttp.port=9001"
-	    "-Duser.timezone=UTC" "-Dlogger.resource=jobrunner.prod.logback.xml"
-	    "-Dlogback.debug=true")
+      "-Dconfig.resource=jobrunner.matt.application.conf" "-Dhttp.port=9001"
+      "-Duser.timezone=UTC" "-Dlogger.resource=jobrunner.prod.logback.xml"
+      "-Dlogback.debug=true")
     :port 9001
     :cwd "~/src/product"
     :stop-signal 'sigkill
@@ -698,24 +733,24 @@
   "Renames both current buffer and file it's visiting to NEW-NAME."
   (interactive "sNew name: ")
   (let ((name (buffer-name))
-	(filename (buffer-file-name)))
+  (filename (buffer-file-name)))
     (if (not filename)
-	(message "Buffer '%s' is not visiting a file!" name)
+  (message "Buffer '%s' is not visiting a file!" name)
       (if (get-buffer new-name)
-	  (message "A buffer named '%s' already exists!" new-name)
-	(progn
-	  (rename-file filename new-name 1)
-	  (rename-buffer new-name)
-	  (set-visited-file-name new-name)
-	  (set-buffer-modified-p nil))))))
+    (message "A buffer named '%s' already exists!" new-name)
+  (progn
+    (rename-file filename new-name 1)
+    (rename-buffer new-name)
+    (set-visited-file-name new-name)
+    (set-buffer-modified-p nil))))))
 
 
 (defun wc (&optional start end)
   "Prints number of lines, words and characters in region or whole buffer."
   (interactive)
   (let ((n 0)
-	(start (if mark-active (region-beginning) (point-min)))
-	(end (if mark-active (region-end) (point-max))))
+  (start (if mark-active (region-beginning) (point-min)))
+  (end (if mark-active (region-end) (point-max))))
     (save-excursion
       (goto-char start)
       (while (< (point) end) (if (forward-word 1) (setq n (1+ n)))))
@@ -828,7 +863,6 @@ abort completely with `C-g'."
 (setq save-abbrevs 'silently)
 (setq-default abbrev-mode t)
 
-
 ;; Interpret mIRC-style color commands in IRC chats
 (setq erc-interpret-mirc-color t)
 
@@ -840,7 +874,7 @@ abort completely with `C-g'."
  '(ansi-color-names-vector
    ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
  '(custom-safe-themes
-   '("730a87ed3dc2bf318f3ea3626ce21fb054cd3a1471dcd59c81a4071df02cb601" "6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
+   '("58c6711a3b568437bab07a30385d34aacf64156cc5137ea20e799984f4227265" "b3775ba758e7d31f3bb849e7c9e48ff60929a792961a2d536edec8f68c671ca5" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
  '(fci-rule-color "#444a73")
  '(helm-completion-style 'emacs)
  '(helm-minibuffer-history-key "M-p")

@@ -4,3 +4,6 @@
 [submodule "spacemacs/.emacsconfig/lib/flow-minor-mode"]
 	path = spacemacs/.emacsconfig/lib/flow-minor-mode
 	url = git@github.com:an-sh/flow-minor-mode.git
+[submodule "spacemacs/.emacsconfig/lib/el-csv"]
+	path = spacemacs/.emacsconfig/lib/el-csv
+	url = git@github.com:mrc/el-csv.git
