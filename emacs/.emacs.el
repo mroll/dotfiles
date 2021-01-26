@@ -75,6 +75,9 @@
     "bs" 'sbt-start
     "bc" 'sbt-do-compile)
 
+  (bind-map-set-keys company-active-map
+    "RET" 'company-complete-selection)
+
   ;; throws an error if we don't explicitly load org-agenda
   ;; in order to define 'org-agenda-mode-map
   (require 'org-agenda)
