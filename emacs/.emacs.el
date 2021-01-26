@@ -44,6 +44,9 @@
   :after (helm helm-projectile helm-rg helm-swoop)
   :config
 
+  (bind-map-set-keys helm-rg-map
+    "C-d" 'helm-rg--set-dir)
+
   (bind-map my-base-leader-map
     :keys ("M-m")
     :evil-keys ("SPC")
@@ -59,7 +62,17 @@
     "s" 'org-schedule
     "I" 'org-clock-in
     "O" 'org-clock-out
-    "." 'org-time-stamp-inactive)
+    "." 'org-time-stamp-inactive
+    "," 'org-ctrl-c-ctrl-c)
+
+  (bind-map my-scala-mode-map
+    :keys ("M-m m")
+    :evil-keys ("SPC m" ",")
+    :major-modes (scala-mode))
+
+  (bind-map-set-keys my-scala-mode-map
+    "bs" 'sbt-do-start
+    "bc" 'sbt-do-compile)
 
   ;; throws an error if we don't explicitly load org-agenda
   ;; in order to define 'org-agenda-mode-map
@@ -74,7 +87,7 @@
     ;; Application commands
     "aoc" 'org-capture
     "aoa" 'org-agenda
-    "am"  'mu4e
+    ;; "am"  'mu4e
 
     ;; File commands
     "ff" 'helm-find-files
@@ -94,6 +107,21 @@
     "wj" 'windmove-down
     "wF" 'make-frame
     "wo" 'other-frame
+
+    ;; Workspace commands
+    "w<" 'eyebrowse-prev-window-config
+    "w>" 'eyebrowse-next-window-config
+    "w," 'eyebrowse-rename-window-config
+    "w0" 'eyebrowse-switch-to-window-config-0
+    "w1" 'eyebrowse-switch-to-window-config-1
+    "w2" 'eyebrowse-switch-to-window-config-2
+    "w3" 'eyebrowse-switch-to-window-config-3
+    "w4" 'eyebrowse-switch-to-window-config-4
+    "w5" 'eyebrowse-switch-to-window-config-5
+    "w6" 'eyebrowse-switch-to-window-config-6
+    "w7" 'eyebrowse-switch-to-window-config-7
+    "w8" 'eyebrowse-switch-to-window-config-8
+    "w9" 'eyebrowse-switch-to-window-config-9
 
     ;; Buffer commands
     "TAB" 'switch-to-last-buffer
@@ -154,7 +182,7 @@
   :after evil
   :straight t
   :custom (evil-collection-mode-list
-     '(magit calc calendar dired flycheck company ibuffer mu4e))
+     '(magit calc calendar dired flycheck company ibuffer))
   :config
   (evil-collection-init))
 
@@ -180,6 +208,11 @@
   :config
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys))
+
+(use-package eyebrowse
+  :straight t
+  :config
+  (eyebrowse-mode t))
 
 (use-package exec-path-from-shell
   :straight t
@@ -285,113 +318,129 @@
   (setq lsp-headerline-breadcrumb-enable nil))
 
 (use-package magit
-  :straight t)
-
-(use-package mu4e
-  :straight ( :host github
-              :repo "djcb/mu"
-              :branch "master"
-              :files ("mu4e/*")
-              :pre-build (("./autogen.sh") ("make")))
-  :custom   (mu4e-mu-binary (expand-file-name "mu/mu" (straight--repos-dir "mu")))
-  :hook (evil-collection-setup . (lambda (&rest a)
-           (evil-define-key 'normal mu4e-headers-mode-map
-             (kbd "a") 'mu4e-headers-mark-for-archive)))
+  :straight t
   :config
 
-  (set-face-attribute 'variable-pitch nil :height 200)
-  (set-face-attribute 'mu4e-highlight-face nil :inherit 'default)
-
-  (setq mail-user-agent 'mu4e-user-agent)
-
-  ;; default
-  (setq mu4e-maildir "~/.mail/pm")
-  (setq mu4e-drafts-folder "/Drafts")
-  (setq mu4e-sent-folder   "/Sent")
-  (setq mu4e-trash-folder  "/Trash")
-  (setq mu4e-refile-folder  "/Archive")
-
-  (setq mu4e-headers-fields
-  '( (:human-date       .   12)
-     (:flags            .    6)
-     (:mailing-list     .   10)
-     (:from             .   22)
-     (:thread-subject   .   nil)))
-
-  (setq mu4e-headers-full-search nil)
-  (setq mu4e-headers-result-limit 1000)
-  (setq message-kill-buffer-on-exit t)
-
-  (setq mu4e-view-show-images t)
-
-  ;; (mu4e-alert-set-default-style 'notifier)
-  ;; (mu4e-alert-enable-mode-line-display)
-
-  ;; This allows me to use 'helm' to select mailboxes
-  (setq mu4e-completing-read-function 'completing-read)
-  ;; Why would I want to leave my message open after I've sent it?
-  (setq message-kill-buffer-on-exit t)
-  ;; Don't ask for a 'context' upon opening mu4e
-  (setq mu4e-context-policy 'pick-first)
-  ;; Don't ask to quit... why is this the default?
-  (setq mu4e-confirm-quit nil)
-
-  (setq user-mail-address "mproll@pm.me")
-  (setq smtpmail-default-smtp-server "127.0.0.1"
-  smtpmail-smtp-server "127.0.0.1"
-  smtpmail-smtp-service 1025)
-  (setq message-send-mail-function 'smtpmail-send-it)
-
-  (setq mu4e-update-interval 300)
-  (setq mu4e-view-show-addresses 't)
-
-  (setq mu4e-get-mail-command "offlineimap -o")
-
-  (setq mu4e-maildir-shortcuts
-  '( ("/INBOX"                       . ?i)
-     ("/Sent"                        . ?s)
-     ("/Archive"                     . ?a)
-     ("/Trash"                       . ?T)
-     ("/Folders.newsletters"         . ?n)))
-
-  (setq mu4e-headers-fields
-  '( (:human-date       .   12)
-     (:flags            .    6)
-     (:mailing-list     .   10)
-     (:from             .   22)
-     (:thread-subject   .   nil)))
-
-  (setq mu4e-view-prefer-html t)
-
-  ;; Mark as read and archive
-  (add-to-list 'mu4e-marks
-         '(archive
-     :char       "A"
-     :prompt     "Archive"
-     :show-target (lambda (target) "archive")
-     :action      (lambda (docid msg target)
-        ;; must come before proc-move since retag runs
-        ;; 'sed' on the file
-        (mu4e-action-retag-message msg "-/Inbox")
-        (mu4e~proc-move docid "/Archive" "+S-u-N"))))
-
-  (mu4e~headers-defun-mark-for archive)
+  (evil-define-key 'normal with-editor-mode-map (kbd ",,") 'with-editor-finish)
+  (evil-define-key 'motion with-editor-mode-map (kbd ",,") 'with-editor-finish)
 
   )
+
+;; (use-package mu4e
+;;   :straight ( :host github
+;;               :repo "djcb/mu"
+;;               :branch "master"
+;;               :files ("mu4e/*")
+;;               :pre-build (("./autogen.sh") ("make")))
+;;   :custom   (mu4e-mu-binary (expand-file-name "mu/mu" (straight--repos-dir "mu")))
+;;   :hook (evil-collection-setup . (lambda (&rest a)
+;;            (evil-define-key 'normal mu4e-headers-mode-map
+;;              (kbd "a") 'mu4e-headers-mark-for-archive)))
+;;   :config
+
+;;   (set-face-attribute 'variable-pitch nil :height 200)
+;;   (set-face-attribute 'mu4e-highlight-face nil :inherit 'default)
+
+;;   (setq mail-user-agent 'mu4e-user-agent)
+
+;;   ;; default
+;;   (setq mu4e-maildir "~/.mail/pm")
+;;   (setq mu4e-drafts-folder "/Drafts")
+;;   (setq mu4e-sent-folder   "/Sent")
+;;   (setq mu4e-trash-folder  "/Trash")
+;;   (setq mu4e-refile-folder  "/Archive")
+
+;;   (setq mu4e-headers-fields
+;;   '( (:human-date       .   12)
+;;      (:flags            .    6)
+;;      (:mailing-list     .   10)
+;;      (:from             .   22)
+;;      (:thread-subject   .   nil)))
+
+;;   (setq mu4e-headers-full-search nil)
+;;   (setq mu4e-headers-result-limit 1000)
+;;   (setq message-kill-buffer-on-exit t)
+
+;;   (setq mu4e-view-show-images t)
+
+;;   ;; (mu4e-alert-set-default-style 'notifier)
+;;   ;; (mu4e-alert-enable-mode-line-display)
+
+;;   ;; This allows me to use 'helm' to select mailboxes
+;;   (setq mu4e-completing-read-function 'completing-read)
+;;   ;; Why would I want to leave my message open after I've sent it?
+;;   (setq message-kill-buffer-on-exit t)
+;;   ;; Don't ask for a 'context' upon opening mu4e
+;;   (setq mu4e-context-policy 'pick-first)
+;;   ;; Don't ask to quit... why is this the default?
+;;   (setq mu4e-confirm-quit nil)
+
+;;   (setq user-mail-address "mproll@pm.me")
+;;   (setq smtpmail-default-smtp-server "127.0.0.1"
+;;   smtpmail-smtp-server "127.0.0.1"
+;;   smtpmail-smtp-service 1025)
+;;   (setq message-send-mail-function 'smtpmail-send-it)
+
+;;   (setq mu4e-update-interval 300)
+;;   (setq mu4e-view-show-addresses 't)
+
+;;   (setq mu4e-get-mail-command "offlineimap -o")
+
+;;   (setq mu4e-maildir-shortcuts
+;;   '( ("/INBOX"                       . ?i)
+;;      ("/Sent"                        . ?s)
+;;      ("/Archive"                     . ?a)
+;;      ("/Trash"                       . ?T)
+;;      ("/Folders.newsletters"         . ?n)))
+
+;;   (setq mu4e-headers-fields
+;;   '( (:human-date       .   12)
+;;      (:flags            .    6)
+;;      (:mailing-list     .   10)
+;;      (:from             .   22)
+;;      (:thread-subject   .   nil)))
+
+;;   (setq mu4e-view-prefer-html t)
+
+;;   ;; Mark as read and archive
+;;   (add-to-list 'mu4e-marks
+;;          '(archive
+;;      :char       "A"
+;;      :prompt     "Archive"
+;;      :show-target (lambda (target) "archive")
+;;      :action      (lambda (docid msg target)
+;;         ;; must come before proc-move since retag runs
+;;         ;; 'sed' on the file
+;;         (mu4e-action-retag-message msg "-/Inbox")
+;;         (mu4e~proc-move docid "/Archive" "+S-u-N"))))
+
+;;   (mu4e~headers-defun-mark-for archive)
+
+;;   )
+
+;; code {
+;; 	color: #c7254e;
+;; 	background-color: #f9f2f4;
+;; 	border-radius: 4px;
+;; 	padding: 2px;
+;; 	font-family: monospace;
+;;     white-space: nowrap;
+;;     font-size: 14px;
+;; }
+
 
 (use-package org
   :straight t
   :config
   (require 'org-capture)
 
-  (setq org-agenda-files '("~/Dropbox/org/projects.org"
-         "~/Dropbox/org/next.org"))
+  (setq org-agenda-files '("~/org/idiomatic.org"))
   (setq org-hide-emphasis-markers t)
   (setq org-use-speed-commands t)
-  (setq org-directory "~/Dropbox/org")
-  (setq org-default-notes-file "~/Dropbox/org/inbox.org")
+  (setq org-directory "~/org")
+  (setq org-default-notes-file "~/org/inbox.org")
 
-  (setq matt/org-agenda-directory "~/Dropbox/org/")
+  (setq matt/org-agenda-directory "~/org/")
 
   (add-to-list 'org-capture-templates
        `("i" "inbox" entry (file ,(concat matt/org-agenda-directory "inbox.org"))
@@ -456,22 +505,17 @@
     ("CANCELLED" :foreground "gray38" :weight bold))))
 
   (setq matt/org-agenda-todo-view
-  `("." "Agenda"
-    ((agenda ""
-       ((org-agenda-span 'day)
-        (org-deadline-warning-days 365)))
-     (todo '("NEXT" "TODO")
-     ((org-agenda-overriding-header "To Refile")
-      (org-agenda-files '(,(concat matt/org-agenda-directory "inbox.org")))))
-     (todo "TODO"
-     ((org-agenda-overriding-header "Projects")
-      (org-agenda-files '(,(concat matt/org-agenda-directory "projects.org")))
-      ))
-     (todo '("NEXT" "TODO")
-     ((org-agenda-overriding-header "One-off Tasks")
-      (org-agenda-files '(,(concat matt/org-agenda-directory "next.org")))
-      (org-agenda-skip-function '(org-agenda-skip-entry-if 'deadline 'scheduled))))
-     nil)))
+	`("." "Agenda"
+	  ((agenda ""
+		   ((org-agenda-span 'day)
+		    (org-deadline-warning-days 365)))
+	   (todo "TODO"
+		 ((org-agenda-overriding-header "To Refile")
+		  (org-agenda-files '(,(concat matt/org-agenda-directory "inbox.org")))))
+	   (todo '("NEXT" "TODO")
+		 ((org-agenda-overriding-header "Idiomatic")
+		  (org-agenda-files '(,(concat matt/org-agenda-directory "idiomatic.org")))))
+	   nil)))
 
   (setq org-agenda-custom-commands `(,matt/org-agenda-todo-view))
 
@@ -535,7 +579,7 @@
       :hook
       (after-init . org-roam-mode)
       :custom
-      (org-roam-directory "~/Dropbox/org/notes")
+      (org-roam-directory "~/org/notes")
       :bind (:map org-roam-mode-map
         (("C-c n l" . org-roam)
          ("C-c n f" . org-roam-find-file)
@@ -569,7 +613,7 @@
 
   (prodigy-define-service
     :name "idiomatic-enduser"
-    :command "~/src/product/activator"
+    :command "~/bin/product/activator"
     :args '("-d" "-J-Xmx2048M" "-J-XX:MaxMetaspaceSize=512M" "enduser/run"
       "-Dconfig.resource=enduser.matt.application.conf" "-Dhttp.port=9000"
       "-Duser.timezone=UTC" "-Dlogger.resource=enduser.matt.logback.xml"
@@ -605,11 +649,7 @@
 
   (prodigy-define-service
     :name "idiomatic-jobrunner"
-    :command "~/src/product/activator"
-    :args '("-d" "-J-Xmx2048M" "-J-XX:MaxMetaspaceSize=512M" "jobrunner/run"
-      "-Dconfig.resource=jobrunner.matt.application.conf" "-Dhttp.port=9001"
-      "-Duser.timezone=UTC" "-Dlogger.resource=jobrunner.prod.logback.xml"
-      "-Dlogback.debug=true")
+    :command "~/bin/startjobrunner"
     :port 9001
     :cwd "~/src/product"
     :stop-signal 'sigkill
@@ -640,7 +680,8 @@
 (use-package scala-mode
   :straight t
   :interpreter
-  ("scala" . scala-mode))
+  ("scala" . scala-mode)
+  :hook (scala-mode . (lambda () electric-pair-mode)))
 
 (use-package smartparens
   :straight t
@@ -873,7 +914,7 @@ abort completely with `C-g'."
  '(ansi-color-names-vector
    ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
  '(custom-safe-themes
-   '("5036346b7b232c57f76e8fb72a9c0558174f87760113546d3a9838130f1cdb74" "cae81b048b8bccb7308cdcb4a91e085b3c959401e74a0f125e7c5b173b916bf9" "58c6711a3b568437bab07a30385d34aacf64156cc5137ea20e799984f4227265" "b3775ba758e7d31f3bb849e7c9e48ff60929a792961a2d536edec8f68c671ca5" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
+   '("5036346b7b232c57f76e8fb72a9c0558174f87760113546d3a9838130f1cdb74" "4f01c1df1d203787560a67c1b295423174fd49934deb5e6789abd1e61dba9552" "c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "730a87ed3dc2bf318f3ea3626ce21fb054cd3a1471dcd59c81a4071df02cb601" "6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
  '(fci-rule-color "#444a73")
  '(helm-completion-style 'emacs)
  '(helm-minibuffer-history-key "M-p")
