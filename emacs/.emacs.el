@@ -72,7 +72,7 @@
     :major-modes (scala-mode))
 
   (bind-map-set-keys my-scala-mode-map
-    "bs" 'sbt-do-start
+    "bs" 'sbt-start
     "bc" 'sbt-do-compile)
 
   ;; throws an error if we don't explicitly load org-agenda
@@ -325,9 +325,7 @@
   (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
 
   (evil-define-key 'normal with-editor-mode-map (kbd ",,") 'with-editor-finish)
-  (evil-define-key 'motion with-editor-mode-map (kbd ",,") 'with-editor-finish)
-
-  )
+  (evil-define-key 'motion with-editor-mode-map (kbd ",,") 'with-editor-finish))
 
 ;; (use-package mu4e
 ;;   :straight ( :host github
