@@ -45,7 +45,8 @@
   :config
 
   (bind-map-set-keys helm-rg-map
-    "C-d" 'helm-rg--set-dir)
+    "C-d" 'helm-rg--set-dir
+    "TAB" 'helm-execute-persistent-action)
 
   (bind-map my-base-leader-map
     :keys ("M-m")
@@ -159,7 +160,7 @@
   (bind-map-set-keys helm-find-files-map
     "C-h" 'helm-find-files-up-one-level
     "C-l" 'helm-execute-persistent-action
-    "TAB" 'helm-execute-persistent-action
+    "<tab>" 'helm-execute-persistent-action
     "C-j" 'helm-next-line
     "C-k" 'helm-previous-line))
 
@@ -320,6 +321,8 @@
 (use-package magit
   :straight t
   :config
+
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
 
   (evil-define-key 'normal with-editor-mode-map (kbd ",,") 'with-editor-finish)
   (evil-define-key 'motion with-editor-mode-map (kbd ",,") 'with-editor-finish)
