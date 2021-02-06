@@ -277,6 +277,8 @@
   :straight t
   :config
 
+  (setq helm-rg-thing-at-point nil)
+
   (defun mpr/helm-rg--set-dir ()
     "Set the directory in which to invoke ripgrep and search again."
     (interactive)
