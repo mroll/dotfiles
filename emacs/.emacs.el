@@ -78,7 +78,13 @@
     "st" 'sbt/run-testcase-at-point)
 
   (bind-map-set-keys company-active-map
-    "RET" 'company-complete-selection)
+    "C-j" 'company-select-next
+    "C-k" 'company-select-previous
+    "C-w" 'backward-kill-word)
+
+  (bind-map-set-keys company-search-map
+    "C-j" 'company-select-next
+    "C-k" 'company-select-previous)
 
   ;; throws an error if we don't explicitly load org-agenda
   ;; in order to define 'org-agenda-mode-map
@@ -135,6 +141,7 @@
     "bd"  'kill-this-buffer
     "ss"  'helm-swoop-without-pre-input
     "br"  'revert-buffer
+    "bn"  'evil-buffer-new
 
     ;; Frame commands
     "tF" 'toggle-frame-fullscreen
@@ -188,7 +195,7 @@
   :after evil
   :straight t
   :custom (evil-collection-mode-list
-     '(magit calc calendar dired flycheck company ibuffer))
+     '(magit calc calendar dired flycheck ibuffer))
   :config
   (evil-collection-init))
 
@@ -440,16 +447,21 @@
   :config
   (require 'org-capture)
 
-  (setq org-agenda-files '("~/org/idiomatic.org"))
+  (setq mpr/org-dir
+	(if (string-equal (system-name) "hogwarts.local")
+	    "~/Dropbox/org/"
+	  "~/org/"))
+
+  (setq org-agenda-files `(,mpr/org-dir))
   (setq org-hide-emphasis-markers t)
   (setq org-use-speed-commands t)
-  (setq org-directory "~/org")
-  (setq org-default-notes-file "~/org/inbox.org")
+  (setq org-directory mpr/org-dir)
+  (setq org-default-notes-file (concat mpr/org-dir "inbox.org"))
 
-  (setq matt/org-agenda-directory "~/org/")
+  (setq mpr/org-agenda-directory mpr/org-dir)
 
   (add-to-list 'org-capture-templates
-       `("i" "inbox" entry (file ,(concat matt/org-agenda-directory "inbox.org"))
+       `("i" "inbox" entry (file ,(concat mpr/org-agenda-directory "inbox.org"))
          "* TODO %?"))
 
   (setq org-log-done 'time
@@ -510,20 +522,33 @@
     ("HOLD" :foreground "magenta" :weight bold)
     ("CANCELLED" :foreground "gray38" :weight bold))))
 
-  (setq matt/org-agenda-todo-view
-	`("." "Agenda"
-	  ((agenda ""
-		   ((org-agenda-span 'day)
-		    (org-deadline-warning-days 365)))
-	   (todo "TODO"
-		 ((org-agenda-overriding-header "To Refile")
-		  (org-agenda-files '(,(concat matt/org-agenda-directory "inbox.org")))))
-	   (todo '("NEXT" "TODO")
-		 ((org-agenda-overriding-header "Idiomatic")
-		  (org-agenda-files '(,(concat matt/org-agenda-directory "idiomatic.org")))))
-	   nil)))
+  (setq mpr/org-agenda-todo-view
+	(if (string-equal (system-name) "hogwarts.local")
+	    `("." "Agenda"
+	      ((agenda ""
+		       ((org-agenda-span 'day)
+			(org-deadline-warning-days 365)))
+	       (todo "TODO"
+		     ((org-agenda-overriding-header "To Refile")
+		      (org-agenda-files '(,(concat mpr/org-agenda-directory "inbox.org")))))
+	       (todo '("NEXT" "TODO")
+		     ((org-agenda-overriding-header "Projects")
+		      (org-agenda-files '(,(concat mpr/org-agenda-directory "projects.org")))))
+	       nil))
 
-  (setq org-agenda-custom-commands `(,matt/org-agenda-todo-view))
+	  `("." "Agenda"
+	    ((agenda ""
+		     ((org-agenda-span 'day)
+		      (org-deadline-warning-days 365)))
+	     (todo "TODO"
+		   ((org-agenda-overriding-header "To Refile")
+		    (org-agenda-files '(,(concat mpr/org-agenda-directory "inbox.org")))))
+	     (todo '("NEXT" "TODO")
+		   ((org-agenda-overriding-header "Idiomatic")
+		    (org-agenda-files '(,(concat mpr/org-agenda-directory "idiomatic.org")))))
+	     nil))))
+
+  (setq org-agenda-custom-commands `(,mpr/org-agenda-todo-view))
 
   (setq org-refile-use-outline-path 'file
   org-outline-path-complete-in-steps nil)
@@ -654,6 +679,32 @@
     :command "~/bin/startjobrunner"
     :port 9001
     :cwd "~/src/product"
+    :stop-signal 'sigkill
+    :kill-process-buffer-on-stop t)
+
+  (prodigy-define-service
+    :name "storyblanks-web"
+    :command "yarn"
+    :args '("start")
+    :port 3000
+    :cwd "~/src/storyblanks/web"
+    :stop-signal 'sigkill
+    :kill-process-buffer-on-stop t)
+
+  (prodigy-define-service
+    :name "staq-live-demo"
+    :command "yarn"
+    :args '("start")
+    :port 3000
+    :cwd "~/src/staq-live-demo/"
+    :stop-signal 'sigkill
+    :kill-process-buffer-on-stop t)
+
+  (prodigy-define-service
+    :name "staqjs"
+    :command "yarn"
+    :args '("start")
+    :cwd "~/src/staq/project/client/"
     :stop-signal 'sigkill
     :kill-process-buffer-on-stop t))
 
