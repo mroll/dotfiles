@@ -72,8 +72,10 @@
     :major-modes (scala-mode))
 
   (bind-map-set-keys my-scala-mode-map
-    "bs" 'sbt-start
-    "bc" 'sbt-do-compile)
+    "ss" 'sbt-start
+    "sc" 'sbt-do-compile
+    "sT" 'sbt/run-test-file
+    "st" 'sbt/run-testcase-at-point)
 
   (bind-map-set-keys company-active-map
     "RET" 'company-complete-selection)
@@ -629,11 +631,7 @@
 
   (prodigy-define-service
     :name "idiomatic-engine"
-    :command "~/src/product/activator"
-    :args '("-d" "-J-Xmx6000M" "-J-XX:MaxMetaspaceSize=512M" "engine/run"
-      "-Dconfig.resource=engine.matt.application.conf" "-Dhttp.port=9000"
-      "-Duser.timezone=UTC" "-Dlogger.resource=engine.matt.logback.xml"
-      "-Dlogback.debug=true")
+    :command "~/bin/startengine"
     :port 9000
     :cwd "~/src/product"
     :stop-signal 'sigkill
@@ -679,7 +677,51 @@
   (substitute-key-definition
    'minibuffer-complete-word
    'self-insert-command
-   minibuffer-local-completion-map))
+   minibuffer-local-completion-map)
+
+  (ert-deftest sbt/get-testonly-file_filename_testOnlyFile ()
+    (should
+     (string= (sbt/get-testonly-file "testSpec") "testOnly *testSpec")))
+
+  (defun sbt/get-testonly-file (&optional file)
+    "Return FILE formatted in a sbt testOnly command."
+    (--> (or file (file-name-base))
+      (format "testOnly *%s" it)))
+
+  (defun sbt/run-test-file (&optional file)
+    (interactive)
+    (sbt-command (sbt/get-testonly-file file)))
+
+  (defun second (l)
+    (if l (cadr l)))
+	
+
+  (defun sbt/get-testcase-name ()
+    "Get Scala test case nearby point."
+    (save-excursion
+      (let* ((line (thing-at-point 'line t))
+	     (on-testcase-p (and (s-contains? "\"" line)
+				 (s-contains? "{\n" line)))
+	     (get-testcase-name (lambda (l)
+				  (--> l
+				    (s-split "\"" it)
+				    reverse
+				    second))))
+	(if on-testcase-p
+	    (funcall get-testcase-name line)
+	  (progn
+	    (search-backward "{\n")
+	    (funcall get-testcase-name (thing-at-point 'line t)))))))
+
+  (defun sbt/run-testcase-at-point ()
+    "Run Scala test case at point."
+    (interactive)
+    (--> (sbt/get-testonly-file)
+      (format "%s -- -z \"%s\"" it (sbt/get-testcase-name))
+      sbt-command))
+
+
+  )
 
 (use-package scala-mode
   :straight t
