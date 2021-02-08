@@ -715,6 +715,24 @@
     :kill-process-buffer-on-stop t)
 
   (prodigy-define-service
+    :name "idiomatic-engine-proxy"
+    :command "~/bin/startengine"
+    :args '("-Dhttp.proxyHost=127.0.0.1" "-Dhttp.proxyPort=8888")
+    :port 9000
+    :cwd "~/src/product"
+    :stop-signal 'sigkill
+    :kill-process-buffer-on-stop t)
+
+  (prodigy-define-service
+    :name "idiomatic-forward-proxy"
+    :command "tinyproxy"
+    :args '("-d" "-ctinyforward.conf")
+    :port 8888
+    :cwd "~/src/idiomatic-proxy/"
+    :stop-signal 'sigkill
+    :kill-process-buffer-on-stop t)
+
+  (prodigy-define-service
     :name "storyblanks-web"
     :command "yarn"
     :args '("start")
