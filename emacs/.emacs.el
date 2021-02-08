@@ -53,6 +53,10 @@
     :evil-keys ("SPC")
     :evil-states (normal motion visual))
 
+  (evil-define-key 'normal org-mode-map
+    "o" '(lambda () (interactive) (evil-org-eol-call 'always-insert-item)))
+
+
   (bind-map my-org-mode-map
     :keys ("M-m m")
     :evil-keys ("SPC m" ",")
@@ -64,7 +68,12 @@
     "I" 'org-clock-in
     "O" 'org-clock-out
     "." 'org-time-stamp-inactive
-    "," 'org-ctrl-c-ctrl-c)
+    "," 'org-ctrl-c-ctrl-c
+    "r" 'org-refile)
+
+  (require 'org-capture)
+  (bind-map-set-keys org-capture-mode-map
+    ",," 'org-capture-finalize)
 
   (bind-map my-scala-mode-map
     :keys ("M-m m")
@@ -91,7 +100,15 @@
   ;; in order to define 'org-agenda-mode-map
   (require 'org-agenda)
   (bind-map-set-keys org-agenda-mode-map
-    "R" 'org-agenda-refile)
+    "R" 'org-agenda-refile
+    "r" 'org-agenda-refile)
+
+  ;; Pull up custom agenda view w/ F1
+  (global-set-key
+    (kbd "<f1>")
+    '(lambda
+       (&optional arg) (interactive "P")(org-agenda arg ".")))
+  
 
   (bind-map-set-keys my-base-leader-map
     ;; M-x
@@ -182,7 +199,7 @@
   :init
   (global-company-mode)
   (setq company-tooltip-align-annotations t)
-  (setq company-dabbrev-downcase 0)
+  (setq company-dabbrev-downcase nil)
   (setq company-idle-delay 0))
 
 (use-package evil
@@ -220,8 +237,13 @@
   :after org
   :hook (org-mode . (lambda () evil-org-mode))
   :config
+
+  (setf evil-org-key-theme '(navigation insert textobjects additional))
+
   (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
+  (evil-org-agenda-set-keys)
+
+  )
 
 (use-package eyebrowse
   :straight t
@@ -460,12 +482,13 @@
   (setq org-use-speed-commands t)
   (setq org-directory mpr/org-dir)
   (setq org-default-notes-file (concat mpr/org-dir "inbox.org"))
+  (setq org-agenda-window-setup 'only-window)
 
   (setq mpr/org-agenda-directory mpr/org-dir)
 
   (add-to-list 'org-capture-templates
        `("i" "inbox" entry (file ,(concat mpr/org-agenda-directory "inbox.org"))
-         "* TODO %?"))
+         "* TODO %?\n  %U"))
 
   (setq org-log-done 'time
       org-log-into-drawer t
@@ -543,7 +566,7 @@
 	    ((agenda ""
 		     ((org-agenda-span 'day)
 		      (org-deadline-warning-days 365)))
-	     (todo "TODO"
+	     (todo '("NEXT" "TODO")
 		   ((org-agenda-overriding-header "To Refile")
 		    (org-agenda-files '(,(concat mpr/org-agenda-directory "inbox.org")))))
 	     (todo '("NEXT" "TODO")
@@ -554,7 +577,7 @@
   (setq org-agenda-custom-commands `(,mpr/org-agenda-todo-view))
 
   (setq org-refile-use-outline-path 'file
-  org-outline-path-complete-in-steps nil)
+	org-outline-path-complete-in-steps nil)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
   (setq org-refile-targets '(("next.org" :level . 0)
            ("idiomatic.org" :maxlevel . 5)
@@ -602,6 +625,11 @@
   (evil-define-key 'normal org-mode-map (kbd ">") 'org-demote-subtree)
   (evil-define-key 'normal org-mode-map (kbd "<") 'org-promote-subtree))
 
+(use-package org-autolist
+  :straight t
+  :config
+  (add-hook 'org-mode-hook (lambda () (org-autolist-mode))))
+
 (use-package org-bullets
   :straight t
   :config
@@ -633,6 +661,7 @@
   (add-hook 'js2-mode-hook 'prettier-js-mode)
   (add-hook 'rjsx-mode-hook 'prettier-js-mode))
 
+;; TODO: work in auto layouts https://github.com/kiwanami/emacs-window-layout
 (use-package prodigy
   :straight t
   :config
@@ -898,6 +927,15 @@
       (while (< (point) end) (if (forward-word 1) (setq n (1+ n)))))
     (message "%3d %3d %3d" (count-lines start end) n (- end start))))
 
+(defun always-insert-item ()
+  (if (not (org-in-item-p))
+      (insert "\n")
+    (org-insert-item)))
+
+(defun evil-org-eol-call (fun)
+  (end-of-line)
+  (funcall fun)
+  (evil-append nil))
 
 ;; Hooks
 ;; ------------------------
