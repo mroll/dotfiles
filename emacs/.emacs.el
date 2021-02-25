@@ -41,7 +41,7 @@
 
 (use-package bind-map
   :straight t
-  :after (helm helm-projectile helm-rg helm-swoop)
+  :after (forge helm helm-projectile helm-rg helm-swoop)
   :config
 
   (bind-map-set-keys helm-rg-map
@@ -55,7 +55,6 @@
 
   (evil-define-key 'normal org-mode-map
     "o" '(lambda () (interactive) (evil-org-eol-call 'always-insert-item)))
-
 
   (bind-map my-org-mode-map
     :keys ("M-m m")
@@ -117,7 +116,7 @@
     ;; Application commands
     "aoc" 'org-capture
     "aoa" 'org-agenda
-    ;; "am"  'mu4e
+    "am"  'mu4e
 
     ;; File commands
     "ff" 'helm-find-files
@@ -166,6 +165,7 @@
 
     ;; Project commands
     "gs"  'magit-status
+    "gr"  'mpr/refile-issue-from-project
     "pf"  'projectile-find-file
     "pp"  'projectile-switch-project
     "/"   'helm-projectile-rg
@@ -213,7 +213,7 @@
   :after evil
   :straight t
   :custom (evil-collection-mode-list
-     '(magit calc calendar dired flycheck ibuffer))
+     '(magit calc calendar dired mu4e flycheck ibuffer))
   :config
   (evil-collection-init))
 
@@ -364,97 +364,106 @@
   (evil-define-key 'normal with-editor-mode-map (kbd ",,") 'with-editor-finish)
   (evil-define-key 'motion with-editor-mode-map (kbd ",,") 'with-editor-finish))
 
-;; (use-package mu4e
-;;   :straight ( :host github
-;;               :repo "djcb/mu"
-;;               :branch "master"
-;;               :files ("mu4e/*")
-;;               :pre-build (("./autogen.sh") ("make")))
-;;   :custom   (mu4e-mu-binary (expand-file-name "mu/mu" (straight--repos-dir "mu")))
-;;   :hook (evil-collection-setup . (lambda (&rest a)
-;;            (evil-define-key 'normal mu4e-headers-mode-map
-;;              (kbd "a") 'mu4e-headers-mark-for-archive)))
-;;   :config
+(use-package forge
+  :straight t
+  :after magit
+  :config
+  (setq auth-sources '("~/.authinfo")))
 
-;;   (set-face-attribute 'variable-pitch nil :height 200)
-;;   (set-face-attribute 'mu4e-highlight-face nil :inherit 'default)
+(use-package s
+  :straight t)
 
-;;   (setq mail-user-agent 'mu4e-user-agent)
+(use-package mu4e
+  :straight ( :host github
+              :repo "djcb/mu"
+              :branch "master"
+              :files ("mu4e/*")
+              :pre-build (("./autogen.sh") ("make")))
+  :custom   (mu4e-mu-binary (expand-file-name "mu/mu" (straight--repos-dir "mu")))
+  :hook (evil-collection-setup . (lambda (&rest a)
+           (evil-define-key 'normal mu4e-headers-mode-map
+             (kbd "a") 'mu4e-headers-mark-for-archive)))
+  :config
 
-;;   ;; default
-;;   (setq mu4e-maildir "~/.mail/pm")
-;;   (setq mu4e-drafts-folder "/Drafts")
-;;   (setq mu4e-sent-folder   "/Sent")
-;;   (setq mu4e-trash-folder  "/Trash")
-;;   (setq mu4e-refile-folder  "/Archive")
+  (set-face-attribute 'variable-pitch nil :height 160)
+  (set-face-attribute 'mu4e-highlight-face nil :inherit 'default)
 
-;;   (setq mu4e-headers-fields
-;;   '( (:human-date       .   12)
-;;      (:flags            .    6)
-;;      (:mailing-list     .   10)
-;;      (:from             .   22)
-;;      (:thread-subject   .   nil)))
+  (setq mail-user-agent 'mu4e-user-agent)
 
-;;   (setq mu4e-headers-full-search nil)
-;;   (setq mu4e-headers-result-limit 1000)
-;;   (setq message-kill-buffer-on-exit t)
+  ;; default
+  (setq mu4e-maildir "~/.mail/pm")
+  (setq mu4e-drafts-folder "/Drafts")
+  (setq mu4e-sent-folder   "/Sent")
+  (setq mu4e-trash-folder  "/Trash")
+  (setq mu4e-refile-folder  "/Archive")
 
-;;   (setq mu4e-view-show-images t)
+  (setq mu4e-headers-fields
+  '( (:human-date       .   12)
+     (:flags            .    6)
+     (:mailing-list     .   10)
+     (:from             .   22)
+     (:thread-subject   .   nil)))
 
-;;   ;; (mu4e-alert-set-default-style 'notifier)
-;;   ;; (mu4e-alert-enable-mode-line-display)
+  (setq mu4e-headers-full-search nil)
+  (setq mu4e-headers-result-limit 1000)
+  (setq message-kill-buffer-on-exit t)
 
-;;   ;; This allows me to use 'helm' to select mailboxes
-;;   (setq mu4e-completing-read-function 'completing-read)
-;;   ;; Why would I want to leave my message open after I've sent it?
-;;   (setq message-kill-buffer-on-exit t)
-;;   ;; Don't ask for a 'context' upon opening mu4e
-;;   (setq mu4e-context-policy 'pick-first)
-;;   ;; Don't ask to quit... why is this the default?
-;;   (setq mu4e-confirm-quit nil)
+  (setq mu4e-view-show-images t)
 
-;;   (setq user-mail-address "mproll@pm.me")
-;;   (setq smtpmail-default-smtp-server "127.0.0.1"
-;;   smtpmail-smtp-server "127.0.0.1"
-;;   smtpmail-smtp-service 1025)
-;;   (setq message-send-mail-function 'smtpmail-send-it)
+  ;; (mu4e-alert-set-default-style 'notifier)
+  ;; (mu4e-alert-enable-mode-line-display)
 
-;;   (setq mu4e-update-interval 300)
-;;   (setq mu4e-view-show-addresses 't)
+  ;; This allows me to use 'helm' to select mailboxes
+  (setq mu4e-completing-read-function 'completing-read)
+  ;; Why would I want to leave my message open after I've sent it?
+  (setq message-kill-buffer-on-exit t)
+  ;; Don't ask for a 'context' upon opening mu4e
+  (setq mu4e-context-policy 'pick-first)
+  ;; Don't ask to quit... why is this the default?
+  (setq mu4e-confirm-quit nil)
 
-;;   (setq mu4e-get-mail-command "offlineimap -o")
+  (setq user-mail-address "mproll@pm.me")
+  (setq smtpmail-default-smtp-server "127.0.0.1"
+  smtpmail-smtp-server "127.0.0.1"
+  smtpmail-smtp-service 1025)
+  (setq message-send-mail-function 'smtpmail-send-it)
 
-;;   (setq mu4e-maildir-shortcuts
-;;   '( ("/INBOX"                       . ?i)
-;;      ("/Sent"                        . ?s)
-;;      ("/Archive"                     . ?a)
-;;      ("/Trash"                       . ?T)
-;;      ("/Folders.newsletters"         . ?n)))
+  (setq mu4e-update-interval 300)
+  (setq mu4e-view-show-addresses 't)
 
-;;   (setq mu4e-headers-fields
-;;   '( (:human-date       .   12)
-;;      (:flags            .    6)
-;;      (:mailing-list     .   10)
-;;      (:from             .   22)
-;;      (:thread-subject   .   nil)))
+  (setq mu4e-get-mail-command "offlineimap -o")
 
-;;   (setq mu4e-view-prefer-html t)
+  (setq mu4e-maildir-shortcuts
+  '( ("/INBOX"                       . ?i)
+     ("/Sent"                        . ?s)
+     ("/Archive"                     . ?a)
+     ("/Trash"                       . ?T)
+     ("/Folders.newsletters"         . ?n)))
 
-;;   ;; Mark as read and archive
-;;   (add-to-list 'mu4e-marks
-;;          '(archive
-;;      :char       "A"
-;;      :prompt     "Archive"
-;;      :show-target (lambda (target) "archive")
-;;      :action      (lambda (docid msg target)
-;;         ;; must come before proc-move since retag runs
-;;         ;; 'sed' on the file
-;;         (mu4e-action-retag-message msg "-/Inbox")
-;;         (mu4e~proc-move docid "/Archive" "+S-u-N"))))
+  (setq mu4e-headers-fields
+  '( (:human-date       .   12)
+     (:flags            .    6)
+     (:mailing-list     .   10)
+     (:from             .   22)
+     (:thread-subject   .   nil)))
 
-;;   (mu4e~headers-defun-mark-for archive)
+  (setq mu4e-view-prefer-html t)
 
-;;   )
+  ;; Mark as read and archive
+  (add-to-list 'mu4e-marks
+         '(archive
+     :char       "A"
+     :prompt     "Archive"
+     :show-target (lambda (target) "archive")
+     :action      (lambda (docid msg target)
+        ;; must come before proc-move since retag runs
+        ;; 'sed' on the file
+        (mu4e-action-retag-message msg "-/Inbox")
+        (mu4e~proc-move docid "/Archive" "+S-u-N"))))
+
+  (mu4e~headers-defun-mark-for archive)
+
+  )
 
 ;; code {
 ;; 	color: #c7254e;
@@ -471,6 +480,7 @@
   :straight t
   :config
   (require 'org-capture)
+  (require 'org-tempo)
 
   (setq mpr/org-dir
 	(if (string-equal (system-name) "hogwarts.local")
@@ -579,9 +589,9 @@
   (setq org-refile-use-outline-path 'file
 	org-outline-path-complete-in-steps nil)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
-  (setq org-refile-targets '(("next.org" :level . 0)
-           ("idiomatic.org" :maxlevel . 5)
-           ("projects.org" :maxlevel . 5)))
+  (setq org-refile-targets '(("~/org/next.org" :level . 0)
+           ("~/org/idiomatic.org" :maxlevel . 5)
+           ("~/org/projects.org" :maxlevel . 5)))
 
   (org-clock-persistence-insinuate)
 
@@ -978,11 +988,11 @@
 ;;   (set-frame-size (selected-frame) 110 98))
 
 (add-to-list
-   'default-frame-alist'(ns-transparent-titlebar . t))
-  (add-to-list
-   'default-frame-alist'(ns-appearance . light))
+ 'default-frame-alist'(ns-transparent-titlebar . t))
+(add-to-list
+ 'default-frame-alist'(ns-appearance . light))
 
-(load-theme 'doom-horizon t)
+(load-theme 'doom-plain t)
 
 (set-face-attribute 'default nil :height 140)
 
@@ -1016,6 +1026,54 @@
   (setq line-spacing 5)
   (setq global-hl-line-mode nil))
 (add-hook 'markdown-mode-hook 'writing-mode)
+
+(defun blogging-mode ()
+  (interactive)
+  (setq buffer-face-mode-face '(:family "San Francisco" :height 120))
+  (visual-line-mode)
+  (visual-fill-column-mode)
+  (setq visual-fill-column-width 100)
+  (org-indent-mode)
+  (variable-pitch-mode)
+  (auto-fill-mode -1))
+(setq org-image-actual-width nil)
+
+(defun mpr/refile-issue (issue &optional rfloc-arg)
+  (let ((rfloc (or rfloc-arg (org-refile-get-location))))
+    (with-temp-buffer
+      (org-mode)
+      (insert (format "* TODO #%s %s"
+		      (oref issue number)
+		      (oref issue title)))
+      (org-refile nil nil rfloc))))
+
+(defun mpr/refile-issues (issues)
+  (let ((rfloc (org-refile-get-location)))
+    (mapc (lambda (issue)
+	    (mpr/refile-issue issue rfloc))
+	  issues)))
+
+(defun mpr/helm-refile-issue (issues)
+  (helm :sources
+	(helm-build-sync-source "issue"
+	  :candidates
+	  (lambda ()
+	    (mapcar (lambda (issue)
+		      (cons (oref issue title) issue))
+		    issues))
+	  :action (list (cons "Refile issue" (lambda (candidate)
+					       (mpr/refile-issues
+						(helm-marked-candidates))))))
+	:buffer "*helm issues*"
+	:prompt "issue: "))
+
+(defun mpr/refile-issue-from-project ()
+  (interactive)
+  (let* ((repo (forge-get-repository
+		(forge-read-repository "Choose a repo")))
+	 (issues (forge-ls-issues repo)))
+    (mpr/helm-refile-issue issues)))
+
 
 (define-key ctl-x-map "\C-i"
   #'mpr/ispell-word-then-abbrev)
@@ -1070,7 +1128,7 @@ abort completely with `C-g'."
  '(ansi-color-names-vector
    ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
  '(custom-safe-themes
-   '("5036346b7b232c57f76e8fb72a9c0558174f87760113546d3a9838130f1cdb74" "4f01c1df1d203787560a67c1b295423174fd49934deb5e6789abd1e61dba9552" "c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "730a87ed3dc2bf318f3ea3626ce21fb054cd3a1471dcd59c81a4071df02cb601" "6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
+   '("6084dce7da6b7447dcb9f93a981284dc823bab54f801ebf8a8e362a5332d2753" "5036346b7b232c57f76e8fb72a9c0558174f87760113546d3a9838130f1cdb74" "4f01c1df1d203787560a67c1b295423174fd49934deb5e6789abd1e61dba9552" "c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "730a87ed3dc2bf318f3ea3626ce21fb054cd3a1471dcd59c81a4071df02cb601" "6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
  '(fci-rule-color "#444a73")
  '(helm-completion-style 'emacs)
  '(helm-minibuffer-history-key "M-p")
