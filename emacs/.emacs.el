@@ -107,7 +107,6 @@
     (kbd "<f1>")
     '(lambda
        (&optional arg) (interactive "P")(org-agenda arg ".")))
-  
 
   (bind-map-set-keys my-base-leader-map
     ;; M-x
@@ -1038,20 +1037,12 @@
   (auto-fill-mode -1))
 (setq org-image-actual-width nil)
 
-(defun mpr/refile-issue (issue &optional rfloc-arg)
-  (let ((rfloc (or rfloc-arg (org-refile-get-location))))
-    (with-temp-buffer
-      (org-mode)
-      (insert (format "* TODO #%s %s"
-		      (oref issue number)
-		      (oref issue title)))
-      (org-refile nil nil rfloc))))
-
-(defun mpr/refile-issues (issues)
-  (let ((rfloc (org-refile-get-location)))
-    (mapc (lambda (issue)
-	    (mpr/refile-issue issue rfloc))
-	  issues)))
+(defun mpr/refile-issue-from-project ()
+  (interactive)
+  (let* ((repo (forge-get-repository
+		(forge-read-repository "Choose a project")))
+	 (issues (forge-ls-issues repo)))
+    (mpr/helm-refile-issue issues)))
 
 (defun mpr/helm-refile-issue (issues)
   (helm :sources
@@ -1067,12 +1058,20 @@
 	:buffer "*helm issues*"
 	:prompt "issue: "))
 
-(defun mpr/refile-issue-from-project ()
-  (interactive)
-  (let* ((repo (forge-get-repository
-		(forge-read-repository "Choose a repo")))
-	 (issues (forge-ls-issues repo)))
-    (mpr/helm-refile-issue issues)))
+(defun mpr/refile-issues (issues)
+  (let ((rfloc (org-refile-get-location)))
+    (mapc (lambda (issue)
+	    (mpr/refile-issue issue rfloc))
+	  issues)))
+
+(defun mpr/refile-issue (issue &optional rfloc-arg)
+  (let ((rfloc (or rfloc-arg (org-refile-get-location))))
+    (with-temp-buffer
+      (org-mode)
+      (insert (format "* TODO #%s %s"
+		      (oref issue number)
+		      (oref issue title)))
+      (org-refile nil nil rfloc))))
 
 
 (define-key ctl-x-map "\C-i"
