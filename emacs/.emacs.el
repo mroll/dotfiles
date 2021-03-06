@@ -44,8 +44,14 @@
   :after (forge helm helm-projectile helm-rg helm-swoop)
   :config
 
+  (bind-map-set-keys yas-minor-mode-map
+    "C-i" 'yas-insert-snippet)
+
   (bind-map-set-keys helm-rg-map
     "C-d" 'helm-rg--set-dir
+    "TAB" 'helm-execute-persistent-action)
+
+  (bind-map-set-keys helm-projectile-find-file-map
     "TAB" 'helm-execute-persistent-action)
 
   (bind-map my-base-leader-map
@@ -68,11 +74,13 @@
     "O" 'org-clock-out
     "." 'org-time-stamp-inactive
     "," 'org-ctrl-c-ctrl-c
-    "r" 'org-refile)
+    "r" 'org-refile
 
-  (require 'org-capture)
-  (bind-map-set-keys org-capture-mode-map
-    ",," 'org-capture-finalize)
+    "ns" 'org-narrow-to-subtree
+    "nw" 'widen
+    )
+
+  (evil-define-key 'normal org-capture-mode-map (kbd ", ,") 'org-capture-finalize)
 
   (bind-map my-scala-mode-map
     :keys ("M-m m")
@@ -105,8 +113,9 @@
   ;; Pull up custom agenda view w/ F1
   (global-set-key
     (kbd "<f1>")
-    '(lambda
-       (&optional arg) (interactive "P")(org-agenda arg ".")))
+    '(lambda (&optional arg)
+       (interactive "P")
+       (org-agenda arg ".")))
 
   (bind-map-set-keys my-base-leader-map
     ;; M-x
@@ -199,7 +208,8 @@
   (global-company-mode)
   (setq company-tooltip-align-annotations t)
   (setq company-dabbrev-downcase nil)
-  (setq company-idle-delay 0))
+  (setq company-idle-delay 0.5)
+  (setq company-tooltip-idle-delay 0.5))
 
 (use-package evil
   :straight t
@@ -481,10 +491,7 @@
   (require 'org-capture)
   (require 'org-tempo)
 
-  (setq mpr/org-dir
-	(if (string-equal (system-name) "hogwarts.local")
-	    "~/Dropbox/org/"
-	  "~/org/"))
+  (setq mpr/org-dir "~/org/")
 
   (setq org-agenda-files `(,mpr/org-dir))
   (setq org-hide-emphasis-markers t)
@@ -898,8 +905,31 @@
 (use-package writeroom-mode
   :straight t)
 
+(use-package yasnippet
+  :straight t
+  :config
+  (yas-global-mode 1)
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets/"
+			   "~/Dropbox/dotfiles/emacs/snippets/")))
+
+(use-package yasnippet-snippets
+  :straight t)
+
+
 ;; Functions
 ;; ------------------------
+
+(defun eval-next-sexp ()
+  (interactive)
+  (save-excursion
+    (forward-sexp)
+    (eval-last-sexp nil)))
+
+(defun eval-surrounding-sexp (levels)
+  (interactive "p")
+  (save-excursion
+    (up-list (abs levels))
+    (eval-last-sexp nil)))
 
 (defun open-config-file ()
   (interactive)
@@ -973,6 +1003,8 @@
 ;; Variables
 ;; ------------------------
 
+(setq helm-input-idle-delay 0)
+
 (setq default-frame-alist '((font . "Hack")))
 
 (scroll-bar-mode -1)
@@ -991,7 +1023,7 @@
 (add-to-list
  'default-frame-alist'(ns-appearance . light))
 
-(load-theme 'doom-plain t)
+(load-theme 'doom-dracula t)
 
 (set-face-attribute 'default nil :height 140)
 
@@ -1031,7 +1063,7 @@
   (setq buffer-face-mode-face '(:family "San Francisco" :height 120))
   (visual-line-mode)
   (visual-fill-column-mode)
-  (setq visual-fill-column-width 100)
+  (setq visual-fill-column-width 80)
   (org-indent-mode)
   (variable-pitch-mode)
   (auto-fill-mode -1))
@@ -1127,7 +1159,7 @@ abort completely with `C-g'."
  '(ansi-color-names-vector
    ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
  '(custom-safe-themes
-   '("6084dce7da6b7447dcb9f93a981284dc823bab54f801ebf8a8e362a5332d2753" "5036346b7b232c57f76e8fb72a9c0558174f87760113546d3a9838130f1cdb74" "4f01c1df1d203787560a67c1b295423174fd49934deb5e6789abd1e61dba9552" "c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "730a87ed3dc2bf318f3ea3626ce21fb054cd3a1471dcd59c81a4071df02cb601" "6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
+   '("990e24b406787568c592db2b853aa65ecc2dcd08146c0d22293259d400174e37" "6084dce7da6b7447dcb9f93a981284dc823bab54f801ebf8a8e362a5332d2753" "5036346b7b232c57f76e8fb72a9c0558174f87760113546d3a9838130f1cdb74" "4f01c1df1d203787560a67c1b295423174fd49934deb5e6789abd1e61dba9552" "c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "730a87ed3dc2bf318f3ea3626ce21fb054cd3a1471dcd59c81a4071df02cb601" "6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
  '(fci-rule-color "#444a73")
  '(helm-completion-style 'emacs)
  '(helm-minibuffer-history-key "M-p")
