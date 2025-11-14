@@ -6,10 +6,108 @@
 
 ;;; Code:
 
-;; For native-comp
-(setq comp-speed 2)
-(setq comp-deferred-compilation-deny-list '("\\(?:[^z-a]*-autoloads\\.el$\\)"))
 
+;; Encoding Config
+;; ---------------
+(prefer-coding-system 'utf-8-unix)
+(set-locale-environment "en_US.UTF-8")
+(set-default-coding-systems 'utf-8-unix)
+(set-selection-coding-system 'utf-8-unix)
+(set-buffer-file-coding-system 'utf-8-unix)
+(set-clipboard-coding-system 'utf-8) ; included by set-selection-coding-system
+(set-keyboard-coding-system 'utf-8) ; configured by prefer-coding-system
+(set-terminal-coding-system 'utf-8) ; configured by prefer-coding-system
+(setq buffer-file-coding-system 'utf-8) ; utf-8-unix
+(setq save-buffer-coding-system 'utf-8-unix) ; nil
+(setq process-coding-system-alist
+  (cons '("grep" utf-8 . utf-8) process-coding-system-alist))
+
+(add-function :after after-focus-change-function
+  (defun me/garbage-collect-maybe ()
+    (unless (frame-focus-state)
+      (garbage-collect))))
+
+;; Font Config
+;; -----------
+(set-face-attribute 'default nil :height 142)
+(setq-default line-spacing .1)
+;; (set-face-attribute 'default nil :font "Jetbrains Mono")
+;; (set-frame-font "Jetbrains Mono" nil t)
+
+;; Frame Config
+;; ------------
+(add-to-list 'default-frame-alist '(height . 50))
+(add-to-list 'default-frame-alist '(width . 150))
+
+(scroll-bar-mode -1)
+(menu-bar-mode   -1)
+(tool-bar-mode   -1)
+
+(add-to-list 'default-frame-alist'(ns-transparent-titlebar . t))
+(add-to-list 'default-frame-alist'(ns-appearance . light))
+
+(setq frame-title-format nil)
+
+(when (equal system-type 'darwin)
+  (setq ns-auto-hide-menu-bar t)
+  (setq ns-use-proxy-icon nil)
+  (setq initial-frame-alist
+     (append
+      '((ns-transparent-titlebar . t)
+        (ns-appearance . light)
+        (vertical-scroll-bars . nil)
+        (internal-border-width . 0)))))
+
+
+;; Misc Emacs Config
+;; -----------------
+(server-start)
+
+(setq backup-directory-alist '(("." . "~/.emacs.d/.backups/")))
+
+(setq vc-follow-symlinks t)
+
+(setq org-image-actual-width nil)
+
+(setq save-abbrevs 'silently)
+(setq-default abbrev-mode t)
+
+;; Stop helm-org-rifle from complaining
+(setq warning-suppress-types '((emacs)))
+
+(setq ring-bell-function 'ignore)
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets) ; Show path if names are same
+(setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
+(setq adaptive-fill-first-line-regexp "^* *$")
+(setq sentence-end-double-space nil)
+(setq delete-by-moving-to-trash t)
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+(setq set-mark-command-repeat-pop t)
+(setq track-eol t)
+(setq line-move-visual nil)
+(setq-default kill-whole-line t)
+(setq-default indent-tabs-mode nil)
+(defalias 'yes-or-no-p 'y-or-n-p)
+(setq custom-safe-themes t)
+
+;; Resource Config
+;; ---------------
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024)) ;; 1mb
+(setenv "NODE_OPTIONS" "--max-old-space-size=8192")
+
+
+;; Startup Config
+;; --------------
+(setq inhibit-startup-screen t)
+(setq inhibit-startup-message t)
+(setq inhibit-startup-echo-area-message t)
+(setq initial-scratch-message nil)
+
+
+;; Straight.el Config
+;; ------------------
 (setq straight-repository-branch "develop")
 
 (defvar bootstrap-version)
@@ -26,155 +124,53 @@
   (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'use-package)
+(straight-use-package 'org)
 
-(require 'seq)
 
-;; --------------------------------------------------
-;; Ladicle (https://ladicle.com/post/config/)
-;; --------------------------------------------------
-
-;; Default Encoding
-(prefer-coding-system 'utf-8-unix)
-(set-locale-environment "en_US.UTF-8")
-(set-default-coding-systems 'utf-8-unix)
-(set-selection-coding-system 'utf-8-unix)
-(set-buffer-file-coding-system 'utf-8-unix)
-(set-clipboard-coding-system 'utf-8) ; included by set-selection-coding-system
-(set-keyboard-coding-system 'utf-8) ; configured by prefer-coding-system
-(set-terminal-coding-system 'utf-8) ; configured by prefer-coding-system
-(setq buffer-file-coding-system 'utf-8) ; utf-8-unix
-(setq save-buffer-coding-system 'utf-8-unix) ; nil
-(setq process-coding-system-alist
-  (cons '("grep" utf-8 . utf-8) process-coding-system-alist))
-
-;; Quiet Startup
-(setq inhibit-startup-screen t)
-(setq inhibit-startup-message t)
-(setq inhibit-startup-echo-area-message t)
-(setq initial-scratch-message nil)
-
-(setq frame-title-format nil)
-(setq ring-bell-function 'ignore)
-(setq uniquify-buffer-name-style 'post-forward-angle-brackets) ; Show path if names are same
-(setq adaptive-fill-regexp "[ t]+|[ t]*([0-9]+.|*+)[ t]*")
-(setq adaptive-fill-first-line-regexp "^* *$")
-(setq sentence-end "\\([。、！？]\\|……\\|[,.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
-(setq sentence-end-double-space nil)
-(setq delete-by-moving-to-trash t)    ; Deleting files go to OS's trash folder
-(setq make-backup-files nil)          ; Forbide to make backup files
-(setq auto-save-default nil)          ; Disable auto save
-(setq set-mark-command-repeat-pop t)  ; Repeating C-SPC after popping mark pops it again
-(setq track-eol t)			; Keep cursor at end of lines.
-(setq line-move-visual nil)		; To be required by track-eol
-(setq-default kill-whole-line t)	; Kill line including '\n'
-(setq-default indent-tabs-mode nil)   ; use space
-(defalias 'yes-or-no-p #'y-or-n-p)
-
-;; Automatically reload files was modified by external program
-(use-package autorevert
-  :ensure nil
-  :config
-  (global-auto-revert-mode +1)
-  (setq auto-revert-interval 2
-        auto-revert-check-vc-info t
-        global-auto-revert-non-file-buffers t
-        auto-revert-verbose nil))
-
-;; History
-(use-package saveplace
-  :ensure nil
-  :hook (after-init . save-place-mode))
-
-;; Recent files
-(use-package recentf
-  :straight t
-  :hook (after-init . recentf-mode)
-  :custom
-  (recentf-max-saved-items 20000000)
-  (recentf-auto-cleanup 'never)
-  (recentf-exclude '((expand-file-name package-user-dir)
-                     ".cache"
-                     "cache"
-                     "recentf"
-                     "COMMIT_EDITMSG\\'"))
-  :preface
-  (defun ladicle/recentf-save-list-silence ()
-    (interactive)
-    (let ((message-log-max nil))
-      (if (fboundp 'shut-up)
-          (shut-up (recentf-save-list))
-        (recentf-save-list)))
-    (message ""))
-  (defun ladicle/recentf-cleanup-silence ()
-    (interactive)
-    (let ((message-log-max nil))
-      (if shutup-p
-          (shut-up (recentf-cleanup))
-        (recentf-cleanup)))
-    (message ""))
-  :hook
-  (focus-out-hook . (ladicle/recentf-save-list-silence ladicle/recentf-cleanup-silence)))
-
-(when (equal system-type 'darwin)
-  (setq ns-auto-hide-menu-bar t)
-  (setq ns-use-proxy-icon nil)
-  (setq initial-frame-alist
-     (append
-      '((ns-transparent-titlebar . t)
-        (ns-appearance . light)
-        (vertical-scroll-bars . nil)
-        (internal-border-width . 0)))))
-
-(use-package dashboard
-  :straight t
-  :config
-  (dashboard-setup-startup-hook)
-  (setq dashboard-startup-banner 'logo
-        dashboard-banner-logo-title "Yay Evil!"
-        dashboard-items nil
-        dashboard-set-footer nil))
-
-(use-package posframe
-  :straight t)
-
-(use-package git-gutter
-  :straight t
-  :custom
-  (git-gutter:modified-sign "~")
-  (git-gutter:added-sign    "+")
-  (git-gutter:deleted-sign  "-")
-  :custom-face
-  (git-gutter:modified ((t (:foreground "#f1fa8c" :background "#f1fa8c"))))
-  (git-gutter:added    ((t (:foreground "#50fa7b" :background "#50fa7b"))))
-  (git-gutter:deleted  ((t (:foreground "#ff79c6" :background "#ff79c6"))))
-  :config
-  (global-git-gutter-mode +1))
-
-(use-package hl-line
-  :straight t
-  :hook
-  (after-init . global-hl-line-mode))
-
-(use-package highlight-indent-guides
-  :straight t
-  :diminish
-  :hook
-  ((prog-mode yaml-mode) . highlight-indent-guides-mode)
-  :custom
-  (highlight-indent-guides-auto-enabled t)
-  (highlight-indent-guides-responsive t)
-  (highlight-indent-guides-method 'character)) ; column
-
-;; --------------------------------------------------
-;; End (https://ladicle.com/post/config/)
-;; --------------------------------------------------
 
 ;; Packages
 ;; ------------------------
 
+(add-to-list 'load-path "/Users/mattroll/dotfiles/emacs/lisp/beancount-mode")
+(require 'beancount)
+(add-to-list 'auto-mode-alist '("\\.beancount\\'" . beancount-mode))
+(add-hook 'beancount-mode-hook #'outline-minor-mode)
+(define-key beancount-mode-map (kbd "C-c C-n") #'outline-next-visible-heading)
+(define-key beancount-mode-map (kbd "C-c C-p") #'outline-previous-visible-heading)
+
+
+(defun insert-beancount-investment-contribution (cash-acct cash-amount currency ticker-acct ticker-shares ticker)
+  (let* ((cash-debit (format "%s    %s %s" cash-acct cash-amount currency))
+         (cash-credit (format "%s    -%s %s" cash-acct cash-amount currency))
+         (ticker-price (format "%0.5f"(/ cash-amount ticker-shares)))
+         (ticker-debit (format "%s    %s %s {%s USD}" ticker-acct ticker-shares ticker ticker-price)))
+    (end-of-line)
+    (newline-and-indent)
+    (insert cash-debit)
+    (newline-and-indent)
+    (insert cash-credit)
+    (newline-and-indent)
+    (insert ticker-debit)))
+
+
+(defun insert-beancount-investment-contribution--mattstripe401k (cash-amount ticker-shares)
+  (interactive "nCash Amount: \nnTicker Shares: ")
+  (let ((cash-account "Assets:US:Fidelity:MattStripe401k:Cash")
+        (ticker-account "Assets:US:Fidelity:MattStripe401k:VTTSX")
+        (currency "USD")
+        (ticker "VTTSX"))
+    (insert-beancount-investment-contribution cash-account cash-amount currency ticker-account ticker-shares ticker)))
+
+
 (use-package add-node-modules-path
   :straight t
   :hook (rjsx-mode . add-node-modules-path))
+
+(use-package alert
+  :straight t
+  :commands (alert)
+  :init
+  (setq alert-default-style 'notifier))
 
 (use-package all-the-icons
   :straight t)
@@ -186,35 +182,36 @@
     (interactive)
     (ansi-color-apply-on-region (point-min) (point-max))))
 
-(use-package bind-map
+(use-package autorevert
   :straight t
-  :after (forge yasnippet)
+  :config
+  (global-auto-revert-mode 1)
+  (setq auto-revert-use-notify nil)
+  (setq auto-revert-verbose t))
+
+(use-package avy
+  :straight t
+  :config
+  (global-set-key (kbd "C-c j") 'avy-goto-char))
+
+
+(use-package general
+  :straight t
+  :after (which-key)
   :config
 
-  (bind-map-set-keys yas-minor-mode-map
-    "C-i" 'yas-insert-snippet)
+  (general-create-definer my-local-leader-def :prefix ",")
+  (general-create-definer my-leader-def :prefix "SPC")
 
-  (bind-map-set-keys helm-rg-map
-    "C-d" 'helm-rg--set-dir
-    "TAB" 'helm-execute-persistent-action)
+  ;; Org Mode
+  ;; ---
+  (defun mpr/org-open-line ()
+    (interactive)
+    (evil-org-eol-call 'always-insert-item))
 
-  (bind-map-set-keys helm-projectile-find-file-map
-    "TAB" 'helm-execute-persistent-action)
-
-  (bind-map my-base-leader-map
-    :keys ("M-m")
-    :evil-keys ("SPC")
-    :evil-states (normal motion visual))
-
-  (evil-define-key 'normal org-mode-map
-    "o" '(lambda () (interactive) (evil-org-eol-call 'always-insert-item)))
-
-  (bind-map my-org-mode-map
-    :keys ("M-m m")
-    :evil-keys ("SPC m" ",")
-    :major-modes (org-mode))
-
-  (bind-map-set-keys my-org-mode-map
+  (my-local-leader-def
+    :states 'normal
+    :keymaps 'org-mode-map
     "c" 'org-capture
     "s" 'org-schedule
     "I" 'org-clock-in
@@ -222,60 +219,107 @@
     "." 'org-time-stamp-inactive
     "," 'org-ctrl-c-ctrl-c
     "r" 'org-refile
+    "R" 'helm-org-rifle
+    "q" 'org-set-tags-command
 
     "ns" 'org-narrow-to-subtree
     "nw" 'widen
-    )
 
-  (evil-define-key 'normal org-capture-mode-map (kbd ", ,") 'org-capture-finalize)
+    "ta" 'org-roam-tag-add
+    "tk" 'org-roam-tag-remove
+    "tt" 'org-roam-buffer-toggle)
 
-  (bind-map my-scala-mode-map
-    :keys ("M-m m")
-    :evil-keys ("SPC m" ",")
-    :major-modes (scala-mode))
+  (general-define-key
+   :states 'normal
+   :keymaps 'org-mode-map
+   "o" 'mpr/org-open-line)
 
-  (bind-map-set-keys my-scala-mode-map
-    "ss" 'sbt-start
-    "sc" 'sbt-do-compile
-    "sT" 'sbt/run-test-file
-    "st" 'sbt/run-testcase-at-point)
+  (my-local-leader-def 'normal org-capture-mode-map
+    "," 'org-capture-finalize)
 
-  (bind-map-set-keys company-active-map
-    "C-j" 'company-select-next
-    "C-k" 'company-select-previous
-    "C-w" 'backward-kill-word
-    "RET" 'company-complete-selection)
-
-  (bind-map-set-keys company-search-map
-    "C-j" 'company-select-next
-    "C-k" 'company-select-previous)
-
-  ;; throws an error if we don't explicitly load org-agenda
-  ;; in order to define 'org-agenda-mode-map
-  (require 'org-agenda)
-  (bind-map-set-keys org-agenda-mode-map
+  (general-def org-agenda-mode-map
     "R" 'org-agenda-refile
     "r" 'org-agenda-refile)
 
-  ;; Pull up custom agenda view w/ F1
-  (global-set-key
-    (kbd "<f1>")
-    '(lambda (&optional arg)
-       (interactive "P")
-       (org-agenda arg ".")))
+  ;; Company Mode
+  ;; ---
+  (general-define-key
+   :keymaps '(company-active-map company-search-map)
+    "C-j" 'company-select-next
+    "C-k" 'company-select-previous)
 
-  (bind-map-set-keys my-base-leader-map
+  (general-def company-active-map
+    "C-w" 'backward-kill-word
+    "RET" 'company-complete-selection)
+
+  (general-def treemacs-mode-map
+    "SPC wm" 'windmove-right)
+
+  (general-define-key
+   :states 'insert
+   :keymaps 'vterm-mode-map
+     "C-e"     'vterm--self-insert
+     "C-f"     'vterm--self-insert
+     "C-a"     'vterm--self-insert
+     "C-v"     'vterm--self-insert
+     "C-b"     'vterm--self-insert
+     "C-w"     'vterm--self-insert
+     "C-u"     'vterm--self-insert
+     "C-d"     'vterm--self-insert
+     "C-n"     'vterm--self-insert
+     "C-m"     'vterm--self-insert
+     "C-p"     'vterm--self-insert
+     "C-j"     'vterm--self-insert
+     "C-k"     'vterm--self-insert
+     "C-r"     'vterm--self-insert
+     "C-t"     'vterm--self-insert
+     "C-g"     'vterm--self-insert
+     "C-c"     'vterm--self-insert
+     "C-SPC"   'vterm--self-insert)
+
+  (general-define-key
+   :states 'normal
+   :keymaps 'vterm-mode-map
+     "C-d"        'vterm--self-insert
+     ",c"         'multi-vterm
+     ",n"         'multi-vterm-next
+     ",p"         'multi-vterm-prev
+     "i"          'evil-insert-resume
+     "o"          'evil-insert-resume
+     "<return>"   'evil-insert-resume)
+
+  (general-define-key
+   :states 'normal
+   :keymaps 'beancount-mode-map
+     "TAB"        'beancount-tab-dwim)
+
+  ;; Global
+  ;; ---
+  (my-leader-def
+    :keymaps 'override
+    :states 'normal
+    "" '(nil :which-key "my lieutenant general prefix")
+
+    "acc" 'calc
+    "acq" 'quick-calc
+
+    "ft" 'treemacs
+    "fd" 'treemacs-select-directory
+
     "tt"   'vterm-toggle
+    "s-j"  'vterm-toggle
 
     ;; M-x
     "SPC" 'helm-M-x
 
     ;; Application commands
+    "a"   '(:ignore t :which-key "application")
     "aoc" 'org-capture
     "aoa" 'org-agenda
     ;; "am"  'mu4e
 
     ;; File commands
+    "f"   '(:ignore t :which-key "files")
     "ff"  'helm-find-files
     "fs"  'save-buffer
     "fer" 'reload-config
@@ -283,6 +327,7 @@
     "fj"  'dired-this-buffer
 
     ;; Window commands
+    "w"   '(:ignore t :which-key "window/workspace")
     "wm" 'delete-other-windows
     "wd" 'delete-window
     "ws" 'split-window-below
@@ -292,7 +337,9 @@
     "wk" 'windmove-up
     "wj" 'windmove-down
     "wF" 'make-frame
+    "wf" 'make-frame
     "wo" 'other-frame
+    "fk" 'delete-frame
 
     ;; Workspace commands
     "w<" 'eyebrowse-prev-window-config
@@ -310,8 +357,9 @@
     "w9" 'eyebrowse-switch-to-window-config-9
 
     ;; Buffer commands
+    "b"   '(:ignore t :which-key "buffer")
     "TAB" 'switch-to-last-buffer
-    "bb"  'helm-buffers-list
+    "bb"  'helm-mini
     "bd"  'kill-this-buffer
     "ss"  'helm-swoop-without-pre-input
     "br"  'revert-buffer
@@ -321,78 +369,194 @@
     "tf" 'toggle-frame-fullscreen
 
     ;; Project commands
+    "g"  '(:ignore t :which-key "git")
     "gs"  'magit-status
     "gr"  'mpr/refile-issue-from-project
-    "pf"  'projectile-find-file
+
+    "p"  '(:ignore t :which-key "project")
+    "pf"  'helm-projectile-find-file
     "pp"  'projectile-switch-project
     "/"   'helm-projectile-rg
-    "d/"  'mpr/helm-rg-from-dir
     "pv"  'projectile-run-vterm
 
+    ;; Jump commands
+    "j"  '(:ignore t :which-key "jump")
+    "jc" 'avy-goto-char
+
     ;; Service commands
+    "s"  '(:ignore t :which-key "services")
     "sm" 'prodigy
 
     ;; Syntax commands
-    "el" 'flycheck-list-errors
+    "e"  '(:ignore t :which-key "errors")
+    "el" 'flymake-show-buffer-diagnostics
 
     ;; Help
+    "h"  '(:ignore t :which-key "help")
     "hk" 'describe-key
     "hf" 'describe-function
     "hv" 'describe-variable
     "hm" 'describe-mode
 
     ;; Emacs
+    "q"  '(:ignore t :which-key "quit")
     "qq" 'save-buffers-kill-emacs
     "qr" 'restart-emacs
 
-    ;; Text
-    "zx+" 'text-scale-increase
+    ;; Notes
+    "n"  '(:ignore t :which-key "notes")
+    "nd" 'deft
+    "nf" 'org-roam-node-find
+    "ni" 'org-roam-node-insert)
+
+  (general-def helm-grep-mode-map
+    "TAB" 'helm-execute-persistent-action
+    "C-i" 'helm-execute-persistent-action
     )
 
-  (bind-map-set-keys helm-find-files-map
+  (general-def helm-find-files-map
     "C-h" 'helm-find-files-up-one-level
     "C-l" 'helm-execute-persistent-action
-    "<tab>" 'helm-execute-persistent-action
+    "TAB" 'helm-execute-persistent-action
     "C-j" 'helm-next-line
     "C-k" 'helm-previous-line)
 
-  (bind-map-for-mode-inherit my-dired-mode-map my-base-leader-map
-    :major-modes (dired-mode))
+  (general-define-key "C-;" 'comment-or-uncomment-region)
+  (general-define-key "C-c n i" 'org-roam-node-insert-immediate)
 
-  (which-key-add-keymap-based-replacements my-base-leader-map
-    "b" "buffer"
-    "e" "flycheck"
-    "f" "file"
-    "g" "git"
-    "h" "help"
-    "p" "project"
-    "q" "quit"
-    "s" "search"
-    "t" "frame"
-    "w" "window")
+  (defun mpr/agenda ()
+    (interactive)
+    (org-agenda nil "."))
 
-  (global-set-key (kbd "C-;") 'comment-or-uncomment-region)
-  )
-
-(use-package projectile
-  :straight t
-  :config
-  (projectile-mode +1))
+  (general-define-key "s-j" 'vterm-toggle)
+  (general-define-key "<f1>" 'mpr/agenda)
+  (general-define-key "<f2>" 'org-roam-dailies-goto-today))
 
 (use-package company
   :straight t
-  :after company-flow
   :init
   (global-company-mode)
+  (setq company-tooltip-limit 20)
+  (setq company-show-numbers t)
+  (setq company-idle-delay 0.1)
+  (setq company-echo-delay 0)
+
   (setq company-tooltip-align-annotations t)
   (setq company-minimum-prefix-length 2)
   (setq company-dabbrev-downcase nil)
-  (setq company-idle-delay 0.0)
   (setq company-tooltip-idle-delay 0.0)
   (setq company-tooltip-minimum-width 60)
-  (setq company-tooltip-margin 2)
+  (setq company-tooltip-margin 2))
+
+(use-package company-box
+  :straight t
+  :hook (company-mode . company-box-mode)
+  :config
+  (setq company-box-icon-right-margin 1))
+
+(use-package company-flow
+  :straight t
   :config
   (add-to-list 'company-backends 'company-flow))
+
+(use-package dashboard
+  :straight t
+  :config
+  (dashboard-setup-startup-hook)
+  (setq dashboard-startup-banner 'logo
+        dashboard-banner-logo-title "Happy Hacking :)"))
+
+(use-package deft
+  :straight t
+  :after (evil)
+  :config
+  (setq deft-default-extension "org")
+  (setq deft-directory "~/org/notes")
+  (setq deft-recursive t)
+  (setq deft-org-mode-title-prefix t)
+  (setq deft-use-filter-string-for-filename t)
+  (setq deft-auto-save-interval 0)
+
+  (setq deft-file-naming-rules
+      '((noslash . "-")
+        (nospace . "-")
+        (case-fn . downcase)))
+
+  (add-hook 'deft-mode-hook #'evil-insert-state)
+
+  (define-key deft-mode-map (kbd "C-k") 'quit-window)
+  (evil-define-key 'insert deft-mode-map (kbd "C-k") 'quit-window)
+
+  (defun mpr/deft-notes-popup ()
+    (let ((monitor-start-x (nth 1 (assq 'geometry (frame-monitor-attributes))))
+          (monitor-width (nth 3 (assq 'geometry (frame-monitor-attributes)))))
+      (make-frame-on-current-monitor '((name . "Deft Notes")
+                                       (width . 80)
+                                       (height . 50)))
+      (set-frame-position (selected-frame)
+                          (-
+                           (+ monitor-start-x monitor-width)
+                           700)
+                          50)
+      (deft)
+      (evil-insert-state))))
+
+(use-package doom-modeline
+  :straight t
+  :init
+  (line-number-mode 1)
+  (column-number-mode 1)
+
+  (setq doom-modeline-icon t)
+  (setq doom-modeline-major-mode-icon t)
+
+  (display-time-mode 1)
+  (display-battery-mode 1)
+  (setq doom-modeline-time-icon t)
+  (setq doom-modeline-time t)
+  (setq display-time-default-load-average nil)
+  (setq display-time-format "%I:%M%p    ")
+
+  (setq global-mode-string nil)
+
+  (doom-modeline-mode 1))
+
+(use-package doom-themes
+  :straight t
+  :custom
+  (doom-themes-enable-italic t)
+  (doom-themes-enable-bold t)
+  :config
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t)
+
+  (doom-themes-org-config)
+
+  (load-theme 'doom-one-light)
+  )
+
+;; (use-package eglot
+;;   :straight t
+;;   :config
+;;   (add-hook 'rjsx-mode-hook 'eglot-ensure)
+;;   (add-hook 'web-mode-hook 'eglot-ensure)
+;;   (add-hook 'js2-mode-hook 'eglot-ensure)
+;;   )
+
+(use-package elpy
+  :straight t
+  :init
+  (elpy-enable)
+
+  (when (load "flycheck" t t)
+    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+    (add-hook 'elpy-mode-hook 'flycheck-mode))
+
+  (setq python-shell-interpreter "python"
+        python-shell-interpreter-args "-i"))
+
+(use-package emacsql-sqlite3
+  :straight t)
 
 (use-package evil
   :straight t
@@ -415,27 +579,25 @@
   (evil-escape-mode)
   (setq-default evil-escape-key-sequence "kj"))
 
-(use-package evil-leader
-  :straight t
-  :config
-  (global-evil-leader-mode)
-  (evil-leader/set-leader "<SPC>")
-
-  (define-key evil-normal-state-map (kbd "C-u") 'scroll-down-half-page)
-  (define-key evil-normal-state-map (kbd "C-d") 'scroll-up-half-page))
+;; (use-package evil-leader
+;;   :straight t
+;;   :config
+;;   (global-evil-leader-mode)
+;;   (evil-leader/set-leader "<SPC>")
+;;
+;;   (define-key evil-normal-state-map (kbd "C-u") 'scroll-down-half-page)
+;;   (define-key evil-normal-state-map (kbd "C-d") 'scroll-up-half-page))
 
 (use-package evil-org
   :straight t
   :after org
   :hook (org-mode . (lambda () evil-org-mode))
   :config
+  (require 'evil-org-agenda)
 
   (setf evil-org-key-theme '(navigation insert textobjects additional))
 
-  (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys)
-
-  )
+  (evil-org-agenda-set-keys))
 
 (use-package eyebrowse
   :straight t
@@ -447,68 +609,49 @@
   :config
   (exec-path-from-shell-initialize))
 
-(use-package doom-modeline
+(use-package flow-minor-mode
   :straight t
-  :init (doom-modeline-mode 1))
+  :config
+  (add-hook 'js2-mode-hook 'flow-minor-enable-automatically)
+  (add-hook 'rjsx-mode-hook 'flow-minor-enable-automatically))
 
-(use-package doom-themes
+(use-package flymake
+  :ensure t
+  :config
+  (add-hook 'rjsx-mode-hook 'flymake-mode))
+
+(use-package fzf
+  :straight t
+  :config
+  (setq fzf/args "-x --color bw --print-query --margin=1,0 --no-hscroll"
+        fzf/executable "fzf"
+        fzf/git-grep-args "-i --line-number %s"
+        fzf/grep-command "rg --no-heading -nH"
+        fzf/position-bottom t
+        fzf/window-height 25))
+
+(use-package git-auto-commit-mode
+  :straight t
+  :config
+  (setq-default gac-automatically-add-new-files-p t)
+  (setq-default gac-automatically-push-p t)
+
+  ;; minimum 1 hour between commits
+  (setq-default gac-debounce-interval 3600))
+
+
+(use-package git-gutter
   :straight t
   :custom
-  (doom-themes-enable-italic t)
-  (doom-themes-enable-bold t)
+  (git-gutter:modified-sign "~")
+  (git-gutter:added-sign    "+")
+  (git-gutter:deleted-sign  "-")
+  :custom-face
+  (git-gutter:modified ((t (:foreground "#f1fa8c" :background "#f1fa8c"))))
+  (git-gutter:added    ((t (:foreground "#50fa7b" :background "#50fa7b"))))
+  (git-gutter:deleted  ((t (:foreground "#ff79c6" :background "#ff79c6"))))
   :config
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-     doom-themes-enable-italic t) ; if nil, italics is universally disabled
-
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config)
-  (load-theme 'doom-dracula t))
-
-;; (use-package doom-themes
-;;   :straight t
-;;   :custom
-;;   (doom-themes-enable-italic t)
-;;   (doom-themes-enable-bold t)
-;;   :custom-face
-;;   ;; (vertical-bar   (doom-darken base5 0.4))
-;;   ;; (doom-darken bg 0.4)
-;;   :config
-;;   (load-theme 'doom-dracula t)
-;;   (doom-themes-neotree-config)
-;;   (doom-themes-org-config)
-
-;;   ;; Modeline
-;;   (use-package doom-modeline
-;;     :straight t
-;;     :custom
-;;     (doom-modeline-buffer-file-name-style 'truncate-with-project)
-;;     (doom-modeline-icon t)
-;;     (doom-modeline-major-mode-icon nil)
-;;     (doom-modeline-minor-modes nil)
-;;     :hook
-;;     (after-init . doom-modeline-mode)
-;;     :config
-;;     (set-cursor-color "cyan")
-;;     (line-number-mode 1)
-;;     (column-number-mode 1)
-;;     (doom-modeline-def-modeline 'main
-;;       '(bar workspace-name window-number matches buffer-info remote-host buffer-position parrot selection-info)
-;;       '(misc-info persp-name lsp github debug minor-modes input-method major-mode process vcs checker ))))
-
-(use-package flycheck-flow
-  :straight t)
-
-(use-package company-flow
-  :straight t)
-
-(use-package flycheck
-  :straight t
- :after flycheck-flow
-  :init
-  (global-flycheck-mode)
-  (flycheck-add-mode 'javascript-flow 'flow-minor-mode)
-  (flycheck-add-mode 'javascript-eslint 'flow-minor-mode)
-  (flycheck-add-next-checker 'javascript-flow 'javascript-eslint))
+  (global-git-gutter-mode +1))
 
 (use-package helm
   :straight t
@@ -519,13 +662,26 @@
   (define-key helm-map (kbd "C-k") 'helm-previous-line)
   (define-key helm-map (kbd "M-d") 'mpr/helm-rg--set-dir)
 
+
+  (setq helm-input-idle-delay 0)
+  (setq helm-mini-default-sources '(helm-source-buffers-list
+                                    helm-source-bookmarks
+                                    helm-source-recentf
+                                    helm-source-buffer-not-found))
+
   (setq helm-split-window-in-side-p t))
+
+(use-package helm-org-rifle
+  :straight t
+  :config
+  (setq helm-org-rifle-show-path t))
 
 (use-package helm-projectile
   :straight t
   :config
   (helm-projectile-on)
 
+  (setq projectile-enable-caching t)
   (setq projectile-globally-ignored-directories '("node_modules"
                                                "target")))
 
@@ -533,47 +689,28 @@
   :straight t
   :config
 
-  (setq helm-rg-thing-at-point nil)
-
-  (defun mpr/helm-rg--set-dir ()
-    "Set the directory in which to invoke ripgrep and search again."
-    (interactive)
-    (let ((pat helm-pattern))
-      (helm-run-after-exit
-       (lambda ()
-         (let ((helm-rg--current-dir
-                (expand-file-name
-                 (projectile-complete-dir (projectile-acquire-root))
-                 (projectile-acquire-root))))
-           (helm-rg--do-helm-rg pat))))))
-
-  (defun mpr/helm-rg-from-dir ()
-    (interactive)
-    (let ((helm-rg--current-dir
-        (expand-file-name
-         (projectile-complete-dir (projectile-acquire-root))
-         (projectile-acquire-root))))
-      (helm-rg helm-pattern)))
-
-  (defun mpr/helm-rg--from-dir (dir)
-    (let ((helm-rg--current-dir dir))
-      (helm-rg helm-pattern)))
-
-  (defmacro mpr/def-rg-from-dir-fn (name dir)
-    `(defun ,name ()
-       (interactive)
-       (mpr/helm-rg--from-dir ,dir)))
-
-  (mpr/def-rg-from-dir-fn mpr/rg-from-storyblanks-web "/Users/matt/src/storyblanks/web/")
-  (mpr/def-rg-from-dir-fn mpr/rg-from-storyblanks-functions "/Users/matt/src/storyblanks/functions/"))
+  (setq helm-rg-thing-at-point nil))
 
 (use-package helm-swoop
   :straight t)
 
-(use-package whitespace
+(use-package hide-mode-line
+  :straight t)
+
+(use-package highlight-indent-guides
   :straight t
-  :ensure nil
-  :hook (before-save . whitespace-cleanup))
+  :diminish
+  :hook
+  ((prog-mode yaml-mode) . highlight-indent-guides-mode)
+  :custom
+  (highlight-indent-guides-auto-enabled t)
+  (highlight-indent-guides-responsive t)
+  (highlight-indent-guides-method 'character))
+
+(use-package hl-line
+  :straight t
+  :hook
+  (after-init . global-hl-line-mode))
 
 (use-package js2-mode
   :straight t
@@ -583,21 +720,51 @@
   (setq js2-mode-show-strict-warnings nil)
   (setq js2-basic-offset 2)
   (setq js2-strict-missing-semi-warning nil)
-  (setq js2-missing-semi-one-line-override t))
+  (setq js2-missing-semi-one-line-override t)
+
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+
+  ;; Better imenu
+  (add-hook 'js2-mode-hook #'js2-imenu-extras-mode))
+
+(use-package kaolin-themes
+  :straight t
+  :config
+  ;; (load-theme 'kaolin-mono-light t)
+  (kaolin-treemacs-theme))
+
+(use-package lsp-mode
+  :straight t
+  :commands lsp
+  :config
+  (add-hook 'ruby-mode-hook #'lsp)
+  (add-hook 'enh-ruby-mode-hook #'lsp)
+  (add-hook 'rjsx-mode-hook #'lsp)
+  (setq lsp-prefer-flymake :none)
+  (setq lsp-log-io t)
+  (setq lsp-enable-snippet nil)
+  (setq lsp-restart 'ignore))
 
 (use-package lsp-ui
   :straight t
+  :commands lsp-ui-mode
   :config
-  (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
-  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
+  (setq lsp-headerline-breadcrumb-enable nil)
+  (setq lsp-ui-peek-list-width 125)
+  (setq lsp-ui-imenu-window-width 70)
+  (setq lsp-ui-imenu-window-fix-width t)
 
-;; Failing atm due to missing tsc-dyn dependency
-;; Might be a Apple Silicon thing
-;; (use-package tree-sitter
-;;   :straight t)
+  (evil-define-key nil lsp-ui-peek-mode-map (kbd "C-j") 'lsp-ui-peek--select-next)
+  (evil-define-key nil lsp-ui-peek-mode-map (kbd "C-k") 'lsp-ui-peek--select-prev)
+  (evil-define-key nil lsp-ui-peek-mode-map (kbd "C-h") 'lsp-ui-peek--select-prev-file)
+  (evil-define-key nil lsp-ui-peek-mode-map (kbd "C-l") 'lsp-ui-peek--select-next-file))
 
-;; (use-package tree-sitter-langs
-;;   :straight t)
+(use-package company-lsp
+  :straight t
+  :commands company-lsp)
+
+(use-package lua-mode
+  :straight t)
 
 (use-package magit
   :straight t
@@ -605,150 +772,147 @@
 
   (setq magit-display-buffer-function #'magit-display-buffer-fullcolumn-most-v1)
 
+  ;; Uncomment for magit profiling
+  ;; https://jakemccrary.com/blog/2020/11/14/speeding-up-magit/
+  ;; (setq magit-refresh-verbose t)
+
+  (setq vc-handled-backends nil)
+
+  (remove-hook 'magit-status-headers-hook 'magit-insert-tags-header)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-tags-header)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-pushremote)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-upstream-or-recent)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-sequencer-sequence)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-stashes)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-upstream)
+
+
   (evil-define-key 'normal with-editor-mode-map (kbd ",,") 'with-editor-finish)
   (evil-define-key 'motion with-editor-mode-map (kbd ",,") 'with-editor-finish))
 
-(use-package forge
+(use-package magit-delta
   :straight t
-  :after magit
+  :hook (magit-mode . magit-delta-mode))
+
+(use-package multi-vterm
+  :straight t
   :config
-  (setq auth-sources '("~/.authinfo")))
+  (add-hook 'vterm-mode-hook
+            (lambda ()
+              (setq-local evil-insert-state-cursor 'box)
+              (evil-insert-state)))
+  ;; (define-key vterm-mode-map [return]                      #'vterm-send-return)
 
-(use-package s
-  :straight t)
+  ;; (setq vterm-keymap-exceptions nil)
+  )
 
-;; (use-package mu4e
-;;   :straight ( :host github
-;;               :repo "djcb/mu"
-;;               :branch "master"
-;;               :files ("mu4e/*")
-;;               :pre-build (("./autogen.sh") ("make")))
-;;   :custom   (mu4e-mu-binary (expand-file-name "mu/mu" (straight--repos-dir "mu")))
-;;   :hook (evil-collection-setup . (lambda (&rest a)
-;;            (evil-define-key 'normal mu4e-headers-mode-map
-;;              (kbd "a") 'mu4e-headers-mark-for-archive)))
-;;   :config
-;;
-;;   (set-face-attribute 'variable-pitch nil :height 160)
-;;   (set-face-attribute 'mu4e-highlight-face nil :inherit 'default)
-;;
-;;   (setq mail-user-agent 'mu4e-user-agent)
-;;
-;;   ;; default
-;;   (setq mu4e-maildir "~/.mail/pm")
-;;   (setq mu4e-drafts-folder "/Drafts")
-;;   (setq mu4e-sent-folder   "/Sent")
-;;   (setq mu4e-trash-folder  "/Trash")
-;;   (setq mu4e-refile-folder  "/Archive")
-;;
-;;   (setq mu4e-headers-fields
-;;   '( (:human-date       .   12)
-;;      (:flags            .    6)
-;;      (:mailing-list     .   10)
-;;      (:from             .   22)
-;;      (:thread-subject   .   nil)))
-;;
-;;   (setq mu4e-headers-full-search nil)
-;;   (setq mu4e-headers-result-limit 1000)
-;;   (setq message-kill-buffer-on-exit t)
-;;
-;;   (setq mu4e-view-show-images t)
-;;
-;;   ;; (mu4e-alert-set-default-style 'notifier)
-;;   ;; (mu4e-alert-enable-mode-line-display)
-;;
-;;   ;; This allows me to use 'helm' to select mailboxes
-;;   (setq mu4e-completing-read-function 'completing-read)
-;;   ;; Why would I want to leave my message open after I've sent it?
-;;   (setq message-kill-buffer-on-exit t)
-;;   ;; Don't ask for a 'context' upon opening mu4e
-;;   (setq mu4e-context-policy 'pick-first)
-;;   ;; Don't ask to quit... why is this the default?
-;;   (setq mu4e-confirm-quit nil)
-;;
-;;   (setq user-mail-address "mproll@pm.me")
-;;   (setq smtpmail-default-smtp-server "127.0.0.1"
-;;   smtpmail-smtp-server "127.0.0.1"
-;;   smtpmail-smtp-service 1025)
-;;   (setq message-send-mail-function 'smtpmail-send-it)
-;;
-;;   (setq mu4e-update-interval 300)
-;;   (setq mu4e-view-show-addresses 't)
-;;
-;;   (setq mu4e-get-mail-command "offlineimap -o")
-;;
-;;   (setq mu4e-maildir-shortcuts
-;;   '( ("/INBOX"                       . ?i)
-;;      ("/Sent"                        . ?s)
-;;      ("/Archive"                     . ?a)
-;;      ("/Trash"                       . ?T)
-;;      ("/Folders.newsletters"         . ?n)))
-;;
-;;   (setq mu4e-headers-fields
-;;   '( (:human-date       .   12)
-;;      (:flags            .    6)
-;;      (:mailing-list     .   10)
-;;      (:from             .   22)
-;;      (:thread-subject   .   nil)))
-;;
-;;   (setq mu4e-view-prefer-html t)
-;;
-;;   ;; Mark as read and archive
-;;   (add-to-list 'mu4e-marks
-;;          '(archive
-;;      :char       "A"
-;;      :prompt     "Archive"
-;;      :show-target (lambda (target) "archive")
-;;      :action      (lambda (docid msg target)
-;;         ;; must come before proc-move since retag runs
-;;         ;; 'sed' on the file
-;;         (mu4e-action-retag-message msg "-/Inbox")
-;;         (mu4e~proc-move docid "/Archive" "+S-u-N"))))
-;;
-;;   (mu4e~headers-defun-mark-for archive)
-;;
-;;   )
+(use-package org-roam
+  :straight t
+  :after (org)
+  :config
+
+  (setq org-roam-directory (expand-file-name "~/org/org-roam"))
+  (setq org-roam-database-connector 'sqlite3)
+  (setq org-roam-dailies-directory "daily/")
+
+  (setq org-roam-dailies-capture-templates
+        '(("d" "default" entry
+           "* %?"
+           :target (file+head "%<%Y-%m-%d>.org"
+                              "#+title: %<%Y-%m-%d>\n"))))
+
+  (org-roam-db-autosync-mode)
+
+  (setq org-roam-capture-templates
+        '(("d" "default" plain
+           "\n\n\n%?\n\n"
+           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t
+           )))
+
+  (add-to-list 'display-buffer-alist
+             '("\\*org-roam\\*"
+               (display-buffer-in-direction)
+               (direction . right)
+               (window-width . 0.33)
+               (window-height . fit-window-to-buffer)))
+
+  (defun org-roam-node-insert-immediate (arg &rest args)
+    (interactive "P")
+    (let ((args (cons arg args))
+          (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                    '(:immediate-finish t)))))
+      (apply #'org-roam-node-insert args))))
+
+(use-package org-roam-ui
+  :straight (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+  :after org-roam
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
 
 (use-package org
   :straight t
   :config
+  (require 'org-agenda)
   (require 'org-capture)
+  (require 'org-habit)
   (require 'org-tempo)
 
-  (setq mpr/org-dir "~/org/")
+  (require 'ob-ruby)
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((ruby . t)))
 
-  (setq org-agenda-files `(,mpr/org-dir))
+  (defun mpr/org-confirm-babel-evaluate (lang body)
+    (not (or (string= lang "ruby"))))
+  (setq org-confirm-babel-evaluate 'mpr/org-confirm-babel-evaluate)
+
+  (setq mpr/org-dir "~/org/")
+  (setq mpr/org-agenda-directory mpr/org-dir)
+
+  (setq mpr/org-agenda-files `(,(concat mpr/org-agenda-directory "life.org")
+                               ,(concat mpr/org-agenda-directory "inbox.org")
+                               ,(concat mpr/org-agenda-directory "org-roam/")
+                               ))
+  (setq org-agenda-files mpr/org-agenda-files)
   (setq org-hide-emphasis-markers t)
   (setq org-use-speed-commands t)
   (setq org-directory mpr/org-dir)
   (setq org-default-notes-file (concat mpr/org-dir "inbox.org"))
   (setq org-agenda-window-setup 'only-window)
 
-  (setq mpr/org-agenda-directory mpr/org-dir)
-
   (add-to-list 'org-capture-templates
-       `("i" "inbox" entry (file ,(concat mpr/org-agenda-directory "inbox.org"))
-         "* TODO %?\n  %U"))
+               `("i" "inbox" entry (file ,(concat mpr/org-agenda-directory "inbox.org"))
+                 "* TODO %?\n  %U"))
+  (add-to-list 'org-capture-templates
+               `("t" "tab" entry (file ,(concat mpr/org-agenda-directory "inbox.org"))
+                 "* TODO %i\n  %U\n\n  %c"))
+
+  (setq org-tag-alist (quote (("productivity" . ?p)
+                              ("research" . ?s)
+                              ("reading" . ?r)
+                              ("writing" . ?w)
+                              ("hammerspoon" . ?h)
+                              ("staff" . ?t)
+                              ("emacs" . ?e))))
 
   (setq org-log-done 'time
       org-log-into-drawer t
       org-log-state-notes-insert-after-drawers nil)
 
-  ;; Show lot of clocking history so it's easy to pick items off the C-F11 list
   (setq org-clock-history-length 23)
-  ;; Resume clocking task on clock-in if the clock is open
   (setq org-clock-in-resume t)
 
   (setq org-clock-out-remove-zero-time-clocks t)
 
   (setq org-clock-out-when-done t)
-  ;; Save the running clock and all clock history when exiting Emacs, load it on startup
   (setq org-clock-persist t)
-  ;; Do not prompt to resume an active clock
   (setq org-clock-persist-query-resume nil)
-  ;; Enable auto clock resolution for finding open clocks
   (setq org-clock-auto-clock-resolution (quote when-no-clock-is-running))
-  ;; Include current clocking task in clock reports
   (setq org-clock-report-include-clocking-task t)
 
   (setq org-clock-idle-time 5)
@@ -778,89 +942,300 @@
   (setq org-log-state-notes-insert-after-drawers nil)
 
   (setq org-todo-keywords
-  (quote ((sequence "TODO(t)" "NEXT(n)" "IN-PROGRESS(i)" "|" "DONE(d)")
-    (sequence "HOLD(h)"))))
+        (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)" "CANCELLED(c@)")
+                (sequence "WAITING(w)" "SOMEDAY(s)" "|"))))
+
+  (add-to-list 'org-modules 'org-habit t)
+  (setq org-habit-show-all-today t)
+  (setq org-habit-graph-column 60)
 
   (setq org-todo-keyword-faces
   (quote (("TODO" :foreground "orange" :weight bold)
-    ("NEXT" :foreground "#32ed5e")
+    ("NEXT" :foreground "green3" :weight bold)
     ("DONE" :foreground "gray38" :weight bold)
-    ("HOLD" :foreground "magenta" :weight bold)
+    ("WAITING" :foreground "magenta" :weight bold)
     ("CANCELLED" :foreground "gray38" :weight bold))))
 
+  (defun bh/find-project-task ()
+    (save-restriction
+      (widen)
+      (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+        (while (org-up-heading-safe)
+          (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+            (setq parent-task (point))))
+        (goto-char parent-task)
+        parent-task)))
+
+  (defun mpr/is-project-p ()
+    (and
+     (equal (org-get-todo-state) "TODO")
+     (equal (org-get-category) "project")))
+
+  (defvar bh/hide-scheduled-and-waiting-next-tasks t)
+
+  (defun bh/is-project-p ()
+    (save-restriction
+      (widen)
+      (let ((has-subtask)
+            (subtree-end (save-excursion (org-end-of-subtree t)))
+            (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+        (save-excursion
+          (forward-line 1)
+          (while (and (not has-subtask)
+                      (< (point) subtree-end)
+                      (re-search-forward "^\*+ " subtree-end t))
+            (when (member (org-get-todo-state) org-todo-keywords-1)
+              (setq has-subtask t))))
+        (and is-a-task has-subtask))))
+
+  (defun bh/is-project-subtree-p ()
+    "Any task with a todo keyword that is in a project subtree.
+Callers of this function already widen the buffer view."
+    (let ((task (save-excursion (org-back-to-heading 'invisible-ok)
+                                (point))))
+      (save-excursion
+        (bh/find-project-task)
+        (if (equal (point) task)
+            nil
+          t))))
+
+  (defun bh/is-task-p ()
+    "Any task with a todo keyword and no subtask"
+    (save-restriction
+      (widen)
+      (let ((has-subtask)
+            (subtree-end (save-excursion (org-end-of-subtree t)))
+            (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+        (save-excursion
+          (forward-line 1)
+          (while (and (not has-subtask)
+                      (< (point) subtree-end)
+                      (re-search-forward "^\*+ " subtree-end t))
+            (when (member (org-get-todo-state) org-todo-keywords-1)
+              (setq has-subtask t))))
+        (and is-a-task (not has-subtask)))))
+
+  (defun bh/is-subproject-p ()
+    "Any task which is a subtask of another project"
+    (let ((is-subproject)
+          (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+      (save-excursion
+        (while (and (not is-subproject) (org-up-heading-safe))
+          (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+            (setq is-subproject t))))
+      (and is-a-task is-subproject)))
+
+  (defun bh/skip-stuck-projects ()
+    "Skip trees that are not stuck projects"
+    (save-restriction
+      (widen)
+      (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+        (if (mpr/is-project-p)
+            (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+                   (has-next ))
+              (save-excursion
+                (forward-line 1)
+                (while (and (not has-next) (< (point) subtree-end) (re-search-forward "^\\*+ NEXT " subtree-end t))
+                  (unless (member "WAITING" (org-get-tags-at))
+                    (setq has-next t))))
+              (if has-next
+                  nil
+                next-headline))
+          nil))))
+
+  (defun bh/skip-non-stuck-projects ()
+    "Skip trees that are not stuck projects"
+    (save-restriction
+      (widen)
+      (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+        (if (mpr/is-project-p)
+            (let* ((subtree-end (save-excursion (org-end-of-subtree t)))
+                   (has-next ))
+              (save-excursion
+                (forward-line 1)
+                (while (and (not has-next) (< (point) subtree-end) (re-search-forward "^\\*+ NEXT " subtree-end t))
+                  (unless (member "WAITING" (org-get-tags-at))
+                    (setq has-next t))))
+              (if has-next
+                  next-headline
+                nil))
+          next-headline))))
+
+  (defun bh/skip-project-tasks ()
+    "Show non-project tasks.
+Skip project and sub-project tasks, habits, and project related tasks."
+    (save-restriction
+      (widen)
+      (let* ((subtree-end (save-excursion (org-end-of-subtree t))))
+        (cond
+         ((mpr/is-project-p)
+          subtree-end)
+         ((org-is-habit-p)
+          subtree-end)
+         ((bh/is-project-subtree-p)
+          subtree-end)
+         (t
+          nil)))))
+
+  (defun bh/skip-non-tasks ()
+    "Show non-project tasks.
+Skip project and sub-project tasks, habits, and project related tasks."
+    (save-restriction
+      (widen)
+      (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+        (cond
+         ((bh/is-task-p)
+          nil)
+         (t
+          next-headline)))))
+
+  (defun bh/skip-non-projects ()
+    "Skip trees that are not projects"
+    (if (save-excursion (bh/skip-non-stuck-projects))
+        (save-restriction
+          (widen)
+          (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+            (cond
+             ((mpr/is-project-p)
+              nil)
+             ((and (bh/is-project-subtree-p) (not (bh/is-task-p)))
+              nil)
+             (t
+              subtree-end))))
+      (save-excursion (org-end-of-subtree t))))
+
+  (defun mpr/skip-non-chore-tasks ()
+    (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+      (if (and (equal (org-get-category) "todo")
+               (not (equal (org-get-todo-state) "WAITING")))
+          nil
+        subtree-end)))
+
+  (defun mpr/skip-non-project-tasks ()
+    (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+      (if (and (equal (org-get-category) "project")
+               (not (equal (org-get-todo-state) "WAITING")))
+          nil
+        subtree-end)))
+
+  (setq org-agenda-tags-todo-honor-ignore-options t)
+
   (setq mpr/org-agenda-todo-view
-        (if (string-equal (system-name) "hogwarts.local")
-            `("." "Agenda"
-              ((agenda ""
-                       ((org-agenda-span 'day)
-                        (org-deadline-warning-days 365)))
-               (todo "TODO"
-                     ((org-agenda-overriding-header "To Refile")
-                      (org-agenda-files '(,(concat mpr/org-agenda-directory "inbox.org")))))
-               (todo '("NEXT" "TODO")
-                     ((org-agenda-overriding-header "Projects")
-                      (org-agenda-files '(,(concat mpr/org-agenda-directory "projects.org")))))
-               nil))
+        `("." "Agenda"
+          ((agenda ""
+                   ((org-agenda-span 'day)
+                    (org-deadline-warning-days 365)))
+           (todo "TODO"
+                 ((org-agenda-overriding-header "Refile")
+                  (org-agenda-files `(,(concat mpr/org-agenda-directory "inbox.org")))))
+           (tags-todo "-TODO=\"TODO\"-CANCELLED-WAITING"
+                      ((org-agenda-overriding-header "Project Tasks")
+                       (org-agenda-skip-function 'mpr/skip-non-project-tasks)
+                       (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
+                       (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
+                       (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
+                       (org-agenda-tag-filter '("-productivity"))
+                       (org-agenda-sorting-strategy
+                        '(category-keep))))
+           (tags-todo "-productivity-research-staff-REFILE-CANCELLED-WAITING-HOLD/!"
+                      ((org-agenda-overriding-header "Todo")
+                       (org-agenda-skip-function 'mpr/skip-non-chore-tasks)
+                       (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
+                       (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
+                       (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
+                       (org-agenda-files `(,(concat mpr/org-agenda-directory "life.org")))
+                       (org-agenda-sorting-strategy
+                        '(category-keep))))
+           (tags-todo "productivity"
+                 ((org-agenda-overriding-header "Productivity")))
+           (tags-todo "research"
+                 ((org-agenda-overriding-header "Research")))
+           (tags-todo "-WAITING-CANCELLED/!"
+                      ((org-agenda-overriding-header "Projects")
+                       (org-agenda-skip-function 'bh/skip-non-projects)
+                       (org-agenda-files `(,(concat mpr/org-agenda-directory "life.org")))
+                       (org-agenda-sorting-strategy
+                        '(category-keep))))
+           (todo "WAITING"
+                 ((org-agenda-overriding-header (concat "Waiting and Postponed Tasks"
+                                                        (if bh/hide-scheduled-and-waiting-next-tasks
+                                                            ""
+                                                          " (including WAITING and SCHEDULED tasks)")))
+                  (org-agenda-skip-function 'bh/skip-non-tasks)
+                  (org-tags-match-list-sublevels nil)
+                  (org-agenda-files `(,(concat mpr/org-agenda-directory "life.org")))
+                  (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
+                  (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)))
+           nil)))
 
-          `("." "Agenda"
-            ((agenda ""
-                     ((org-agenda-span 'day)
-                      (org-deadline-warning-days 365)))
-             (todo '("NEXT" "TODO")
-                   ((org-agenda-overriding-header "To Refile")
-                    (org-agenda-files '(,(concat mpr/org-agenda-directory "inbox.org")))))
-             (todo '("NEXT" "TODO")
-                   ((org-agenda-overriding-header "Idiomatic")
-                    (org-agenda-files '(,(concat mpr/org-agenda-directory "idiomatic.org")))))
-             nil))))
+  (setq mpr/org-agenda-month-view
+        `("m" "Month"
+          ((agenda ""
+                   ((org-agenda-span 'month)
+                    (org-deadline-warning-days 365))))))
 
-  (setq org-agenda-custom-commands `(,mpr/org-agenda-todo-view))
+  (setq org-agenda-custom-commands `(,mpr/org-agenda-todo-view
+                                     ,mpr/org-agenda-month-view))
+
+  (defun gtd-save-org-buffers ()
+    "Save `org-agenda-files' buffers without user confirmation.
+See also `org-save-all-org-buffers'"
+    (interactive)
+    (message "Saving org-agenda-files buffers...")
+    (save-some-buffers t (lambda ()
+                           (when (string-match "\.org$" (buffer-file-name))
+                             t)))
+    (message "Saving org-agenda-files buffers... done"))
+
+  (advice-add 'org-refile :after
+              (lambda (&rest _)
+                (gtd-save-org-buffers)))
+
+  (defun mpr/org-capture-tab (title url)
+    (with-temp-buffer
+      (insert url)
+      (evil-delete-whole-line (point-min) (point-max)))
+    (org-capture-string title "t")
+    (org-capture-finalize))
+
+  (setq org-adapt-indentation t)
 
   (setq org-refile-use-outline-path 'file
         org-outline-path-complete-in-steps nil)
   (setq org-refile-allow-creating-parent-nodes 'confirm)
-  (setq org-refile-targets '(("~/org/next.org" :level . 0)
-           ("~/org/idiomatic.org" :maxlevel . 5)
-           ("~/org/projects.org" :maxlevel . 5)))
+  (setq org-refile-targets '(("~/org/stripe.org" :maxlevel . 10)
+                             ("~/org/someday.org" :maxlevel . 10)
+                             ("~/org/readlater.org" :maxlevel . 10)))
 
   (org-clock-persistence-insinuate)
 
   (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
-  (defun ck/org-confirm-babel-evaluate (lang body)
-    (not (or (string= lang "latex")
-       (string= lang "tcl")
-       (string= lang "bash")
-       (string= lang "ledger")
-       (string= lang "python")
-       (string= lang "emacs-lisp")
-       (string= lang "shell")
-       (string= lang "lisp"))))
-  (setq-default org-confirm-babel-evaluate 'ck/org-confirm-babel-evaluate)
+  (defvar bh/insert-inactive-timestamp t)
 
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((R . t)
-     (ditaa . nil)
-     (dot . nil)
-     (emacs-lisp . t)
-     (gnuplot . t)
-     (haskell . t)
-     (latex . t)
-     (ledger . t)
-     (ocaml . nil)
-     (octave . nil)
-     (python . t)
-     (ruby . nil)
-     (screen . nil)
-     (shell . t)
-     (sql . nil)
-     (sqlite . nil)))
+  (defun bh/toggle-insert-inactive-timestamp ()
+    (interactive)
+    (setq bh/insert-inactive-timestamp (not bh/insert-inactive-timestamp))
+    (message "Heading timestamps are %s" (if bh/insert-inactive-timestamp "ON" "OFF")))
+
+  (defun bh/insert-inactive-timestamp ()
+    (interactive)
+    (org-insert-time-stamp nil t t nil nil nil))
+
+  (defun bh/insert-heading-inactive-timestamp ()
+    (save-excursion
+      (when bh/insert-inactive-timestamp
+        (org-return)
+        (org-cycle)
+        (bh/insert-inactive-timestamp))))
+
+  (add-hook 'org-insert-heading-hook 'bh/insert-heading-inactive-timestamp 'append)
 
   (evil-define-key 'normal org-mode-map "t" 'org-todo)
 
   (evil-define-key 'normal org-mode-map (kbd "SPC h i") 'org-insert-heading)
   (evil-define-key 'normal org-mode-map (kbd "SPC h s") 'org-insert-subheading)
+  (evil-define-key 'normal org-mode-map (kbd "TAB") 'org-cycle)
 
   (evil-define-key 'normal org-mode-map (kbd ">") 'org-demote-subtree)
   (evil-define-key 'normal org-mode-map (kbd "<") 'org-promote-subtree))
@@ -875,127 +1250,43 @@
   :config
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
-;; (use-package org-roam
-;;       :straight t
-;;       :ensure t
-;;       :hook
-;;       (after-init . org-roam-mode)
-;;       :custom
-;;       (org-roam-directory "~/org/notes")
-;;       :bind (:map org-roam-mode-map
-;;         (("C-c n l" . org-roam)
-;;          ("C-c n f" . org-roam-find-file)
-(use-package add-node-modules-path
-  :straight t
-  :hook (rjsx-mode . add-node-modules-path))
-
-(use-package company
-  :straight t
-  :after company-flow
-  :init
-  (global-company-mode)
-  (setq company-tooltip-align-annotations t)
-  (setq company-dabbrev-downcase nil)
-  (setq company-idle-delay 0.0)
-  (setq company-tooltip-idle-delay 0.5)
-  :config
-  (add-to-list 'company-backends 'company-flow))
-
-(use-package flycheck
-  :straight t
-  :after flycheck-flow
-  :init
-  (global-flycheck-mode)
-  (flycheck-add-mode 'javascript-flow 'flow-minor-mode)
-  (flycheck-add-mode 'javascript-eslint 'flow-minor-mode)
-  (flycheck-add-next-checker 'javascript-flow 'javascript-eslint))
-
-(use-package lsp-mode
-  :straight t
-  :hook
-  (js2-mode . lsp)
-  (rjsx-mode . lsp)
-  :config
-  (setq lsp-headerline-breadcrumb-enable nil))
-
-(use-package prettier-js
-  :straight t
-  :config
-  (add-hook 'js2-mode-hook 'prettier-js-mode)
-  (add-hook 'rjsx-mode-hook 'prettier-js-mode)
-  (add-hook 'typescript-mode 'prettier-js-mode)
-  (add-hook 'tide-mode 'prettier-js-mode))
-
-(use-package rjsx-mode
-  :straight t
-  :mode ("\\.jsx\\'" "\\.tsx\\'"))
-
 (use-package paren
   :ensure nil
   :init (setq show-paren-delay 0)
   :config (show-paren-mode +1))
 
-(use-package smartparens
-  :straight t
-  :hook
-  (after-init . smartparens-global-mode)
-  :config
-  (require 'smartparens-config)
-  (sp-pair "=" "=" :actions '(wrap))
-  (sp-pair "+" "+" :actions '(wrap))
-  (sp-pair "<" ">" :actions '(wrap))
-  (sp-pair "$" "$" :actions '(wrap)))
-
-(use-package tide
+(use-package parrot
   :straight t
   :config
-  (defun setup-tide-mode ()
-    (interactive)
-    (tide-setup)
-    (flycheck-mode +1)
-    (setq flycheck-check-syntax-automatically '(save mode-enabled))
-    (eldoc-mode +1)
-    (tide-hl-identifier-mode +1)
-    (company-mode +1))
+  (parrot-mode))
 
-  (add-hook 'typescript-mode-hook #'setup-tide-mode)
-  (add-hook 'rjsx-mode-hook
-            (lambda ()
-              (when (string-equal "tsx" (file-name-extension buffer-file-name))
-                (setup-tide-mode))))
+;; (use-package persp-projectile
+;;   :straight t)
 
-  ;; enable typescript-tslint checker
-  (flycheck-add-mode 'typescript-tslint 'web-mode)
-  )
-
-;; (use-package typescript-mode
+;; (use-package perspective
 ;;   :straight t
-;;   (add-hook 'typescript-mode #'smartparens-mode))
-
-(use-package web-mode
-  :straight t
-  :config
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-
-  (defun my-web-mode-hook ()
-    "Hooks for Web mode."
-    (setq web-mode-markup-indent-offset 2)
-    (setq web-mode-code-indent-offset 2)
-    (setq web-mode-css-indent-offset 2))
-  (add-hook 'web-mode-hook  'my-web-mode-hook))
+;;   :config
+;;   (setq persp-mode-prefix-key (kbd "C-x x"))
+;;   (persp-mode))
 
 (use-package popwin
   :straight t
   :config
   (popwin-mode 1))
 
-(use-package flow-minor-mode
+(use-package prettier-js
   :straight t
-  :config
-  (add-hook 'js2-mode-hook 'flow-minor-enable-automatically)
-  (add-hook 'rjsx-mode-hook 'flow-minor-enable-automatically))
+  :init
 
-;; TODO: work in auto layouts https://github.com/kiwanami/emacs-window-layout
+  (defun enable-minor-mode (my-pair)
+    (if (buffer-file-name)
+        (if (string-match (car my-pair) buffer-file-name)
+            (funcall (cdr my-pair)))))
+
+  (add-hook 'web-mode-hook #'(lambda () (enable-minor-mode '("\\.jsx?\\'" . prettier-js-mode))))
+  (add-hook 'typescript-mode-hook #'(lambda () (enable-minor-mode '("\\.tsx?\\'" . prettier-js-mode))))
+  (add-hook 'rjsx-mode-hook #'(lambda () (enable-minor-mode '("\\.tsx?\\'" . prettier-js-mode)))))
+
 (use-package prodigy
   :straight t
   :config
@@ -1007,8 +1298,6 @@
   (evil-define-key 'normal prodigy-mode-map (kbd "d") 'prodigy-display-process)
 
   (evil-define-key 'normal prodigy-view-mode-map (kbd "q") 'quit-window)
-
-
   (prodigy-define-service
     :name "canopy-charts-lib"
     :command "npx"
@@ -1056,9 +1345,43 @@
   )
 
 (use-package projectile
-  :straight t
+  :init
+  (setq projectile-indexing-method 'alien)
+  (setq projectile-use-git-grep t)
+  (setq projectile-tags-command "/usr/local/bin/ctags --exclude=node_modules --exclude=admin --exclude=.git --exclude=frontend --exclude=home --exclude=**/*.js -Re -f \"%s\" %s")
+
   :config
-  (projectile-mode +1))
+  (projectile-global-mode))
+
+(use-package recentf
+  :straight t
+  :hook (after-init . recentf-mode)
+  :custom
+  (recentf-max-saved-items 20000000)
+  (recentf-auto-cleanup 'never)
+  (recentf-exclude '((expand-file-name package-user-dir)
+                     ".cache"
+                     "cache"
+                     "recentf"
+                     "COMMIT_EDITMSG\\'"))
+  :preface
+  (defun ladicle/recentf-save-list-silence ()
+    (interactive)
+    (let ((message-log-max nil))
+      (if (fboundp 'shut-up)
+          (shut-up (recentf-save-list))
+        (recentf-save-list)))
+    (message ""))
+
+  (defun ladicle/recentf-cleanup-silence ()
+    (interactive)
+    (let ((message-log-max nil))
+      (if shutup-p
+          (shut-up (recentf-cleanup))
+        (recentf-cleanup)))
+    (message ""))
+  :hook
+  (focus-out-hook . (ladicle/recentf-save-list-silence ladicle/recentf-cleanup-silence)))
 
 (use-package restart-emacs
   :straight t)
@@ -1067,109 +1390,184 @@
   :straight t
   :mode ("\\.jsx\\'" "\\.tsx\\'"))
 
-(use-package sbt-mode
-  :straight t
-  :commands sbt-start sbt-command
+(use-package ruby-mode
   :config
-  ;; WORKAROUND: allows using SPACE when in the minibuffer
-  (substitute-key-definition
-   'minibuffer-complete-word
-   'self-insert-command
-   minibuffer-local-completion-map)
+  (defun my-ruby-mode-hook ()
+    (set-fill-column 80)
+    (add-hook 'before-save-hook 'delete-trailing-whitespace nil 'local)
+    (setq ruby-insert-encoding-magic-comment nil))
+  (add-hook 'ruby-mode-hook 'my-ruby-mode-hook))
 
-  (ert-deftest sbt/get-testonly-file_filename_testOnlyFile ()
-    (should
-     (string= (sbt/get-testonly-file "testSpec") "testOnly *testSpec")))
+(use-package s
+  :straight t)
 
-  (defun sbt/get-testonly-file (&optional file)
-    "Return FILE formatted in a sbt testOnly command."
-    (--> (or file (file-name-base))
-      (format "testOnly *%s" it)))
+(use-package saveplace
+  :ensure nil
+  :hook (after-init . save-place-mode))
 
-  (defun sbt/run-test-file (&optional file)
-    (interactive)
-    (sbt-command (sbt/get-testonly-file file)))
-
-  (defun second (l)
-    (if l (cadr l)))
-
-
-  (defun sbt/get-testcase-name ()
-    "Get Scala test case nearby point."
-    (save-excursion
-      (let* ((line (thing-at-point 'line t))
-             (on-testcase-p (and (s-contains? "\"" line)
-                                 (s-contains? "{\n" line)))
-             (get-testcase-name (lambda (l)
-                                  (--> l
-                                    (s-split "\"" it)
-                                    reverse
-                                    second))))
-        (if on-testcase-p
-            (funcall get-testcase-name line)
-          (progn
-            (search-backward "{\n")
-            (funcall get-testcase-name (thing-at-point 'line t)))))))
-
-  (defun sbt/run-testcase-at-point ()
-    "Run Scala test case at point."
-    (interactive)
-    (--> (sbt/get-testonly-file)
-      (format "%s -- -z \"%s\"" it (sbt/get-testcase-name))
-      sbt-command))
-
-
-  )
-
-(use-package scala-mode
+(use-package slack
   :straight t
-  :interpreter
-  ("scala" . scala-mode)
-  :hook (scala-mode . (lambda () electric-pair-mode)))
+  :commands (slack-start)
+  :init
+  (setq slack-buffer-emojify t)
+  (setq slack-prefer-current-team t)
+  :config
+
+  (slack-register-team
+   :name "czitechnologies"
+   :default t
+   :token "xoxc-1824813693126-1844217614177-4654612160754-2dd86b9fb4868c49d747e67f41c9f6db7c10962c9670a870a86274ff686428fd"
+   :cookie "xoxd-fQhIPvOTwWwZofGX6lFJydGg6S8Hea0wVIolnqxvISJEx4XUUF7C%2BJNITfOIZ5rHPx83zqzQKTZHsABNQkYcPX0%2BMfa8Kb6yi7FxWwTn44EqoX6xjdIPNP%2FihZDOiFoB2LUPB%2BcPvOjEygxjshy0Nt2Au8PfHvIWYa4fM0OhQVuD0cDVJF2kWtWHmA%3D%3D"
+   :subscribed-channels '(general)
+   :full-and-display-names t)
+
+  (evil-define-key 'normal slack-info-mode-map
+    ",u" 'slack-room-update-messages)
+  (evil-define-key 'normal slack-mode-map
+    ",c" 'slack-buffer-kill
+    ",ra" 'slack-message-add-reaction
+    ",rr" 'slack-message-remove-reaction
+    ",rs" 'slack-message-show-reaction-users
+    ",pl" 'slack-room-pins-list
+    ",pa" 'slack-message-pins-add
+    ",pr" 'slack-message-pins-remove
+    ",mm" 'slack-message-write-another-buffer
+    ",me" 'slack-message-edit
+    ",md" 'slack-message-delete
+    ",u" 'slack-room-update-messages
+    ",2" 'slack-message-embed-mention
+    ",3" 'slack-message-embed-channel
+    "\C-n" 'slack-buffer-goto-next-message
+    "\C-p" 'slack-buffer-goto-prev-message)
+  (evil-define-key 'normal slack-edit-message-mode-map
+    ",k" 'slack-message-cancel-edit
+    ",s" 'slack-message-send-from-buffer
+    ",2" 'slack-message-embed-mention
+    ",3" 'slack-message-embed-channel))
 
 (use-package smartparens
   :straight t
+  :init
+  (require 'smartparens-config)
+  :hook
+  (after-init . smartparens-global-mode)
   :config
-  (add-hook 'js-mode-hook #'smartparens-mode)
-  (add-hook 'scala-mode-hook #'smartparens-mode))
+  (sp-pair "=" "=" :actions '(wrap))
+  (sp-pair "+" "+" :actions '(wrap))
+  (sp-pair "<" ">" :actions '(wrap))
+  (sp-pair "$" "$" :actions '(wrap)))
 
-(use-package sublime-themes
+(use-package terraform-mode
+  :straight t)
+
+(use-package treemacs
   :straight t
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
   :config
-  (add-to-list 'custom-theme-load-path "~/.emacs.d/themes"))
+  (progn
+    (setq treemacs-collapse-dirs                   (if treemacs-python-executable 3 0)
+          treemacs-deferred-git-apply-delay        0.5
+          treemacs-directory-name-transformer      #'identity
+          treemacs-display-in-side-window          t
+          treemacs-eldoc-display                   'simple
+          treemacs-file-event-delay                5000
+          treemacs-file-extension-regex            treemacs-last-period-regex-value
+          treemacs-file-follow-delay               0.2
+          treemacs-file-name-transformer           #'identity
+          treemacs-follow-after-init               t
+          treemacs-expand-after-init               t
+          treemacs-find-workspace-method           'find-for-file-or-pick-first
+          treemacs-git-command-pipe                ""
+          treemacs-goto-tag-strategy               'refetch-index
+          treemacs-header-scroll-indicators        '(nil . "^^^^^^")
+          treemacs-hide-dot-git-directory          t
+          treemacs-indentation                     2
+          treemacs-indentation-string              " "
+          treemacs-is-never-other-window           nil
+          treemacs-max-git-entries                 5000
+          treemacs-missing-project-action          'ask
+          treemacs-move-forward-on-expand          nil
+          treemacs-no-png-images                   nil
+          treemacs-no-delete-other-windows         t
+          treemacs-project-follow-cleanup          nil
+          treemacs-persist-file                    (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-position                        'left
+          treemacs-read-string-input               'from-child-frame
+          treemacs-recenter-distance               0.1
+          treemacs-recenter-after-file-follow      nil
+          treemacs-recenter-after-tag-follow       nil
+          treemacs-recenter-after-project-jump     'always
+          treemacs-recenter-after-project-expand   'on-distance
+          treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
+          treemacs-show-cursor                     nil
+          treemacs-show-hidden-files               t
+          treemacs-silent-filewatch                nil
+          treemacs-silent-refresh                  nil
+          treemacs-sorting                         'alphabetic-asc
+          treemacs-select-when-already-in-treemacs 'move-back
+          treemacs-space-between-root-nodes        t
+          treemacs-tag-follow-cleanup              t
+          treemacs-tag-follow-delay                1.5
+          treemacs-text-scale                      nil
+          treemacs-user-mode-line-format           nil
+          treemacs-user-header-line-format         nil
+          treemacs-wide-toggle-width               100
+          treemacs-width                           50
+          treemacs-width-increment                 1
+          treemacs-width-is-initially-locked       t
+          treemacs-workspace-switch-cleanup        nil)
 
-;; this is cute but it gets in the way of minibuffer messages
-;; (use-package symon
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode 'always)
+    (when treemacs-python-executable
+      (treemacs-git-commit-diff-mode t))
+
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
+
+    (treemacs-hide-gitignored-files-mode nil))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t d"   . treemacs-select-directory)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+(use-package treemacs-evil
+  :straight t
+  :after (treemacs evil))
+
+(use-package treemacs-projectile
+  :straight t
+  :after (treemacs projectile))
+
+(use-package treemacs-icons-dired
+  :straight t
+  :hook (dired-mode . treemacs-icons-dired-enable-once))
+
+(use-package treemacs-magit
+  :straight t
+  :after (treemacs magit))
+
+;; (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
 ;;   :straight t
-;;   :config
-;;   (symon-mode))
-
-
-(use-package tide
-  :straight t
-  :config
-  (defun setup-tide-mode ()
-    (interactive)
-    (tide-setup)
-    (flycheck-mode +1)
-    (setq flycheck-check-syntax-automatically '(save mode-enabled))
-    (eldoc-mode +1)
-    (tide-hl-identifier-mode +1)
-    (company-mode +1))
-
-  ;; formats the buffer before saving
-  ;; (add-hook 'before-save-hook 'tide-format-before-save)
-
-  (add-hook 'typescript-mode-hook #'setup-tide-mode)
-  ;; (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
-  (add-hook 'rjsx-mode-hook
-            (lambda ()
-              (when (string-equal "tsx" (file-name-extension buffer-file-name))
-                (setup-tide-mode))))
-
-  ;; enable typescript-tslint checker
-  (flycheck-add-mode 'typescript-tslint 'web-mode)
-  )
+;;   :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+;;   :config (treemacs-set-scope-type 'Perspectives))
 
 (use-package typescript-mode
   :straight t)
@@ -1178,125 +1576,64 @@
   :straight t
   :config
   (global-undo-tree-mode)
-  (evil-set-undo-system 'undo-tree))
+  (evil-set-undo-system 'undo-tree)
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo"))))
 
 (use-package vterm
   :straight t)
 
-(use-package multi-vterm
-  :straight t
-  :config
-  (add-hook 'vterm-mode-hook
-            (lambda ()
-              (setq-local evil-insert-state-cursor 'box)
-              (evil-insert-state)))
-  (define-key vterm-mode-map [return]                      #'vterm-send-return)
-
-  (setq vterm-keymap-exceptions nil)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-e")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-f")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-a")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-v")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-b")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-w")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-u")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-n")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-m")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-p")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-j")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-k")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-r")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-t")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-g")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-c")      #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "C-SPC")    #'vterm--self-insert)
-  (evil-define-key 'insert vterm-mode-map (kbd "TAB")      #'vterm--self-insert)
-  (evil-define-key 'normal vterm-mode-map (kbd "C-d")      #'vterm--self-insert)
-  (evil-define-key 'normal vterm-mode-map (kbd ",c")       #'multi-vterm)
-  (evil-define-key 'normal vterm-mode-map (kbd ",n")       #'multi-vterm-next)
-  (evil-define-key 'normal vterm-mode-map (kbd ",p")       #'multi-vterm-prev)
-  (evil-define-key 'normal vterm-mode-map (kbd "i")        #'evil-insert-resume)
-  (evil-define-key 'normal vterm-mode-map (kbd "o")        #'evil-insert-resume)
-  (evil-define-key 'normal vterm-mode-map (kbd "<return>") #'evil-insert-resume)
-
-
-  (global-set-key (kbd "C-v") 'vterm-yank)
-  (evil-define-key 'normal vterm-mode-map "P" 'vterm-yank)
-  (evil-define-key 'normal vterm-mode-map "p" 'vterm-yank))
-
 (use-package vterm-toggle
-  :straight t
-  :config
-  (define-key vterm-mode-map [(control return)]   #'vterm-toggle-insert-cd)
-  (setq vterm-toggle-fullscreen-p nil)
-  (add-to-list 'display-buffer-alist
-               '((lambda(bufname _) (with-current-buffer bufname (equal major-mode 'vterm-mode)))
-                 (display-buffer-reuse-window display-buffer-at-bottom)
-                 ;;(display-buffer-reuse-window display-buffer-in-direction)
-                 ;;display-buffer-in-direction/direction/dedicated is added in emacs27
-                 ;;(direction . bottom)
-                 ;;(dedicated . t) ;dedicated is supported in emacs27
-                 (reusable-frames . visible)
-                 (window-height . 0.3))))
+  :straight t)
 
 (use-package web-mode
   :straight t
-  :config
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-
-  (defun my-web-mode-hook ()
-    "Hooks for Web mode."
+  :init
+  (defun web-mode-customization ()
+    "Customization for web-mode."
     (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-attr-indent-offset 2)
+    (setq web-mode-css-indent-offset 2)
     (setq web-mode-code-indent-offset 2)
-    (setq web-mode-css-indent-offset 2))
-  (add-hook 'web-mode-hook  'my-web-mode-hook))
+    (setq web-mode-enable-auto-pairing t)
+    (setq web-mode-enable-css-colorization t)
+    (add-hook 'before-save-hook 'delete-trailing-whitespace nil 'local))
+  (add-hook 'web-mode-hook 'web-mode-customization)
+
+  :mode ("\\.html?\\'" "\\.erb\\'" "\\.hbs\\'"
+         "\\.json\\'" "\\.s?css\\'" "\\.less\\'" "\\.sass\\'"))
 
 (use-package which-key
   :straight t
-  :after (bind-map)
   :config
-  (setq which-key-idle-delay 0.2)
+  (setq which-key-idle-delay 0.1)
+  (setq which-key-popup-type 'minibuffer)
 
   (which-key-mode))
 
-(use-package writeroom-mode
+(use-package whitespace
+  :straight t
+  :ensure nil
+  :hook (before-save . whitespace-cleanup))
+
+(use-package yaml-mode
   :straight t)
 
-(use-package yasnippet
+(use-package zoom
   :straight t
   :config
-  (define-key yas-minor-mode-map (kbd "<tab>") nil)
-  (define-key yas-minor-mode-map (kbd "TAB") nil)
-  (define-key yas-minor-mode-map (kbd "C-i") #'yas-insert-snippet)
-
-  (setq yas-snippet-dirs '("~/.emacs.d/snippets/"
-                           "~/Dropbox/dotfiles/emacs/snippets/"))
-
-  (yas-global-mode 1))
-
-(use-package yasnippet-snippets
-  :straight t)
+  (zoom-mode 1))
 
 
 ;; Functions
 ;; ------------------------
 
-(defun eval-next-sexp ()
+(defun switch-to-last-buffer ()
   (interactive)
-  (save-excursion
-    (forward-sexp)
-    (eval-last-sexp nil)))
-
-(defun eval-surrounding-sexp (levels)
-  (interactive "p")
-  (save-excursion
-    (up-list (abs levels))
-    (eval-last-sexp nil)))
+  (switch-to-buffer nil))
 
 (defun open-config-file ()
   (interactive)
-  (find-file "~/.emacs.el"))
+  (find-file "~/dotfiles/emacs/.emacs.el"))
 
 (defun reload-config ()
   (interactive)
@@ -1305,20 +1642,6 @@
 (defun dired-this-buffer ()
   (interactive)
   (find-file default-directory))
-
-(defun switch-to-last-buffer ()
-  (interactive)
-  (switch-to-buffer nil))
-
-(defun scroll-up-half-page ()
-  (interactive)
-  (scroll-up-command
-   (truncate (/ (window-total-height) 2))))
-
-(defun scroll-down-half-page ()
-  (interactive)
-  (scroll-down-command
-   (truncate (/ (window-total-height) 2))))
 
 (defun rename-file-and-buffer (new-name)
   "Renames both current buffer and file it's visiting to NEW-NAME."
@@ -1335,13 +1658,12 @@
     (set-visited-file-name new-name)
     (set-buffer-modified-p nil))))))
 
-
 (defun wc (&optional start end)
   "Prints number of lines, words and characters in region or whole buffer."
   (interactive)
   (let ((n 0)
-  (start (if mark-active (region-beginning) (point-min)))
-  (end (if mark-active (region-end) (point-max))))
+        (start (if mark-active (region-beginning) (point-min)))
+        (end (if mark-active (region-end) (point-max))))
     (save-excursion
       (goto-char start)
       (while (< (point) end) (if (forward-word 1) (setq n (1+ n)))))
@@ -1357,200 +1679,74 @@
   (funcall fun)
   (evil-append nil))
 
+(use-package visual-fill-column
+  :straight t)
+
+(use-package writeroom-mode
+  :straight t)
+
+(defun blogging-mode ()
+  (interactive)
+  (variable-pitch-mode)
+  (setq buffer-face-mode-face
+        '(:family "ETBembo" :height 140))
+  (visual-line-mode)
+  (visual-fill-column-mode)
+  (setq visual-fill-column-width 100)
+  (org-indent-mode)
+  (auto-fill-mode -1))
+
+;; (let* ((variable-tuple
+;;         (cond ((x-list-fonts "ETBembo")         '(:font "ETBembo"))
+;;               ((x-list-fonts "Source Sans Pro") '(:font "Source Sans Pro"))
+;;               ((x-list-fonts "Lucida Grande")   '(:font "Lucida Grande"))
+;;               ((x-list-fonts "Verdana")         '(:font "Verdana"))
+;;               ((x-family-fonts "Sans Serif")    '(:family "Sans Serif"))
+;;               (nil (warn "Cannot find a Sans Serif Font.  Install Source Sans Pro."))))
+;;        (base-font-color     (face-foreground 'default nil 'default))
+;;        (headline           `(:inherit default :weight bold :foreground ,base-font-color)))
+
+;;   (custom-theme-set-faces
+;;    'user
+;;    `(org-level-8 ((t (,@headline ,@variable-tuple))))
+;;    `(org-level-7 ((t (,@headline ,@variable-tuple))))
+;;    `(org-level-6 ((t (,@headline ,@variable-tuple))))
+;;    `(org-level-5 ((t (,@headline ,@variable-tuple))))
+;;    `(org-level-4 ((t (,@headline ,@variable-tuple :height 1.1))))
+;;    `(org-level-3 ((t (,@headline ,@variable-tuple :height 1.25))))
+;;    `(org-level-2 ((t (,@headline ,@variable-tuple :height 1.5))))
+;;    `(org-level-1 ((t (,@headline ,@variable-tuple :height 1.75))))
+;;    `(org-document-title ((t (,@headline ,@variable-tuple :height 2.0 :underline nil))))))
+
 ;; Hooks
 ;; ------------------------
 
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 
-
-;; Variables
-;; ------------------------
-
-(setq helm-input-idle-delay 0)
-
-(setq default-frame-alist '((font . "Jetbrains Mono")))
-(setq-default line-spacing .1)
-
-(scroll-bar-mode -1)
-(menu-bar-mode   -1)
-(tool-bar-mode   -1)
-
-(defalias 'yes-or-no-p 'y-or-n-p)
-
-(setq backup-directory-alist '(("." . "~/.emacs.d/.backups/")))
-
-;; (when window-system
-;;   (set-frame-size (selected-frame) 110 98))
-
-(add-to-list
- 'default-frame-alist'(ns-transparent-titlebar . t))
-(add-to-list
- 'default-frame-alist'(ns-appearance . light))
-
-
-;; (load-theme 'doom-one-light t)
-
-(set-face-attribute 'default nil :height 120)
-
-(setq vc-follow-symlinks t)
-
-;; writeroom mode
-(setq-default markdown-header-scaling t)
-(setq-default markdown-hide-markup t)
-(setq-default writeroom-maximize-window nil)
-(setq-default writeroom-width 70)
-
-(defun writing-mode ()
-  (interactive)
-  (setq buffer-face-mode-face '(:family "San Francisco" :height 172))
-  (buffer-face-mode)
-  (linum-mode 0)
-  (writeroom-mode 1)
-  (blink-cursor-mode)
-  (visual-line-mode 1)
-  (setq truncate-lines nil)
-  (setq line-spacing 5)
-  (setq global-hl-line-mode nil))
-;; (add-hook 'markdown-mode-hook 'writing-mode)
-
-(defun blogging-mode ()
-  (interactive)
-  (setq buffer-face-mode-face '(:family "San Francisco" :height 120))
-  (visual-line-mode)
-  (visual-fill-column-mode)
-  (setq visual-fill-column-width 80)
-  (org-indent-mode)
-  (variable-pitch-mode)
-  (auto-fill-mode -1))
-(setq org-image-actual-width nil)
-
-(defun mpr/refile-issue-from-project ()
-  (interactive)
-  (let* ((repo (forge-get-repository
-                (forge-read-repository "Choose a project")))
-         (issues (forge-ls-issues repo)))
-    (mpr/helm-refile-issue issues)))
-
-(defun mpr/helm-refile-issue (issues)
-  (helm :sources
-        (helm-build-sync-source "issue"
-          :candidates
-          (lambda ()
-            (mapcar (lambda (issue)
-                      (cons (oref issue title) issue))
-                    issues))
-          :action (list (cons "Refile issue" (lambda (candidate)
-                                               (mpr/refile-issues
-                                                (helm-marked-candidates))))))
-        :buffer "*helm issues*"
-        :prompt "issue: "))
-
-(defun mpr/refile-issues (issues)
-  (let ((rfloc (org-refile-get-location)))
-    (mapc (lambda (issue)
-            (mpr/refile-issue issue rfloc))
-          issues)))
-
-(defun mpr/refile-issue (issue &optional rfloc-arg)
-  (let ((rfloc (or rfloc-arg (org-refile-get-location))))
-    (with-temp-buffer
-      (org-mode)
-      (insert (format "* TODO #%s %s"
-                      (oref issue number)
-                      (oref issue title)))
-      (org-refile nil nil rfloc))))
-
-
-(define-key ctl-x-map "\C-i"
-  #'mpr/ispell-word-then-abbrev)
-
-(defun mpr/simple-get-word ()
-  (car-safe (save-excursion (ispell-get-word nil))))
-
-(defun mpr/ispell-word-then-abbrev (p)
-  "Call `ispell-word', then create an abbrev for it.
-With prefix P, create local abbrev. Otherwise it will
-be global.
-If there's nothing wrong with the word at point, keep
-looking for a typo until the beginning of buffer. You can
-skip typos you don't want to fix with `SPC', and you can
-abort completely with `C-g'."
-  (interactive "P")
-  (let (bef aft)
-    (save-excursion
-      (while (if (setq bef (mpr/simple-get-word))
-                 ;; Word was corrected or used quit.
-                 (if (ispell-word nil 'quiet)
-                     nil ; End the loop.
-                   ;; Also end if we reach `bob'.
-                   (not (bobp)))
-               ;; If there's no word at point, keep looking
-               ;; until `bob'.
-               (not (bobp)))
-        (backward-word)
-        (backward-char))
-      (setq aft (mpr/simple-get-word)))
-    (if (and aft bef (not (equal aft bef)))
-        (let ((aft (downcase aft))
-              (bef (downcase bef)))
-          (define-abbrev
-            (if p local-abbrev-table global-abbrev-table)
-            bef aft)
-          (message "\"%s\" now expands to \"%s\" %sally"
-                   bef aft (if p "loc" "glob")))
-      (user-error "No typo at or before point"))))
-
-(setq save-abbrevs 'silently)
-(setq-default abbrev-mode t)
-
-;; Interpret mIRC-style color commands in IRC chats
-(setq erc-interpret-mirc-color t)
-
+;; Emacs-managed Customizations
+;; (I don't love this but it's hard to completely get rid of)
+;; ---
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
- '(custom-safe-themes
-   '("4a8d4375d90a7051115db94ed40e9abb2c0766e80e228ecad60e06b3b397acab" "c83c095dd01cde64b631fb0fe5980587deec3834dc55144a6e78ff91ebc80b19" "54cf3f8314ce89c4d7e20ae52f7ff0739efb458f4326a2ca075bf34bc0b4f499" "fd22c8c803f2dac71db953b93df6560b6b058cb931ac12f688def67f08c10640" "c4bdbbd52c8e07112d1bfd00fee22bf0f25e727e95623ecb20c4fa098b74c1bd" "aaa4c36ce00e572784d424554dcc9641c82d1155370770e231e10c649b59a074" "56d10d2b60685d112dd54f4ba68a173c102eacc2a6048d417998249085383da1" "b5fff23b86b3fd2dd2cc86aa3b27ee91513adaefeaa75adc8af35a45ffb6c499" "3df5335c36b40e417fec0392532c1b82b79114a05d5ade62cfe3de63a59bc5c6" "0685ffa6c9f1324721659a9cd5a8931f4bb64efae9ce43a3dba3801e9412b4d8" "5b809c3eae60da2af8a8cfba4e9e04b4d608cb49584cb5998f6e4a1c87c057c4" "3c2f28c6ba2ad7373ea4c43f28fcf2eed14818ec9f0659b1c97d4e89c99e091e" "e3c64e88fec56f86b49dcdc5a831e96782baf14b09397d4057156b17062a8848" "fce3524887a0994f8b9b047aef9cc4cc017c5a93a5fb1f84d300391fba313743" "f4876796ef5ee9c82b125a096a590c9891cec31320569fc6ff602ff99ed73dca" "08a27c4cde8fcbb2869d71fdc9fa47ab7e4d31c27d40d59bf05729c4640ce834" "990e24b406787568c592db2b853aa65ecc2dcd08146c0d22293259d400174e37" "6084dce7da6b7447dcb9f93a981284dc823bab54f801ebf8a8e362a5332d2753" "5036346b7b232c57f76e8fb72a9c0558174f87760113546d3a9838130f1cdb74" "4f01c1df1d203787560a67c1b295423174fd49934deb5e6789abd1e61dba9552" "c086fe46209696a2d01752c0216ed72fd6faeabaaaa40db9fc1518abebaf700d" "730a87ed3dc2bf318f3ea3626ce21fb054cd3a1471dcd59c81a4071df02cb601" "6c9cbcdfd0e373dc30197c5059f79c25c07035ff5d0cc42aa045614d3919dab4" "01cf34eca93938925143f402c2e6141f03abb341f27d1c2dba3d50af9357ce70" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "f2927d7d87e8207fa9a0a003c0f222d45c948845de162c885bf6ad2a255babfd" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "35c096aa0975d104688a9e59e28860f5af6bb4459fd692ed47557727848e6dfe" "f490984d405f1a97418a92f478218b8e4bcc188cf353e5dd5d5acd2f8efd0790" "28a104f642d09d3e5c62ce3464ea2c143b9130167282ea97ddcc3607b381823f" "3d5ef3d7ed58c9ad321f05360ad8a6b24585b9c49abcee67bdcbb0fe583a6950" "72a81c54c97b9e5efcc3ea214382615649ebb539cb4f2fe3a46cd12af72c7607" default))
- '(fci-rule-color "#444a73")
- '(flycheck-javascript-flow-args nil)
- '(helm-completion-style 'emacs)
- '(helm-minibuffer-history-key "M-p")
- '(jdee-db-active-breakpoint-face-colors (cons "#161a2a" "#82aaff"))
- '(jdee-db-requested-breakpoint-face-colors (cons "#161a2a" "#c3e88d"))
- '(jdee-db-spec-breakpoint-face-colors (cons "#161a2a" "#444a73"))
- '(objed-cursor-color "#ff757f")
- '(pdf-view-midnight-colors (cons "#c8d3f5" "#212337"))
- '(rustic-ansi-faces
-   ["#212337" "#ff757f" "#c3e88d" "#ffc777" "#82aaff" "#c099ff" "#b4f9f8" "#c8d3f5"])
- '(vc-annotate-background "#212337")
- '(vc-annotate-color-map
-   (list
-    (cons 20 "#c3e88d")
-    (cons 40 "#d7dd85")
-    (cons 60 "#ebd27e")
-    (cons 80 "#ffc777")
-    (cons 100 "#ffb76e")
-    (cons 120 "#ffa866")
-    (cons 140 "#ff995e")
-    (cons 160 "#ea9993")
-    (cons 180 "#d599c9")
-    (cons 200 "#c099ff")
-    (cons 220 "#d58dd4")
-    (cons 240 "#ea81a9")
-    (cons 260 "#ff757f")
-    (cons 280 "#d06a7c")
-    (cons 300 "#a15f79")
-    (cons 320 "#725476")
-    (cons 340 "#444a73")
-    (cons 360 "#444a73")))
- '(vc-annotate-very-old-color nil))
+ '(helm-minibuffer-history-key "M-p"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(git-gutter:added ((t (:foreground "#50fa7b" :background "#50fa7b"))))
+ '(git-gutter:deleted ((t (:foreground "#ff79c6" :background "#ff79c6"))))
+ '(git-gutter:modified ((t (:foreground "#f1fa8c" :background "#f1fa8c"))))
+ '(org-document-title ((t (:inherit default :weight bold :foreground "#383a42" :font "ETBembo" :height 2.0 :underline nil))))
+ '(org-level-1 ((t (:inherit default :weight bold :foreground "#383a42" :font "ETBembo" :height 1.75))))
+ '(org-level-2 ((t (:inherit default :weight bold :foreground "#383a42" :font "ETBembo" :height 1.5))))
+ '(org-level-3 ((t (:inherit default :weight bold :foreground "#383a42" :font "ETBembo" :height 1.25))))
+ '(org-level-4 ((t (:inherit default :weight bold :foreground "#383a42" :font "ETBembo" :height 1.1))))
+ '(org-level-5 ((t (:inherit default :weight bold :foreground "#383a42" :font "ETBembo"))))
+ '(org-level-6 ((t (:inherit default :weight bold :foreground "#383a42" :font "ETBembo"))))
+ '(org-level-7 ((t (:inherit default :weight bold :foreground "#383a42" :font "ETBembo"))))
+ '(org-level-8 ((t (:inherit default :weight bold :foreground "#383a42" :font "ETBembo"))))
+ '(variable-pitch ((t (:family "ETBembo")))))
