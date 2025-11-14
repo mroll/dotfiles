@@ -1,0 +1,22 @@
+# Ignore straight.el build artifacts and caches
+straight
+eln-cache
+auto-save-list
+\.cache
+transient
+\.elc$
+
+# Ignore org-roam database (user-specific)
+org-roam\.db
+org-roam\.db-shm
+org-roam\.db-wal
+
+# Ignore other runtime files
+recentf
+places
+projectile-bookmarks\.eld
+projectile\.cache
+
+# Ignore embedded git repos (beancount-mode, word-count-mode)
+lisp/beancount-mode
+lisp/word-count-mode

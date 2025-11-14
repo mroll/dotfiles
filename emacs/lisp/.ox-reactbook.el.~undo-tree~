@@ -1,0 +1,319 @@
+(undo-tree-save-format-version . 1)
+"15c3053d508abb53db7409de58e163ce9c571615"
+[nil nil nil nil (25176 35068 515928 0) 0 nil]
+([nil nil ((apply 9 56725 56832 undo--wrap-and-run-primitive-undo 56725 56832 ((#(";; " 0 3 (fontified t face font-lock-comment-delimiter-face)) . -56820) (#(";; " 0 3 (fontified t face font-lock-comment-delimiter-face)) . -56778) (#(";; " 0 3 (fontified t face font-lock-comment-delimiter-face)) . -56725) 56841)) (t 25176 35004 816351 585000)) nil (25176 35068 515927 0) 0 nil])
+([nil nil ((apply 3 1596 1634 undo--wrap-and-run-primitive-undo 1596 1634 ((#(";; " 0 3 (fontified t face font-lock-comment-delimiter-face)) . -1600) 1637))) nil (25176 35068 515923 0) 0 nil])
+([nil nil ((#("(defcustom org-reactbook-javascript
+  \"function getElementsByTagNames(list,obj) {
+        if (!obj) var obj = document;
+        var tagNames = list.split(',');
+        var resultArray = new Array();
+        for (var i=0;i < tagNames.length;i++) {
+                var tags = obj.getElementsByTagName(tagNames[i]);
+                for (var j=0;j < tags.length;j++) {
+                        resultArray.push(tags[j]);
+                }
+        }
+        var testNode = resultArray[0];
+        if (!testNode) return [];
+        if (testNode.sourceIndex) {
+                resultArray.sort(function (a,b) {
+                                return a.sourceIndex - b.sourceIndex;
+                });
+        }
+        else if (testNode.compareDocumentPosition) {
+                resultArray.sort(function (a,b) {
+                                return 3 - (a.compareDocumentPosition(b) & 6);
+                });
+        }
+        return resultArray;
+}
+
+function createTOC() {
+        // Add go to top button
+        let top = document.createElement('a');
+        top.innerHTML = 'Top';
+        top.href = '#top';
+        top.className += 'top %s';
+
+    // The tags with the headlines
+        let headlines = getElementsByTagNames('%s');
+
+        if (headlines.length < 2) return false;
+
+    // Populate the #toc div
+        let toc = document.getElementById('toc');
+
+    // The title
+        // let title = document.getElementById('toc-link-title');
+        // let tocTitle = document.createElement('a');
+        // tocTitle.className = 'px-2 py-1 ';
+
+    // Set the classes to be used by the title
+    let title_classes = ' %s %s';
+
+    // Header counts for numbering
+    let header_2 = 0;
+    let header_3 = 0;
+    let header_4 = 0;
+    let header_5 = 0;
+    let header_6 = 0;
+
+        for (var i=0;i < headlines.length;i++) {
+
+                let tocHeader = document.createElement('a');
+
+        // Reactbook.css classes
+                tocHeader.className = 'px-2 py-1';
+        tocHeader.className += ' %s';
+
+        // Add the header to the table of contents
+        toc.appendChild(tocHeader);
+
+        switch (headlines[i].nodeName) {
+          case 'H1':
+            tocHeader.className += title_classes;
+
+            break;
+          case 'H2':
+            tocHeader.className += ' block mt-2 ml-0';
+            header_2 += 1;
+            header_3 = 0;
+            header_4 = 0;
+            header_5 = 0;
+            header_6 = 0;
+            header_7 = 0;
+
+                // Numbering
+                tocHeader.innerHTML += '<b>' + header_2 + '.</b> ';
+
+            break;
+
+          case 'H3':
+            tocHeader.className += ' block ml-5';
+            header_3 += 1;
+            header_4 = 0;
+            header_5 = 0;
+            header_6 = 0;
+            header_7 = 0;
+
+                // Numbering
+                tocHeader.innerHTML += '<b>' + header_2 + '.' + header_3 + '.</b> ';
+            break;
+
+          case 'H4':
+            tocHeader.className += ' block ml-12';
+            header_4 += 1;
+            header_5 = 0;
+            header_6 = 0;
+            header_7 = 0;
+
+                // Numbering
+                tocHeader.innerHTML += '<b>' + header_2 + '.' + header_3 + '.' + header_4 + '.</b> ';
+            break;
+
+          case 'H5':
+            tocHeader.className += ' block ml-20';
+            header_5 += 1;
+            header_6 = 0;
+            header_7 = 0;
+
+                // Numbering
+                tocHeader.innerHTML += '<b>' + header_2 + '.' + header_3 + '.' + header_4 + '.' + header_5 + '.</b> ';
+            break;
+
+          case 'H6':
+            tocHeader.className += ' block ml-32';
+            header_6 += 1;
+            header_7 = 0;
+
+                // Numbering
+                tocHeader.innerHTML += '<b>' + header_2 + '.' + header_3 + '.' + header_4 + '.' + header_5 + '.' + header_6 + '.</b> ';
+            break;
+
+          case 'H7':
+            tocHeader.className += ' block ml-48';
+            header_7 += 1;
+
+                // Numbering
+                tocHeader.innerHTML += '<b>' + header_2 + '.' + header_3 + '.' + header_4 + '.' + header_5 + '.' + header_6 + '.' + header_7 + '.</b> ';
+            break;
+        }
+
+        // Header title
+        tocHeader.innerHTML += headlines[i].innerHTML;
+
+        // Add a link to the header
+                let headerId = headlines[i].id || 'toc-link-' + i;
+                headlines[i].id = headerId;
+        tocHeader.id = \\\"goto-\\\" + headerId;
+                tocHeader.href = '#' + headerId;
+        }
+}
+
+createTOC();
+
+
+// Populate search bar
+let searchBar = document.getElementById('search-bar')
+let searchBarResults = document.getElementById('search-bar-results')
+for(let i = 0; i < tocTree.length; i++) {
+    let heading = tocTree[i]
+    let item = document.createElement('li')
+    let link = document.createElement('a')
+    link.href = heading.file + '#toc-link-' + heading.index
+    link.className = \\\"%s\\\"
+    link.style.display = 'none'
+
+    if (heading.name === heading.parent) {
+        link.innerText = heading.name
+    } else {
+        link.innerText = heading.name + ' > ' + heading.parent
+    }
+
+    item.appendChild(link)
+    searchBarResults.appendChild(item)
+}
+
+
+// Show results on search bar focus
+function showResults(){
+    searchBarResults.style.display = ''
+}
+
+
+function hideResults(){
+    searchBarResults.style.display = 'none'
+    searchBar.value = ''
+}
+
+
+// Search Bar
+function search(){
+    let searchBar = document.getElementById('search-bar')
+    let filter = searchBar.value.toUpperCase()
+    let count = 0
+
+    let searchResults = searchBarResults.getElementsByTagName('li')
+
+    for(let i = 0; i < searchResults.length; i++) {
+        let link = searchResults[i].getElementsByTagName('a')[0]
+        let txtValue = link.textContent || link.innerText
+
+        if (txtValue.toUpperCase().indexOf(filter) > -1 && count < 10) {
+            link.style.display = ''
+            count += 1
+        } else {
+            link.style.display = 'none'
+        }
+    }
+}
+
+
+// Check if an element is visible
+function isElementVisible (el, parent) {
+    let rect = el.getBoundingClientRect();
+
+    return (
+        rect.top >= parent.getBoundingClientRect().top &&
+        rect.left >= 0 &&
+        rect.bottom <= (parent.clientHeight + parent.getBoundingClientRect().top) &&
+        rect.right <= (parent.clientWidth)
+    );
+}
+
+
+DOMTokenList.prototype.addMany = function(classes) {
+    var array = classes.split(' ');
+    for (var i = 0, length = array.length; i < length; i++) {
+      this.add(array[i]);
+    }
+}
+
+
+DOMTokenList.prototype.removeMany = function(classes) {
+    var array = classes.split(' ');
+    for (var i = 0, length = array.length; i < length; i++) {
+      this.remove(array[i]);
+    }
+}
+
+
+// Scroll Spy
+// Everything is run inside the function because offsets
+// are created due to reactbook.css classes as it changes
+// the height/position of the elements after the page is loaded
+function scrollSpy () {
+  let headings = document.querySelectorAll('[id^=\\\"toc-link-\\\"]');
+  let headingsTopOffsets = {};
+  let i = 0;
+
+  let selectedClassName = \\\"%s\\\";
+
+  Array.prototype.forEach.call(headings, function(s) {
+    headingsTopOffsets[s.id] = s.offsetTop;
+  });
+
+  let scrollEl = document.getElementById(\\\"content-container\\\");
+  let scrollPosition = scrollEl.scrollTop + 150;
+
+  let sidebar = document.getElementById('sidebar');
+
+  for (i in headingsTopOffsets) {
+    if (headingsTopOffsets[i] <= scrollPosition) {
+      document.getElementsByClassName(selectedClassName)[0].classList.removeMany(selectedClassName);
+      document.querySelector(`a[id^=\\\"goto-${i}\\\"]`).classList.addMany(selectedClassName);
+
+      // Scroll the sidebar to the current heading if not visible
+      let tocItem = document.getElementById(`goto-${i}`);
+      if (!isElementVisible(tocItem, sidebar)) {
+          tocItem.scrollIntoView();
+      }
+    }
+  }
+};
+
+
+// Manage dark theme
+// On page load or when changing themes, best to add inline in `head` to avoid FOUC
+if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  document.documentElement.classList.add('dark')
+} else {
+  document.documentElement.classList.remove('dark')
+}
+
+function toggleLight() {
+  if (localStorage.theme === 'light') {
+    //localStorage.setItem('theme', 'dark');
+    localStorage.theme = 'dark'
+  } else {
+    //localStorage.setItem('theme', 'light');
+    localStorage.theme = 'light'
+  }
+  location.reload();
+  return false;
+}
+\"
+  \"Javascript code needed in the HTML file.\"
+  :type '(string))" 0 1 (fontified t) 1 10 (fontified t face font-lock-keyword-face) 10 11 (fontified t) 11 35 (fontified t face font-lock-variable-name-face) 35 36 (fontified t) 36 37 (fontified t highlight-indent-guides-prop (0 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 20477 in ox-reactbook.el> . #<marker at 20477 in ox-reactbook.el>))) display "│" face highlight-indent-guides-character-face) 37 38 (fontified t highlight-indent-guides-prop (0 nil nil 1 nil ((#<marker at 20477 in ox-reactbook.el> . #<marker at 20477 in ox-reactbook.el>)))) 38 82 (fontified t face font-lock-string-face) 82 1043 (fontified t face font-lock-string-face) 1043 1044 (fontified t face (font-lock-constant-face font-lock-string-face)) 1044 1073 (fontified t face font-lock-string-face) 1073 1076 (fontified t face (font-lock-constant-face font-lock-string-face)) 1076 1224 (fontified t face font-lock-string-face) 1224 1226 (fontified t face (font-lock-constant-face font-lock-string-face)) 1226 1352 (fontified t face font-lock-string-face) 1352 1355 (fontified t face (font-lock-constant-face font-lock-string-face)) 1355 1425 (fontified t face font-lock-string-face) 1425 1439 (fontified t face (font-lock-constant-face font-lock-string-face)) 1439 1493 (fontified t face font-lock-string-face) 1493 1494 (fontified t face (font-lock-constant-face font-lock-string-face)) 1494 1879 (fontified t face font-lock-string-face) 1879 1880 (fontified t face (font-lock-constant-face font-lock-string-face)) 1880 2153 (fontified t face font-lock-string-face) 2153 2155 (fontified t face (font-lock-constant-face font-lock-string-face)) 2155 2244 (fontified t face font-lock-string-face) 2244 2246 (fontified t face (font-lock-constant-face font-lock-string-face)) 2246 2531 (fontified t face font-lock-string-face) 2531 2534 (fontified t face (font-lock-constant-face font-lock-string-face)) 2534 2596 (fontified t face font-lock-string-face) 2596 2598 (fontified t face (font-lock-constant-face font-lock-string-face)) 2598 2852 (fontified t face font-lock-string-face) 2852 2855 (fontified t face (font-lock-constant-face font-lock-string-face)) 2855 2871 (fontified t face font-lock-string-face) 2871 2872 (fontified t face (font-lock-constant-face font-lock-string-face)) 2872 2933 (fontified t face font-lock-string-face) 2933 2935 (fontified t face (font-lock-constant-face font-lock-string-face)) 2935 3164 (fontified t face font-lock-string-face) 3164 3167 (fontified t face (font-lock-constant-face font-lock-string-face)) 3167 3183 (fontified t face font-lock-string-face) 3183 3184 (fontified t face (font-lock-constant-face font-lock-string-face)) 3184 3200 (fontified t face font-lock-string-face) 3200 3201 (fontified t face (font-lock-constant-face font-lock-string-face)) 3201 3262 (fontified t face font-lock-string-face) 3262 3264 (fontified t face (font-lock-constant-face font-lock-string-face)) 3264 3467 (fontified t face font-lock-string-face) 3467 3470 (fontified t face (font-lock-constant-face font-lock-string-face)) 3470 3486 (fontified t face font-lock-string-face) 3486 3487 (fontified t face (font-lock-constant-face font-lock-string-face)) 3487 3503 (fontified t face font-lock-string-face) 3503 3504 (fontified t face (font-lock-constant-face font-lock-string-face)) 3504 3520 (fontified t face font-lock-string-face) 3520 3521 (fontified t face (font-lock-constant-face font-lock-string-face)) 3521 3582 (fontified t face font-lock-string-face) 3582 3584 (fontified t face (font-lock-constant-face font-lock-string-face)) 3584 3761 (fontified t face font-lock-string-face) 3761 3764 (fontified t face (font-lock-constant-face font-lock-string-face)) 3764 3780 (fontified t face font-lock-string-face) 3780 3781 (fontified t face (font-lock-constant-face font-lock-string-face)) 3781 3797 (fontified t face font-lock-string-face) 3797 3798 (fontified t face (font-lock-constant-face font-lock-string-face)) 3798 3814 (fontified t face font-lock-string-face) 3814 3815 (fontified t face (font-lock-constant-face font-lock-string-face)) 3815 3831 (fontified t face font-lock-string-face) 3831 3832 (fontified t face (font-lock-constant-face font-lock-string-face)) 3832 3893 (fontified t face font-lock-string-face) 3893 3895 (fontified t face (font-lock-constant-face font-lock-string-face)) 3895 4046 (fontified t face font-lock-string-face) 4046 4049 (fontified t face (font-lock-constant-face font-lock-string-face)) 4049 4065 (fontified t face font-lock-string-face) 4065 4066 (fontified t face (font-lock-constant-face font-lock-string-face)) 4066 4082 (fontified t face font-lock-string-face) 4082 4083 (fontified t face (font-lock-constant-face font-lock-string-face)) 4083 4099 (fontified t face font-lock-string-face) 4099 4100 (fontified t face (font-lock-constant-face font-lock-string-face)) 4100 4116 (fontified t face font-lock-string-face) 4116 4117 (fontified t face (font-lock-constant-face font-lock-string-face)) 4117 4133 (fontified t face font-lock-string-face) 4133 4134 (fontified t face (font-lock-constant-face font-lock-string-face)) 4134 4356 (fontified t face font-lock-string-face) 4356 4365 (fontified t face (font-lock-constant-face font-lock-string-face)) 4365 4602 (fontified t face font-lock-string-face) 4602 4612 (fontified t face (font-lock-constant-face font-lock-string-face)) 4612 4663 (fontified t face font-lock-string-face) 4663 4681 (fontified t face (font-lock-constant-face font-lock-string-face)) 4681 4794 (fontified t face font-lock-string-face) 4794 4796 (fontified t face (font-lock-constant-face font-lock-string-face)) 4796 4838 (fontified t face font-lock-string-face) 4838 4839 (fontified t face (font-lock-constant-face font-lock-string-face)) 4839 4956 (fontified t face font-lock-string-face) 4956 4960 (fontified t face (font-lock-constant-face font-lock-string-face)) 4960 5363 (fontified t face font-lock-string-face) 5363 5367 (fontified t face (font-lock-constant-face font-lock-string-face)) 5367 5476 (fontified t face font-lock-string-face) 5476 5486 (fontified t face (font-lock-constant-face font-lock-string-face)) 5486 5618 (fontified t face font-lock-string-face) 5618 5620 (fontified t face (font-lock-constant-face font-lock-string-face)) 5620 5734 (fontified t face font-lock-string-face) 5734 5735 (fontified t face (font-lock-constant-face font-lock-string-face)) 5735 5983 (fontified t face font-lock-string-face) 5983 5987 (fontified t face (font-lock-constant-face font-lock-string-face)) 5987 7370 (fontified t face font-lock-string-face) 7370 7377 (fontified t face (font-lock-constant-face font-lock-string-face)) 7377 7892 (fontified t face font-lock-string-face) 7892 8025 (fontified t face font-lock-string-face) 8025 8029 (fontified t face (font-lock-constant-face font-lock-string-face)) 8029 8038 (fontified t face font-lock-string-face) 8038 8043 (fontified t face (font-lock-constant-face font-lock-string-face)) 8043 8127 (fontified t face font-lock-string-face) 8127 8169 (fontified t face font-lock-string-face) 8169 8173 (fontified t face (font-lock-constant-face font-lock-string-face)) 8173 8230 (fontified t face font-lock-string-face) 8230 8234 (fontified t face (font-lock-constant-face font-lock-string-face)) 8234 8295 (fontified t face font-lock-string-face) 8295 8300 (fontified t face (font-lock-constant-face font-lock-string-face)) 8300 8333 (fontified t face font-lock-string-face) 8333 8338 (fontified t face (font-lock-constant-face font-lock-string-face)) 8338 8342 (fontified t face font-lock-string-face) 8342 8346 (fontified t face (font-lock-constant-face font-lock-string-face)) 8346 8376 (fontified t face font-lock-string-face) 8376 8380 (fontified t face (font-lock-constant-face font-lock-string-face)) 8380 8421 (fontified t face font-lock-string-face) 8421 8426 (fontified t face (font-lock-constant-face font-lock-string-face)) 8426 8430 (fontified t face font-lock-string-face) 8430 8435 (fontified t face (font-lock-constant-face font-lock-string-face)) 8435 8465 (fontified t face font-lock-string-face) 8465 8470 (fontified t face (font-lock-constant-face font-lock-string-face)) 8470 8516 (fontified t face font-lock-string-face) 8516 8517 (fontified t) 8517 8518 (fontified t highlight-indent-guides-prop (0 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 20477 in ox-reactbook.el> . #<marker at 20477 in ox-reactbook.el>))) display "│" face highlight-indent-guides-character-face) 8518 8519 (fontified t highlight-indent-guides-prop (0 nil nil 1 nil ((#<marker at 20477 in ox-reactbook.el> . #<marker at 20477 in ox-reactbook.el>)))) 8519 8561 (fontified t face font-lock-doc-face) 8561 8562 (fontified t) 8562 8563 (fontified t highlight-indent-guides-prop (0 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 20477 in ox-reactbook.el> . #<marker at 20477 in ox-reactbook.el>))) display "│" face highlight-indent-guides-character-face) 8563 8564 (fontified t highlight-indent-guides-prop (0 nil nil 1 nil ((#<marker at 20477 in ox-reactbook.el> . #<marker at 20477 in ox-reactbook.el>)))) 8564 8569 (fontified t face font-lock-builtin-face) 8569 8580 (fontified t)) . 20477) (undo-tree-id6 . -8579) (undo-tree-id7 . -8579) (undo-tree-id8 . -36) (undo-tree-id9 . -36) (undo-tree-id10 . 8580) (undo-tree-id11 . -1) (undo-tree-id12 . 1) (undo-tree-id13 . -8580) (undo-tree-id14 . -8579) (undo-tree-id15 . -8579) (t 25176 35068 517597 601000)) nil (25176 35206 212947 0) 0 nil])
+([nil nil ((#("
+" 0 1 (fontified t)) . 20477) (undo-tree-id2 . 1) (undo-tree-id3 . -1) (undo-tree-id4 . -1) (undo-tree-id5 . -1)) nil (25176 35206 212941 0) 0 nil])
+([nil nil ((#("
+" 0 1 (fontified t)) . 20477) (undo-tree-id0 . 1) (undo-tree-id1 . -1)) nil (25176 35206 212935 0) 0 nil])
+([nil nil ((#("k" 0 1 (fontified t face font-lock-string-face)) . -22217) (undo-tree-id16 . -1) (undo-tree-id17 . -1) (undo-tree-id18 . -1) (undo-tree-id19 . -1) (undo-tree-id20 . -1) (undo-tree-id21 . -1) (22203 . 22218) (t 25176 35206 215512 18000)) nil (25176 35216 392821 0) 0 nil])
+([nil nil ((#("k" 0 1 (fontified t help-echo "Easy to misread; consider moving the element to the next line" face (font-lock-warning-face))) . -22718) (undo-tree-id50 . -1) (22718 . 22719) (t 25176 35216 395297 511000)) nil (25176 35330 78567 0) 0 nil])
+([nil nil ((#("        (level (+ level 1)))
+" 0 1 (fontified t highlight-indent-guides-prop (0 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) display "│" face highlight-indent-guides-character-face) 1 2 (fontified t highlight-indent-guides-prop (0 nil nil 1 nil ((#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>)))) 2 3 (fontified t highlight-indent-guides-prop (1 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) display "│" face highlight-indent-guides-top-character-face) 3 4 (fontified t highlight-indent-guides-prop (1 nil nil 1 nil ((#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>)))) 4 5 (fontified t highlight-indent-guides-prop (1 nil nil 1 nil ((#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>)))) 5 6 (fontified t highlight-indent-guides-prop (1 nil nil 1 nil ((#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>)))) 6 7 (fontified t highlight-indent-guides-prop (1 nil nil 1 nil ((#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>)))) 7 8 (fontified t highlight-indent-guides-prop (1 nil nil 1 nil ((#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>)))) 8 29 (fontified t)) . 41271) (undo-tree-id47 . -15) (undo-tree-id48 . -18) (undo-tree-id49 . -29) 41289 (t 25176 35216 395297 511000)) nil (25176 35330 78565 0) 0 nil])
+([nil nil ((#("k" 0 1 (fontified t help-echo "Easy to misread; consider moving the element to the next line" face (font-lock-warning-face))) . -41271) (undo-tree-id46 . -1) (41270 . 41272)) nil (25176 35330 78563 0) 0 nil])
+([nil nil ((#("(progn
+                     (push text org-reactbook-chapters)
+                     (org-reactbook-chapter text header-contents))" 0 1 (fontified t) 1 6 (fontified t face font-lock-keyword-face) 6 7 (fontified t) 7 8 (highlight-indent-guides-prop (0 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) display "│" fontified t face highlight-indent-guides-character-face) 8 9 (highlight-indent-guides-prop (0 nil nil 1 nil ((#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 9 10 (highlight-indent-guides-prop (1 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) display "│" fontified t face highlight-indent-guides-character-face) 10 11 (highlight-indent-guides-prop (1 nil nil 1 nil ((#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 11 12 (highlight-indent-guides-prop (2 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) display "│" fontified t face highlight-indent-guides-character-face) 12 13 (highlight-indent-guides-prop (3 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) display "│" fontified t face highlight-indent-guides-top-character-face) 13 14 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 14 15 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 15 16 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 16 17 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 17 18 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 18 19 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 19 20 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 20 21 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 21 22 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 22 23 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 23 24 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 24 25 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 25 26 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 26 27 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 27 28 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 28 29 (fontified t) 29 33 (fontified t face font-lock-keyword-face) 33 63 (fontified t) 63 64 (highlight-indent-guides-prop (0 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) display "│" fontified t face highlight-indent-guides-character-face) 64 65 (highlight-indent-guides-prop (0 nil nil 1 nil ((#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 65 66 (highlight-indent-guides-prop (1 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) display "│" fontified t face highlight-indent-guides-character-face) 66 67 (highlight-indent-guides-prop (1 nil nil 1 nil ((#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 67 68 (highlight-indent-guides-prop (2 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) display "│" fontified t face highlight-indent-guides-character-face) 68 69 (highlight-indent-guides-prop (3 nil t 1 (character (nil) (face highlight-indent-guides-character-face display "│") (top) (face highlight-indent-guides-top-character-face display "│")) ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) display "│" fontified t face highlight-indent-guides-top-character-face) 69 70 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 70 71 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 71 72 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 72 73 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 73 74 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 74 75 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 75 76 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 76 77 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 77 78 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 78 79 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 79 80 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 80 81 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 81 82 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 82 83 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 83 84 (highlight-indent-guides-prop (3 nil nil 1 nil ((#<marker at 41460 in ox-reactbook.el> . #<marker at 41517 in ox-reactbook.el>) (#<marker at 41291 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41231 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>) (#<marker at 41113 in ox-reactbook.el> . #<marker at 41834 in ox-reactbook.el>))) fontified t) 84 129 (fontified t)) . 41358) (undo-tree-id36 . -128) (undo-tree-id37 . -128) (undo-tree-id38 . -5) (undo-tree-id39 . -128) (undo-tree-id40 . -63) (undo-tree-id41 . -128) (undo-tree-id42 . 1) (undo-tree-id43 . -129) (undo-tree-id44 . 129) (undo-tree-id45 . -1) 41486) nil (25176 35330 78561 0) 0 nil])
+([nil nil ((nil rear-nonsticky nil 41429 . 41430) (nil fontified nil 41301 . 41430) (41301 . 41430) 41337 (#("(setq org-reactbook-book-title text)" 0 1 (fontified t) 1 5 (fontified t face font-lock-keyword-face) 5 36 (fontified t)) . 41301) (undo-tree-id28 . -36) (undo-tree-id29 . -35) (undo-tree-id30 . -35) (undo-tree-id31 . 1) (undo-tree-id32 . -36) (undo-tree-id33 . 36) (undo-tree-id34 . -1) (undo-tree-id35 . -35) 41337) nil (25176 35330 78555 0) 0 nil])
+([nil nil ((nil rear-nonsticky nil 41506 . 41507) (nil fontified nil 41451 . 41507) (41451 . 41507)) nil (25176 35330 78550 0) 0 nil])
+([nil nil ((#("k" 0 1 (fontified t help-echo "Easy to misread; consider moving the element to the next line" face (font-lock-warning-face))) . -41823) (undo-tree-id22 . -1) (undo-tree-id23 . -1) (undo-tree-id24 . -1) (undo-tree-id25 . -1) (undo-tree-id26 . -1) (undo-tree-id27 . -1) (41823 . 41824)) nil (25176 35330 78546 0) 0 nil])
+([nil nil ((#("k" 0 1 (fontified t face font-lock-string-face)) . -40556) (undo-tree-id51 . -1) (undo-tree-id52 . -1) (undo-tree-id53 . -1) (undo-tree-id54 . -1) (undo-tree-id55 . -1) (undo-tree-id56 . -1) (40553 . 40557) (t 25176 35330 81115 989000)) nil (25176 43022 460686 0) 0 nil])
+([nil nil ((#("k" 0 1 (fontified t help-echo "Easy to misread; consider moving the element to the next line" face (font-lock-warning-face))) . -40805) (undo-tree-id63 . -1) (40805 . 40806) (t 25176 43022 464127 303000)) nil (25176 43087 634784 0) 0 nil])
+([nil nil ((#("k" 0 1 (fontified t face font-lock-string-face)) . -20773) (undo-tree-id57 . -1) (undo-tree-id58 . -1) (undo-tree-id59 . -1) (undo-tree-id60 . -1) (undo-tree-id61 . -1) (undo-tree-id62 . -1) (20770 . 20774) (t 25176 43022 464127 303000)) nil (25176 43087 634781 0) 0 nil])
+([nil nil ((#("k" 0 1 (fontified t help-echo "Easy to misread; consider moving the element to the next line" face (font-lock-warning-face))) . -21792) (undo-tree-id70 . -1) (21792 . 21793) (t 25176 43087 637603 162000)) nil (25176 59482 543107 0) 0 nil])
+([nil current ((#("k" 0 1 (fontified t face font-lock-string-face)) . -20903) (undo-tree-id64 . -1) (undo-tree-id65 . -1) (undo-tree-id66 . -1) (undo-tree-id67 . -1) (undo-tree-id68 . -1) (undo-tree-id69 . -1) (20900 . 20904) (t 25176 43087 637603 162000)) nil (25176 59482 543103 0) 0 nil])
+nil

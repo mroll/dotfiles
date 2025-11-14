@@ -9,3 +9,5 @@ emacs/.emacs.d/*
 news/.newsrc.eld
 
 .DS_Store
+emacs/lisp/beancount-mode/
+emacs/lisp/word-count-mode/
