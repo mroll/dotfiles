@@ -1,7 +1,7 @@
 ;;; hft-research.el --- HFT Research Workflow Configuration -*- lexical-binding: t -*-
 
 ;; Author: Matt Roll
-;; Description: Configuration for HFT research workflow using Denote, Citar, and org-mode
+;; Description: Configuration for HFT research workflow using org-roam, Citar, and org-mode
 
 ;;; Commentary:
 ;; This module provides keybindings and functions for managing an HFT research workflow.
@@ -13,7 +13,7 @@
 
 ;;; Code:
 
-(require 'denote)
+(require 'org-roam)
 (require 'citar)
 (require 'consult)
 (require 'general)
@@ -43,102 +43,66 @@
     (call-interactively #'find-file)))
 
 (defun hft/new-question ()
-  "Quickly capture a question to inbox/."
+  "Quickly capture a question using org-roam."
   (interactive)
-  (let* ((title (read-string "Question: "))
-         (denote-directory "~/notes/hft/inbox/"))
-    (denote title '("question"))
-    (insert "* Question\n\n")
-    (insert (format "%s\n\n" title))
-    (insert "* Context\n\n")
-    (insert "* Potential Approaches\n\n")
-    (insert "* References\n\n")
-    (goto-char (point-min))
-    (forward-line 3)))
+  (org-roam-capture- :node (org-roam-node-create)
+                     :templates '(("q" "question" plain
+                                   "* Question\n\n%?\n\n* Context\n\n* Potential Approaches\n\n* References\n\n"
+                                   :target (file+head "inbox/%<%Y%m%d%H%M%S>-${slug}.org"
+                                                      "#+title: ${title}\n#+filetags: :question:\n\n")
+                                   :unnarrowed t))))
 
 (defun hft/new-concept ()
-  "Create a new concept note with template."
+  "Create a new concept note with template using org-roam."
   (interactive)
-  (let* ((title (read-string "Concept name: "))
-         (keywords (completing-read-multiple "Keywords: " denote-known-keywords))
-         (denote-directory "~/notes/hft/concepts/"))
-    (denote title (cons "concept" keywords))
-    (insert "* Definition\n\n")
-    (insert "* Intuition\n\n")
-    (insert "* Mathematical Formulation\n\n")
-    (insert "#+begin_src latex\n")
-    (insert "% LaTeX equations here\n")
-    (insert "#+end_src\n\n")
-    (insert "* Implementation Notes\n\n")
-    (insert "* Related Concepts\n\n")
-    (insert "* Sources\n\n")
-    (goto-char (point-min))
-    (forward-line 2)))
+  (org-roam-capture- :node (org-roam-node-create)
+                     :templates '(("c" "concept" plain
+                                   "* Definition\n\n%?\n\n* Intuition\n\n* Mathematical Formulation\n\n#+begin_src latex\n% LaTeX equations here\n#+end_src\n\n* Implementation Notes\n\n* Related Concepts\n\n* Sources\n\n"
+                                   :target (file+head "concepts/%<%Y%m%d%H%M%S>-${slug}.org"
+                                                      "#+title: ${title}\n#+filetags: :concept:\n\n")
+                                   :unnarrowed t))))
 
 (defun hft/new-experiment ()
-  "Create a new experiment/lab note with template."
+  "Create a new experiment/lab note with template using org-roam."
   (interactive)
-  (let* ((title (read-string "Experiment description: "))
-         (keywords (completing-read-multiple "Keywords: " denote-known-keywords))
-         (denote-directory "~/notes/hft/lab/")
-         (git-rev (if (file-exists-p "~/exchd/.git")
-                      (string-trim
-                       (shell-command-to-string "cd ~/exchd && git rev-parse --short HEAD"))
-                    "N/A")))
-    (denote title (cons "experiment" keywords))
-    (insert (format "* Experiment: %s\n\n" title))
-    (insert (format "- Date: %s\n" (format-time-string "%Y-%m-%d")))
-    (insert (format "- Git Rev: %s\n" git-rev))
-    (insert "\n* Setup\n\n")
-    (insert "- Model: \n")
-    (insert "- Parameters: \n")
-    (insert "- Seed: \n")
-    (insert "- Code: \n")
-    (insert "\n* Hypothesis\n\n")
-    (insert "What do I expect to see, and why?\n\n")
-    (insert "* Results\n\n")
-    (insert "* Interpretation\n\n")
-    (insert "* Next Steps\n\n")
-    (goto-char (point-min))
-    (search-forward "Model: ")
-    (end-of-line)))
+  (let ((git-rev (if (file-exists-p "~/exchd/.git")
+                     (string-trim
+                      (shell-command-to-string "cd ~/exchd && git rev-parse --short HEAD"))
+                   "N/A")))
+    (org-roam-capture- :node (org-roam-node-create)
+                       :templates `(("e" "experiment" plain
+                                     ,(format "* Experiment: ${title}\n\n- Date: %%<%Y-%m-%d>\n- Git Rev: %s\n\n* Setup\n\n- Model: \n- Parameters: %%?\n- Seed: \n- Code: \n\n* Hypothesis\n\nWhat do I expect to see, and why?\n\n* Results\n\n* Interpretation\n\n* Next Steps\n\n" git-rev)
+                                     :target (file+head "lab/%<%Y%m%d%H%M%S>-${slug}.org"
+                                                        "#+title: ${title}\n#+filetags: :experiment:lab:\n\n")
+                                     :unnarrowed t)))))
+
+(defun hft/new-source ()
+  "Create a new source note using org-roam."
+  (interactive)
+  (org-roam-capture- :node (org-roam-node-create)
+                     :templates '(("s" "source" plain
+                                   "* Summary\n\n%?\n\n* Key Results\n\n* Important Concepts\n\n* Open Questions\n\n* References\n\n"
+                                   :target (file+head "sources/%<%Y%m%d%H%M%S>-${slug}.org"
+                                                      "#+title: ${title}\n#+filetags: :source:\n#+author: \n#+year: \n#+bibkey: \n\n")
+                                   :unnarrowed t))))
 
 (defun hft/new-source-from-citation ()
-  "Create a source note from a citar selection."
+  "Create a source note from a citar selection using org-roam."
   (interactive)
   (let* ((keys (citar-select-refs))
          (key (car keys))
          (entry (citar-get-entry key))
          (title (citar-get-value "title" entry))
          (author (citar-get-value "author" entry))
-         (year (citar-get-value "year" entry))
-         (denote-directory "~/notes/hft/sources/"))
-    (denote (format "%s (%s)" title year) '("source"))
-    (insert (format "* %s\n\n" title))
-    (insert (format "- Authors: %s\n" author))
-    (insert (format "- Year: %s\n" year))
-    (insert (format "- Bibkey: cite:%s\n" key))
-    (insert "- Status: unread\n")
-    (insert "- Tags: \n")
-    (insert "\n* Summary\n\n")
-    (insert "* Key Results\n\n")
-    (insert "* Important Concepts\n\n")
-    (insert "* Open Questions\n\n")
-    (insert "* References\n\n")
-    (goto-char (point-min))
-    (search-forward "Summary")
-    (forward-line 2)))
-
-(defun hft/insert-denote-link ()
-  "Insert a denote link with completion."
-  (interactive)
-  (call-interactively #'denote-link))
-
-(defun hft/link-to-concept ()
-  "Insert a denote link, scoped to concepts/ directory."
-  (interactive)
-  (let ((denote-directory "~/notes/hft/concepts/"))
-    (call-interactively #'denote-link)))
+         (year (citar-get-value "year" entry)))
+    (org-roam-capture-
+     :node (org-roam-node-create :title (format "%s (%s)" title year))
+     :props (list :immediate-finish nil)
+     :templates `(("s" "source" plain
+                   ,(format "* Summary\n\n%%?\n\n* Key Results\n\n* Important Concepts\n\n* Open Questions\n\n* References\n\n")
+                   :target (file+head ,(format "sources/%%<%Y%m%d%H%M%S>-%s.org" (org-roam-node-slug (org-roam-node-create :title title)))
+                                      ,(format "#+title: %s\n#+filetags: :source:\n#+author: %s\n#+year: %s\n#+bibkey: %s\n\n" title author year key))
+                   :unnarrowed t)))))
 
 ;;; Agenda Configuration
 ;;; --------------------
@@ -161,20 +125,19 @@
   "nq"  '(hft/new-question :which-key "quick question")
   "nc"  '(hft/new-concept :which-key "new concept")
   "ne"  '(hft/new-experiment :which-key "new experiment")
-  "nl"  '(hft/insert-denote-link :which-key "insert link")
-  "nb"  '(denote-backlinks :which-key "show backlinks")
-  "nr"  '(denote-rename-file :which-key "rename note")
+  "ns"  '(hft/new-source :which-key "new source")
+  "nf"  '(org-roam-node-find :which-key "find node")
+  "ni"  '(org-roam-node-insert :which-key "insert link")
+  "nb"  '(org-roam-buffer-toggle :which-key "toggle backlinks")
   "na"  '(hft/agenda :which-key "HFT agenda")
 
   ;; Search commands under SPC s
-  "s"   '(:ignore t :which-key "search")
   "sn"  '(hft/search-notes :which-key "search all notes")
   "sN"  '(hft/search-concepts :which-key "search concepts")
   "sx"  '(hft/search-experiments :which-key "search experiments")
 
   ;; File commands under SPC f
   "fn"  '(hft/find-note :which-key "find note")
-  "fN"  '(denote-open-or-create :which-key "denote find/create")
 
   ;; Bibliography commands under SPC r (references)
   "r"   '(:ignore t :which-key "references")
@@ -192,20 +155,15 @@
   :states 'normal
   :keymaps 'org-mode-map
 
-  "ll" '(hft/insert-denote-link :which-key "insert link")
-  "lc" '(hft/link-to-concept :which-key "link to concept")
-  "lb" '(denote-backlinks :which-key "show backlinks")
+  "ll" '(org-roam-node-insert :which-key "insert roam link")
+  "lb" '(org-roam-buffer-toggle :which-key "toggle backlinks")
+  "la" '(org-roam-alias-add :which-key "add alias")
+  "lt" '(org-roam-tag-add :which-key "add tag")
 
   "ci" '(citar-insert-citation :which-key "insert citation")
   "co" '(citar-open-files :which-key "open citation PDF")
 
   "x"  '(org-babel-execute-src-block :which-key "execute code block"))
-
-;;; Denote Templates
-;;; ----------------
-
-;; You can extend these with denote's template system if needed
-;; For now, the functions above provide the templates inline
 
 (provide 'hft-research)
 ;;; hft-research.el ends here

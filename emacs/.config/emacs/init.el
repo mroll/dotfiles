@@ -42,7 +42,7 @@
 
 (set-face-attribute 'default nil
                     :family "Cascadia Code"
-                    :height 140)
+                    :height 260)
 
 
 (defvar bootstrap-version)
@@ -63,6 +63,43 @@
 
 (straight-use-package 'use-package)
 (straight-use-package 'org)
+
+;; Functions
+;; ------------------------
+
+(defun my/dired-this-buffer ()
+  (interactive)
+  (dired (file-name-directory buffer-file-name)))
+
+(defun compile--make ()
+  (interactive)
+  (compile "make"))
+
+(defun switch-to-last-buffer ()
+  (interactive)
+  (switch-to-buffer nil))
+
+(defun reload-config ()
+  (interactive)
+  (load-file "~/.config/emacs/init.el"))
+
+(defun open-config-file ()
+  (interactive)
+  (find-file "~/.config/emacs/init.el"))
+
+(defun open-line-above ()
+  "Insert an empty line above the current one and move to it."
+  (interactive)
+  (beginning-of-line)
+  (open-line 1))
+
+(defun my/org-insert-inactive-timestamp-now ()
+  "Insert an inactive Org timestamp like [2025-10-18 Sat 14:37] at point."
+  (interactive)
+  (require 'org)
+  ;; ensure minute precision (no rounding)
+  (let ((org-time-stamp-rounding-minutes '(0 1)))
+    (org-insert-time-stamp (current-time) t t))) ; WITH-HM=t, INACTIVE=t
 
 
 (use-package exec-path-from-shell
@@ -670,9 +707,51 @@
 
 (use-package org-roam
   :straight t
+  :after org
   :config
-  (setq org-roam-directory (file-truename "~/org-roam"))
-  (org-roam-db-autosync-mode))
+  ;; Set org-roam directory to HFT notes
+  (setq org-roam-directory (file-truename "~/notes/hft/"))
+
+  ;; Enable database auto-sync
+  (org-roam-db-autosync-mode)
+
+  ;; Capture templates for different note types
+  (setq org-roam-capture-templates
+        '(("d" "default" plain "%?"
+           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                              "#+title: ${title}\n#+filetags: \n\n")
+           :unnarrowed t)
+
+          ("c" "concept" plain
+           "* Definition\n\n%?\n\n* Intuition\n\n* Mathematical Formulation\n\n#+begin_src latex\n% LaTeX equations here\n#+end_src\n\n* Implementation Notes\n\n* Related Concepts\n\n* Sources\n\n"
+           :target (file+head "concepts/%<%Y%m%d%H%M%S>-${slug}.org"
+                              "#+title: ${title}\n#+filetags: :concept:\n\n")
+           :unnarrowed t)
+
+          ("s" "source" plain
+           "* Summary\n\n%?\n\n* Key Results\n\n* Important Concepts\n\n* Open Questions\n\n* References\n\n"
+           :target (file+head "sources/%<%Y%m%d%H%M%S>-${slug}.org"
+                              "#+title: ${title}\n#+filetags: :source:\n#+author: \n#+year: \n#+bibkey: \n\n")
+           :unnarrowed t)
+
+          ("e" "experiment" plain
+           "* Experiment: ${title}\n\n- Date: %<%Y-%m-%d>\n- Git Rev: \n\n* Setup\n\n- Model: \n- Parameters: %?\n- Seed: \n- Code: \n\n* Hypothesis\n\nWhat do I expect to see, and why?\n\n* Results\n\n* Interpretation\n\n* Next Steps\n\n"
+           :target (file+head "lab/%<%Y%m%d%H%M%S>-${slug}.org"
+                              "#+title: ${title}\n#+filetags: :experiment:lab:\n\n")
+           :unnarrowed t)
+
+          ("q" "question" plain
+           "* Question\n\n%?\n\n* Context\n\n* Potential Approaches\n\n* References\n\n"
+           :target (file+head "inbox/%<%Y%m%d%H%M%S>-${slug}.org"
+                              "#+title: ${title}\n#+filetags: :question:\n\n")
+           :unnarroved t)))
+
+  ;; Display options
+  (setq org-roam-node-display-template
+        (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+
+  ;; Completion
+  (setq org-roam-completion-everywhere t))
 
 (use-package avy
   :straight t
@@ -711,40 +790,25 @@
 ;; HFT Research Packages
 ;; ------------------------
 
-;; Denote for filename-based note system
-(use-package denote
-  :straight t
-  :hook (dired-mode . denote-dired-mode)
-  :config
-  (setq denote-directory (expand-file-name "~/notes/hft/"))
-  (setq denote-known-keywords '("source" "concept" "lab" "experiment" "question" "glossary" "model" "empirical"))
-  (setq denote-infer-keywords t)
-  (setq denote-sort-keywords t)
-  (setq denote-file-type nil) ; Use .org by default
-  (setq denote-prompts '(title keywords))
-
-  ;; Automatically rename Denote buffers
-  (denote-rename-buffer-mode 1))
-
 ;; Citar for bibliography management
 (use-package citar
   :straight t
   :config
   (setq citar-bibliography '("~/notes/hft/hft.bib"))
   (setq citar-library-paths '("~/notes/hft/pdfs/"))
-  (setq citar-notes-paths '("~/notes/hft/sources/"))
+  (setq citar-notes-paths '("~/notes/hft/"))
   (setq citar-file-open-functions '(("pdf" . citar-file-open-external)))
 
   ;; Optional: use embark with citar
   (setq citar-at-point-function 'embark-act))
 
-;; Citar-denote integration
-(use-package citar-denote
+;; Citar-org-roam integration
+(use-package citar-org-roam
   :straight t
-  :after (citar denote)
+  :after (citar org-roam)
   :config
-  (citar-denote-mode)
-  (setq citar-open-always-create-notes t))
+  (citar-org-roam-mode)
+  (setq citar-org-roam-subdir "sources/"))
 
 ;; PDF Tools for reading PDFs in Emacs
 (use-package pdf-tools
@@ -820,43 +884,6 @@
 ;; ------------------------
 (add-to-list 'load-path (expand-file-name "~/.config/emacs/"))
 (require 'hft-research)
-
-;; Functions
-;; ------------------------
-
-(defun my/dired-this-buffer ()
-  (interactive)
-  (dired (file-name-directory buffer-file-name)))
-
-(defun compile--make ()
-  (interactive)
-  (compile "make"))
-
-(defun switch-to-last-buffer ()
-  (interactive)
-  (switch-to-buffer nil))
-
-(defun reload-config ()
-  (interactive)
-  (load-file "~/.config/emacs/init.el"))
-
-(defun open-config-file ()
-  (interactive)
-  (find-file "~/.config/emacs/init.el"))
-
-(defun open-line-above ()
-  "Insert an empty line above the current one and move to it."
-  (interactive)
-  (beginning-of-line)
-  (open-line 1))
-
-(defun my/org-insert-inactive-timestamp-now ()
-  "Insert an inactive Org timestamp like [2025-10-18 Sat 14:37] at point."
-  (interactive)
-  (require 'org)
-  ;; ensure minute precision (no rounding)
-  (let ((org-time-stamp-rounding-minutes '(0 1)))
-    (org-insert-time-stamp (current-time) t t))) ; WITH-HM=t, INACTIVE=t
 
 ;; Theming
 (mapc #'disable-theme custom-enabled-themes)
