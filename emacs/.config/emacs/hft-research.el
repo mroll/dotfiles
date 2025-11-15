@@ -184,13 +184,7 @@
   "rn"  '(hft/new-source-from-citation :which-key "new source note")
 
   ;; Toggle commands under SPC t
-  "t"   '(:ignore t :which-key "toggle")
-  "to"  '(olivetti-mode :which-key "olivetti (focused reading)")
-
-  ;; Config file shortcuts under SPC f e
-  "fe"  '(:ignore t :which-key "emacs")
-  "fed" '(open-config-file :which-key "open config")
-  "fer" '(reload-config :which-key "reload config"))
+  "to"  '(olivetti-mode :which-key "olivetti (focused reading)"))
 
 ;; Org-mode local bindings with comma leader
 (my-local-leader-def
