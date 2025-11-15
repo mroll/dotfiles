@@ -43,14 +43,22 @@
 ;; Dynamic font sizing based on monitor setup
 (defun my/adjust-font-size ()
   "Set font height based on number of displays.
-   260 for external monitor, 140 for laptop screen only."
-  (let* ((num-displays (length (display-monitor-attributes-list)))
-         (height (if (> num-displays 1) 260 140)))
+   260 for laptop screen only, 140 for external monitor."
+  (let* ((display-count
+          (if (equal system-type 'darwin)
+              ;; On macOS, use system_profiler to count displays
+              (string-to-number
+               (string-trim
+                (shell-command-to-string
+                 "system_profiler SPDisplaysDataType | grep -c 'Resolution:'")))
+            ;; On other systems, use display-monitor-attributes-list
+            (length (display-monitor-attributes-list))))
+         (height (if (> display-count 1) 140 260)))
     (set-face-attribute 'default nil
                         :family "Cascadia Code"
                         :height height)
     (message "Font height set to %d (%d display%s detected)"
-             height num-displays (if (= num-displays 1) "" "s"))))
+             height display-count (if (= display-count 1) "" "s"))))
 
 ;; Set initial font size
 (my/adjust-font-size)
