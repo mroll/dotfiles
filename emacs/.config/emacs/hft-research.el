@@ -183,7 +183,8 @@
   "ro"  '(citar-open-files :which-key "open PDF")
   "rn"  '(hft/new-source-from-citation :which-key "new source note")
 
-  ;; Toggle commands under SPC t
+  ;; Toggle commands under SPC t (add to existing t prefix)
+  "t"   '(:ignore t :which-key "toggle")
   "to"  '(olivetti-mode :which-key "olivetti (focused reading)"))
 
 ;; Org-mode local bindings with comma leader
