@@ -148,7 +148,8 @@
 
   ;; Toggle commands under SPC t (add to existing t prefix)
   "t"   '(:ignore t :which-key "toggle")
-  "to"  '(olivetti-mode :which-key "olivetti (focused reading)"))
+  "to"  '(olivetti-mode :which-key "olivetti (focused reading)")
+  "tz"  '(my/adjust-font-size :which-key "adjust font size"))
 
 ;; Org-mode local bindings with comma leader
 (my-local-leader-def

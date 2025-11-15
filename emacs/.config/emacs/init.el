@@ -40,9 +40,27 @@
 (setq custom-safe-themes t)
 (setq electric-pair-mode 1)
 
-(set-face-attribute 'default nil
-                    :family "Cascadia Code"
-                    :height 260)
+;; Dynamic font sizing based on monitor setup
+(defun my/adjust-font-size ()
+  "Set font height based on number of displays.
+   260 for external monitor, 140 for laptop screen only."
+  (let* ((num-displays (length (display-monitor-attributes-list)))
+         (height (if (> num-displays 1) 260 140)))
+    (set-face-attribute 'default nil
+                        :family "Cascadia Code"
+                        :height height)
+    (message "Font height set to %d (%d display%s detected)"
+             height num-displays (if (= num-displays 1) "" "s"))))
+
+;; Set initial font size
+(my/adjust-font-size)
+
+;; Auto-adjust when displays change (macOS)
+(when (equal system-type 'darwin)
+  (add-hook 'after-make-frame-functions
+            (lambda (frame)
+              (select-frame frame)
+              (my/adjust-font-size))))
 
 
 (defvar bootstrap-version)
