@@ -13,7 +13,49 @@ Personal configuration files managed with GNU Stow.
 
 ## Emacs Configuration
 
-The Emacs config is located in `emacs/.config/emacs/` and includes:
+The Emacs config lives in `emacs/.config/emacs/` and is now organized into self-contained modules so each concern can be reasoned about independently.
+
+### Modular Layout
+
+```
+~/.config/emacs/
+├── init.el          # Loader: sets load-paths, custom-file, and module order
+├── var/             # Generated files (custom.el, caches)
+└── lisp/
+    ├── core/        # Foundation (settings, bootstrap, editing, keybinds)
+    │   ├── my-core-settings.el
+    │   ├── my-core-packages.el
+    │   ├── my-core-editing.el
+    │   └── my-core-keybinds.el
+    ├── modules/     # Feature slices (completion, Evil, Org, notes, etc.)
+    │   ├── my-module-completion.el
+    │   ├── my-module-evil.el
+    │   ├── my-module-ui.el
+    │   ├── my-module-org.el
+    │   ├── my-module-org-roam.el
+    │   ├── my-module-projects.el
+    │   ├── my-module-notes.el
+    │   └── my-module-navigation.el
+    └── lang/        # Language/tooling integrations
+        ├── my-lang-lsp.el
+        ├── my-lang-c.el
+        ├── my-lang-web.el
+        ├── my-lang-ocaml.el
+        ├── my-lang-python.el
+        └── my-lang-tex.el
+```
+
+Modules are loaded in `init.el` via the ordered `my/emacs-modules` list. To disable a feature, remove its symbol from that list; to add a new module, drop an `my-module-*.el` or `my-lang-*.el` file under `lisp/` (each file must end with a `(provide 'feature-name)` form) and then append the feature to `my/emacs-modules`.
+
+Run a batch validation after changes:
+
+```bash
+emacs --batch -l ~/.config/emacs/init.el --eval "(message \"ok\")"
+```
+
+If you use `org-roam`/`citar-org-roam`, make sure Emacs has SQLite support (built-in on Emacs ≥29 if compiled with `--with-sqlite3`) or install the `sqlite3` Elisp package plus your system’s `libsqlite3` shared library; without it, the loader will log warnings and abort those modules.
+
+The original HFT workflow still lives in `hft-research.el`, which now consumes the shared modules instead of defining packages inline.
 
 ### Core Features
 - **Package Management**: straight.el for reproducible package management
@@ -58,11 +100,12 @@ Specialized configuration for High-Frequency Trading research in `hft-research.e
 - `SPC r n` - Create source note from citation
 
 **Org-Mode Local (`,` prefix)**
-- `, l l` - Insert denote link
+- `, c c` - Org-capture (`,` acts as a prefix; `, c I` / `, c O` handle clocking)
+- `, l l` - Insert denote/org-roam link
 - `, l c` - Link to concept
 - `, l b` - Show backlinks
-- `, c i` - Insert citation
-- `, c o` - Open citation PDF
+- `, c i` - Insert citation (from HFT module)
+- `, c o` - Open citation PDF (from HFT module)
 - `, x` - Execute code block
 
 See `~/notes/hft/README.md` for full workflow documentation.
@@ -158,9 +201,10 @@ dotfiles/
 ├── emacs/
 │   ├── .config/
 │   │   └── emacs/
-│   │       ├── init.el              # Main config
+│   │       ├── init.el              # Loader + module list
 │   │       ├── early-init.el        # Early initialization
-│   │       └── hft-research.el      # HFT research module
+│   │       ├── hft-research.el      # HFT research workflow
+│   │       └── lisp/                # Core/modules/lang structure (see above)
 │   ├── .stow-local-ignore           # Stow ignore patterns
 │   ├── lisp/                        # Custom lisp packages
 │   └── archive/                     # Old configs
@@ -191,6 +235,16 @@ dotfiles/
 M-x straight-pull-all
 M-x straight-rebuild-all
 ```
+
+### Org-roam / citar-org-roam errors about SQLite
+
+Make sure Emacs has SQLite support. On macOS with Homebrew:
+
+```bash
+brew install sqlite
+```
+
+Then install the Emacs `sqlite3` package (e.g., `M-x package-install RET sqlite3 RET`) if your Emacs build lacks native SQLite. Restart Emacs and rerun `emacs --batch -l ~/.config/emacs/init.el`.
 
 ### PDF-tools not working
 ```bash
